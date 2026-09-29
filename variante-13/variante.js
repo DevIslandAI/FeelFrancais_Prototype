@@ -314,10 +314,11 @@
       action: function (a) {
         if (a === 'valide' || a === 'invalide') ctrl.choix = a;
         if (!ctrl.choix) { o.toast('Choisissez d’abord valid ou invalid.'); return false; }
-        var snap = { verdict: verdictActif(boutons, SEL), staff: note ? note.zone.value : '' };
+        var snap = { verdict: verdictActif(boutons, SEL) };
         var com = (ctrl.brouillon || '').trim();
-        IA.ecrire.verdictDocument(d, ctrl.choix === 'valide');  // leur bouton, sur la page
-        if (com) IA.ecrire.commentaire(d.id, 'staff', com);      // leur commentaire, sur la page
+        // Seul leur bouton valid / invalid est ecrit sur la page. « Commentaire du
+        // staff » reste a Perle : l'IA n'y ecrit jamais (le commentaire reste dans l'apercu).
+        IA.ecrire.verdictDocument(d, ctrl.choix === 'valide');
         if (existe(s, 'doc:' + d.nom + ':verdict')) IA.decider('doc:' + d.nom + ':verdict', ctrl.choix === d.verdict ? 'accepte' : 'modifie', ctrl.choix);
         if (existe(s, 'doc:' + d.nom + ':etudiant')) IA.decider('doc:' + d.nom + ':etudiant', com === texte ? 'accepte' : 'modifie', com || null);
         if (existe(s, 'doc:' + d.nom + ':interne')) IA.decider('doc:' + d.nom + ':interne', 'refuse', null);
@@ -326,10 +327,6 @@
       refuser: function () { clesD().forEach(function (k) { IA.decider(k, 'refuse', null); }); },
       annuler: function (snap) {
         if ('verdict' in snap) remettreVerdict(boutons, SEL, snap.verdict, function (v) { IA.ecrire.verdictDocument(d, v); });
-        if ('staff' in snap && note && note.zone.value !== snap.staff) {
-          if (snap.staff) IA.ecrire.commentaire(d.id, 'staff', snap.staff);
-          else note.restaurer();
-        }
         clesD().forEach(function (k) { IA.annuler(k); });
       }
     };
@@ -394,9 +391,7 @@
     if (r && ctrl.rang === ctrl.total) partie('Commentaire de l’étudiant', '<blockquote class="v13-ap-mot">« ' + e(r.texte) + ' »</blockquote>');
     var com = partie('Commentaire', '<textarea rows="4" placeholder="Aucun commentaire proposé"></textarea>');
     var zone = com.querySelector('textarea');
-    // Decide : ce qui est enregistre dans Feel Francais ; sinon la proposition (ou la version de Perle).
-    var decide = ctrl.p.cles().length ? ctrl.p.cles().every(function (k) { return IA.decision(k); }) : !!ctrl.p.memo.local;
-    zone.value = decide && ctrl.note ? ctrl.note.zone.value : ctrl.brouillon;
+    zone.value = ctrl.brouillon;  // la proposition, ou la version de Perle
     zone.addEventListener('input', function () { ctrl.brouillon = zone.value; });
     var b = barre(ctrl.p);
     b.classList.add('v13-prop-ap');
