@@ -36,7 +36,6 @@
       marquer(s);
       proposerSection(s);
       docs(s).forEach(function (d, i) { proposerDocument(s, d, i + 1, docs(s).length); });
-      if (s.mauvaiseSection) poserDeplacement(s);
     });
     brancherApercu();
     ecouterBoutonsFF();
@@ -293,6 +292,19 @@
     } else {
       p.avant = 'Verdict proposé : <span class="v13-verdict v13-verdict-' + verdict + '">' + (verdict === 'valide' ? 'valid' : 'invalid') + '</span>';
     }
+    // Document mal place : dans le meme bloc que le verdict. « Accepter » pose le
+    // verdict ET deplace le document (leur menu ⇄) : un seul clic.
+    var dep = s.mauvaiseSection ? deplacement(s) : null;
+    if (dep) {
+      p.avant += '<span class="v13-dep-ligne"><i class="fa fa-exchange"></i> Document mal placé : il sera déplacé vers <b>' +
+        e(dep.m.sectionProposee) + '</b></span>';
+      p.source = dep.m.motifCourt || dep.m.motif;
+      var cles0 = p.cles, action0 = p.action, refuser0 = p.refuser, annuler0 = p.annuler;
+      p.cles = function () { return cles0().concat([dep.cle]); };
+      p.action = function (a) { var snap = action0(a); dep.deplacer(); return snap; };
+      p.refuser = function () { refuser0(); IA.decider(dep.cle, 'refuse', 'Laissé dans cette section'); };
+      p.annuler = function (snap) { annuler0(snap); dep.remettre(); };
+    }
     proposer();
     var el = barre(p);
     el.classList.add('v13-prop-section');
@@ -436,36 +448,26 @@
     }, true);
   }
 
-  // ─── Document mal place : de → vers, puis Deplacer / Annuler ─────────────
-  function poserDeplacement(s) {
+  // ─── Document mal place : le deplacement (propose dans le bloc de la section) ──
+  function deplacement(s) {
     var m = s.mauvaiseSection;
     var d = docs(s)[0];
-    if (!m || !d) return;
+    if (!m || !d) return null;
     var cle = 'sec:' + s.alias + ':deplacement';
-    var liens = Array.prototype.slice.call(d.el.querySelectorAll('.doc-info-actions .dropdown-menu a'));
-    function aliasDe(a) { return a.textContent.replace(/\s*\|\s*$/, '').trim(); }
     var badge = null;
-    var el = barre({
-      id: 'dep:' + s.alias,
-      avant: '<b>Document mal placé :</b> ' + e(m.sectionActuelle || IA.ui2.nom(s)) + ' <i class="fa fa-long-arrow-right"></i> <b>' + e(m.sectionProposee) + '</b>',
-      source: m.motifCourt || m.motif,
-      cles: function () { return [cle]; },
-      boutons: [['deplacer', 'Déplacer', true], ['refuser', 'Annuler']],
-      libelleRefus: 'Laissé ici',
-      action: function () {
-        var lien = liens.filter(function (x) { return aliasDe(x) === m.aliasPropose; })[0];
+    return {
+      m: m, cle: cle,
+      deplacer: function () {
+        var lien = Array.prototype.slice.call(d.el.querySelectorAll('.doc-info-actions .dropdown-menu a'))
+          .filter(function (x) { return x.textContent.replace(/\s*\|\s*$/, '').trim() === m.aliasPropose; })[0];
         if (lien) lien.click();  // leur menu ⇄ : le document change de section
         badge = o.el('<span class="v13-deplace"><i class="fa fa-arrows"></i> Déplacé vers « ' + e(m.sectionProposee) + ' » · analyse relancée</span>');
         var meta = d.el.querySelector('.doc-info-meta');
         if (meta) meta.appendChild(badge);
         IA.decider(cle, 'accepte', m.aliasPropose);
       },
-      refuser: function () { IA.decider(cle, 'refuse', 'Laissé dans cette section'); },
-      annuler: function () { if (badge) { badge.remove(); badge = null; } IA.annuler(cle); }
-    });
-    el.classList.add('v13-prop-dep');
-    var grille = d.el.closest('.doc-docs-grid') || d.el;
-    grille.parentNode.insertBefore(el, grille);
+      remettre: function () { if (badge) { badge.remove(); badge = null; } IA.annuler(cle); }
+    };
   }
 
   // ─── Une carte par etape : note, pieces recues, conformes, coherence ──────
