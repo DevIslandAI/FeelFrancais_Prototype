@@ -110,13 +110,13 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-apercu-actif #pdfModalFrame, .v13-apercu-actif #pdfModalLoader { display: none !important; }
 .v13-apercu { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
 .v13-ap-pdf { overflow: auto; background: #eef1f4; padding: 18px; }
-.v13-ap-ia { overflow: auto; border-left: 1px solid #e3e8ec; background: #fff; }
-.v13-ap-panneau { padding: 14px 18px 18px; font: 13.5px/1.5 Catamaran, Arial, sans-serif; color: #2b3a42; }
-.v13-ap-titre { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.v13-ap-ia { overflow: auto; border-left: 1px solid #e3e8ec; background: #fff; display: flex; flex-direction: column; }
+.v13-ap-panneau { flex: 1 0 auto; display: flex; flex-direction: column; padding: 16px 20px 18px; font: 13.5px/1.5 Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v13-ap-titre { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
 .v13-ap-rang { font-size: 12px; font-weight: 600; color: #8a97a1; }
 .v13-ap-partie { padding: 12px 0; border-top: 1px solid #eef1f3; }
 .v13-ap-partie:first-of-type { border-top: 0; }
-.v13-ap-partie h4 { margin: 0 0 8px; font-size: 13.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #2b3a42; }
+.v13-ap-partie h4 { margin: 0 0 10px; font-size: 16px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #2b3a42; }
 .v13-note-grande { font-size: 28px; }
 .v13-note-grande small { font-size: 14px; }
 .v13-ap-constats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -133,7 +133,10 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-seg .v13-choisi .v13-ia { background: rgba(255, 255, 255, .3); }
 .v13-ap-mot { margin: 0; padding: 8px 12px; background: #f7f8fa; border-left: 3px solid #b6c2cc; border-radius: 0 6px 6px 0; font-style: italic; }
 .v13-ap-partie textarea { width: 100%; border: 1px solid #d5dbe0; border-radius: 6px; padding: 8px 10px; font: inherit; resize: vertical; background: var(--v13-fond); }
-.v13-prop-ap { margin-top: 12px; }
+/* Accepter / Refuser : sans cadre, en bas a droite de l'apercu */
+.v13-prop-ap, .v13-prop-ap.v13-prop-accepte, .v13-prop-ap.v13-prop-refuse { margin: auto 0 0; padding: 14px 0 0; background: none; border: 0; border-top: 1px solid #eef1f3; border-radius: 0; justify-content: flex-end; }
+.v13-prop-ap .v13-ia, .v13-prop-ap .v13-sep { display: none; }
+.v13-prop-ap .v13-b { padding: 6px 18px; font-size: 14px; }
 
 /* ── Notifications : etat de l'analyse ── */
 .v13-n-quand { color: #8a97a1; font-weight: 400; }
