@@ -163,7 +163,8 @@ window.IA_DONNEES = {
      "alerte": {
       "texte": "Le passeport expire le 14/02/2028, soit 4 mois et demi avant la fin du cursus (30/06/2028, lettre d'inscription). La règle demande 3 mois de validité après le visa.",
       "proposition": "Conserver la validation et prévenir l'étudiante qu'elle devra renouveler son passeport avant février 2028 — ou invalider et demander un renouvellement dès maintenant.",
-      "declenchee": "Date de fin de cursus lue sur la lettre d'inscription (analyse du 25/09)."
+      "declenchee": "Date de fin de cursus lue sur la lettre d'inscription (analyse du 25/09).",
+      "source": "d'après le passeport et la lettre d'inscription : il expire le 14/02/2028, avant la fin du cursus (30/06/2028)"
      },
      "regles": [
       {

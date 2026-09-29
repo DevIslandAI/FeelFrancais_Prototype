@@ -238,12 +238,13 @@
     var rangee = cont.querySelector(':scope > .doc-general-messages-row');
     var entete = s.el.querySelector('.doc-general-state');
     var SEL = '.changeGeneralState';
-    var verdict = verdictSection(s);
+    // Alerte sur une validation de Perle : meme format, l'IA propose simplement un autre verdict.
+    var verdict = s.statut === 'alerte' ? 'invalide' : verdictSection(s);
     var texte = (s.commentaireSection || {}).etudiant || '';
     var note = noteFF(s.idSection, 'general');
     var clesSec = function () { return cles(s, 'sec:' + s.alias + ':').concat(cles(s, 'alerte:')).filter(function (k) { return k.indexOf(':deplacement') < 0; }); };
     var cleV = s.statut === 'alerte' ? 'alerte:' + s.alias : 'sec:' + s.alias + ':verdict';
-    function proposer() { if (note && texte) note.poser(texte, true); encadrer(entete, SEL, s.statut === 'alerte' ? null : verdict); }
+    function proposer() { if (note && texte) note.poser(texte, true); encadrer(entete, SEL, verdict); }
     function retirer() { encadrer(entete, SEL, null); if (note) note.carte.classList.remove('v13-pre'); }
     function enregistrer(valide, statut, valeur) {
       if (valide != null) IA.ecrire.verdictSection(s, valide);
@@ -258,10 +259,7 @@
       cles: clesSec,
       action: function (a) {
         var snap = { verdict: verdictActif(entete, SEL) };
-        if (s.statut === 'alerte') {
-          if (a === 'invalider') { IA.ecrire.verdictSection(s, false); docs(s).forEach(function (d) { IA.ecrire.verdictDocument(d, false); }); }
-          enregistrer(null, a === 'garder' ? 'accepte' : 'modifie', a === 'garder' ? 'Validation conservée' : 'Passé en invalid');
-        } else if (a === 'valide' || a === 'invalide') {
+        if (a === 'valide' || a === 'invalide') {
           enregistrer(a === 'valide', 'modifie', a);
         } else {
           enregistrer(verdict === 'valide', 'accepte', verdict);
@@ -270,7 +268,7 @@
         return snap;
       },
       refuser: function () {
-        clesSec().forEach(function (k) { IA.decider(k, 'refuse', k.indexOf('alerte:') === 0 ? 'Arbitrage reporté' : null); });
+        clesSec().forEach(function (k) { IA.decider(k, 'refuse', k.indexOf('alerte:') === 0 ? 'Validation conservée' : null); });
         retirer();
         if (note) note.restaurer();
       },
@@ -280,12 +278,8 @@
         proposer();
       }
     };
-    if (s.statut === 'alerte') {
-      p.avant = '<b>Déjà validé par ' + e(s.humain.par) + ' le ' + e(s.humain.le.slice(0, 10)) + '.</b> ' + e(s.alerte.texte);
-      p.source = null;
-      p.boutons = [['garder', 'Garder la validation', true], ['invalider', 'Invalider']];
-      p.libelleRefus = 'Arbitrage reporté';
-    } else if (!verdict) {
+    if (s.statut === 'alerte' && s.alerte.source) p.source = s.alerte.source;
+    if (!verdict) {
       // L'IA ne tranche pas (a verifier, provisoire) : Perle choisit, en un clic.
       p.avant = s.statut === 'provisoire' ? 'Pièces encore attendues : pas de verdict pour l’instant.' : 'À vérifier : l’IA ne tranche pas.';
       p.boutons = [['valide', 'valid', true], ['invalide', 'invalid']];
