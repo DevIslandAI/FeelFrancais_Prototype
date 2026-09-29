@@ -7,18 +7,6 @@ COPY index.html ./
 COPY base ./base
 COPY commun ./commun
 COPY documents ./documents
-COPY variante-1 ./variante-1
-COPY variante-2 ./variante-2
-COPY variante-3 ./variante-3
-COPY variante-4 ./variante-4
-COPY variante-5 ./variante-5
-COPY variante-6 ./variante-6
-COPY variante-7 ./variante-7
-COPY variante-8 ./variante-8
-COPY variante-9 ./variante-9
-COPY variante-10 ./variante-10
-COPY variante-11 ./variante-11
-COPY variante-12 ./variante-12
 COPY variante-13 ./variante-13
 COPY outils/serveur.py ./outils/serveur.py
 

@@ -7,7 +7,7 @@
 !/base/
 !/commun/
 !/documents/
-!/variante-*/
+!/variante-13/
 # Du dossier outils, seul le petit serveur du site est publie.
 !/outils/
 /outils/*

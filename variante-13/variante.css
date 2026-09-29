@@ -1,162 +1,139 @@
-/* Variante 13 — Cartes IA */
-.v13-fen { inset: 2.5vh 1.5vw; flex-direction: row; font-family: Catamaran, Arial, sans-serif; color: #2b3a42; }
-.v13-nav { width: 190px; flex: none; background: #f6f3fc; border-right: 1px solid #e0d6f6; padding: 12px 8px; overflow: auto; }
-.v13-nav-titre { margin: 14px 8px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #8a97a1; }
-.v13-item { display: flex; align-items: center; gap: 7px; width: 100%; border: 0; background: none; text-align: left; padding: 6px 8px; border-radius: 5px;
-  font: 600 12.5px/1.3 Catamaran, Arial, sans-serif; color: #2b3a42; cursor: pointer; }
-.v13-item:hover { background: #ebe4f9; }
-.v13-item.v13-actif { background: #fff; box-shadow: 0 0 0 1.5px #b499ee; color: #4f2d93; }
-.v13-item > .fa { color: #6f42c1; }
-.v13-item.v13-fini > .fa { color: #2f9e62; }
-.v13-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.v13-principal { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.v13-fermer { position: absolute; top: 8px; right: 10px; z-index: 3; width: 32px; justify-content: center; padding: 0; }
-.v13-corps { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.v13-corps.v13-simple { display: block; overflow: auto; padding: 18px max(24px, calc((100% - 780px) / 2)); }
-.v13-h { font-size: 17px; margin: 0 0 14px; }
-/* En haut : la carte de section, ses parties cote a cote */
-.v13-haut { flex: none; max-height: 46%; overflow: auto; padding: 12px 56px 0 16px; border-bottom: 1px solid #e0d6f6; background: #fff; }
-.v13-haut .ia4-c-corps { display: grid; grid-template-columns: minmax(230px, 1fr) minmax(0, 2fr) minmax(0, 1.2fr); gap: 0 18px; }
-.v13-haut .ia4-partie + .ia4-partie { border-top: 0; }
-.v13-haut .ia4-alerte, .v13-haut .ia3-inc { grid-column: 1 / -1; }
-.v13-haut .ia4-carte { margin-bottom: 12px; }
-/* En bas : onglets, PDF a gauche, carte du document a droite */
-.v13-bas { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-/* Documents de la section : un onglet par document, numerote, avec son etat */
-.v13-docs-tete { display: flex; align-items: flex-end; gap: 14px; padding: 8px 12px 0; border-bottom: 1.5px solid #d5dbe0; background: #f7f8fa; }
-.v13-docs-titre { flex: none; padding-bottom: 9px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #4a5a64; }
-.v13-docs-titre .fa { color: #6f42c1; }
-.v13-docs-nb { text-transform: none; letter-spacing: 0; font-weight: 600; color: #6f7d88; }
-.v13-onglets { display: flex; gap: 4px; flex-wrap: wrap; }
-.v13-onglet { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid #d5dbe0; border-bottom: 0; border-radius: 7px 7px 0 0; background: #eef1f4;
-  padding: 7px 12px 8px; font: 600 12.5px Catamaran, Arial, sans-serif; color: #4a5a64; cursor: pointer; margin-bottom: -1.5px; max-width: 280px; }
-.v13-onglet:hover { background: #fff; }
-.v13-onglet.v13-onglet-actif { background: #fff; color: #2b3a42; border-color: #6f42c1; box-shadow: inset 0 3px 0 #6f42c1; }
-.v13-o-num { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1.5px solid #b499ee; color: #6f42c1; display: grid; place-items: center;
-  font: 700 11px/1 Arial, sans-serif; flex: none; }
-.v13-onglet-actif .v13-o-num { background: #6f42c1; color: #fff; border-color: #6f42c1; }
-.v13-o-nom { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.v13-o-pb { background: #fbe9e8; color: #d45a55; border-radius: 9px; padding: 0 6px; font-size: 11px; font-weight: 700; }
-.v13-o-etat .fa { color: #6f42c1; }
-.v13-onglet-fini .v13-o-etat .fa { color: #2f9e62; }
-.v13-onglet-fini .v13-o-nom { color: #6f7d88; }
-.v13-doc { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 420px; }
-.v13-pdf { min-height: 0; border-radius: 0; }
-.v13-pdf .ia-v-onglets { display: none; }
-.v13-carte-doc { overflow: auto; padding: 12px; border-left: 1px solid #e6e9ed; background: #fcfbff; min-height: 0; }
-.v13-pied { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-top: 1px solid #e6e9ed; background: #fafbfc; font-size: 13px; color: #6f42c1; }
-/* Dans la fenetre : la carte de SECTION (en haut) reste mauve ; la carte du
-   DOCUMENT (a droite) et la vue Dossier sont sur fond blanc, bordures neutres
-   (le mauve reste reserve a la mention « Proposition IA » et aux controles). */
-.v13-blanc .ia4-carte { background: #fff; border: 1px solid #e3e8ec; box-shadow: 0 1px 3px rgba(0, 0, 0, .04); }
-.v13-blanc .ia4-c-tete { background: #fff; border-bottom: 1px solid #eef1f3; }
-.v13-blanc .ia4-c-actions { background: #fff; border-top: 1px solid #eef1f3; }
-.v13-blanc .ia4-partie + .ia4-partie { border-top-color: #eef1f3; }
-.v13-blanc .ia4-p-titre { color: #4a5a64; }
-.v13-blanc .ia4-texte { border-color: #e6e9ed; background: #fafbfc; }
-.v13-blanc .ia4-constat:hover, .v13-blanc .ia4-constat.ia4-actif { background: #f6f7f9; }
-.v13-blanc .ia4-constat.ia4-actif { box-shadow: 0 0 0 1px #d5dbe0; }
-.v13-blanc .ia4-accepte { border-color: #bfe3cd; }
-.v13-blanc .ia4-accepte .ia4-c-tete { background: #f3faf6; border-bottom-color: #d8efe1; }
-.v13-blanc .ia4-refuse .ia4-c-tete { background: #f6f7f9; }
-.v13-carte-doc { background: #fff; }
-.v13-nav { background: #f7f8fa; border-right-color: #e6e9ed; }
-.v13-haut { border-bottom-color: #e6e9ed; }
-@media (max-width: 1200px) {
-  .v13-haut .ia4-c-corps { grid-template-columns: 1fr 1fr; }
-  .v13-doc { grid-template-columns: minmax(0, 1fr) 360px; }
-}
-@media (max-width: 900px) {
-  .v13-fen { inset: 0; flex-direction: column; border-radius: 0; }
-  .v13-principal { position: static; }
-  .v13-nav { width: auto; display: flex; gap: 4px; overflow-x: auto; padding: 6px 50px 6px 6px; border-right: 0; border-bottom: 1px solid #e0d6f6; }
-  .v13-nav-titre { display: none; }
-  .v13-item { width: auto; flex: none; }
-  .v13-corps { overflow: auto; display: block; }
-  .v13-haut { max-height: none; padding: 10px; }
-  .v13-haut .ia4-c-corps { grid-template-columns: 1fr; }
-  .v13-bas { height: 150vh; }
-  .v13-doc { grid-template-columns: 1fr; grid-template-rows: 55% 45%; }
-  .v13-carte-doc { border-left: 0; border-top: 1px solid #e6e9ed; }
-}
-/* ── Ajouts repris de la plateforme de prevalidation ── */
-/* Carte du document : chaque partie bien separee (filet + espace) */
-.v13-carte-doc .ia4-c-corps > .ia4-partie, .v13-carte-doc .v13-avant-doc > .ia4-partie { padding: 14px 0; }
-.v13-carte-doc .ia4-c-corps > .ia4-partie + .ia4-partie, .v13-carte-doc .v13-avant-doc + .ia4-partie,
-.v13-carte-doc .v13-avant-doc > .ia4-partie + .ia4-partie { border-top: 1px solid #e6e9ed; }
-.v13-carte-doc .v13-avant-doc > .ia4-partie:first-child { padding-top: 10px; }
-/* Note /20 : la note seule, sur une ligne */
-.v13-note { display: flex; align-items: center; gap: 12px; }
-.v13-note .ia4-p-titre { margin: 0; }
-.v13-note-val { font: 700 22px/1 Catamaran, Arial, sans-serif; }
-.v13-note-val small { font-size: 13px; font-weight: 600; color: #8a97a1; }
-.v13-note-ok { color: #2f9e62; }
-.v13-note-ko { color: #d45a55; }
-.v13-o-note { font-size: 11px; font-weight: 700; }
-/* Mot de l'etudiant : son message, rien d'autre */
-.v13-mot .fa { color: #8a97a1; }
-.v13-mot-texte { background: #f7f8fa; border-left: 3px solid #b6c2cc; border-radius: 0 6px 6px 0; padding: 8px 12px; margin-top: 6px; font-style: italic; }
-/* Versions precedentes : repliees */
-.v13-versions > summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; }
-.v13-versions > summary::-webkit-details-marker { display: none; }
-.v13-versions > summary .ia4-p-titre { margin: 0; }
-.v13-v-compte { background: #eef0f3; color: #4a5a64; border-radius: 9px; padding: 0 7px; font-size: 11px; font-weight: 700; }
-.v13-v-chevron { color: #8a97a1; transition: transform .15s; }
-.v13-versions[open] .v13-v-chevron { transform: rotate(180deg); }
-.v13-versions > summary:hover .ia4-p-titre, .v13-versions > summary:hover .v13-v-chevron { color: #6f42c1; }
-.v13-v-liste { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-.v13-v { border: 1px solid #e6e9ed; border-radius: 8px; padding: 8px 10px; }
-.v13-v-tete { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
-.v13-v-num { background: #f4eefe; color: #6f42c1; border-radius: 6px; padding: 0 7px; font-weight: 700; }
-.v13-v-date { color: #6f7d88; }
-.v13-v-etat { border-radius: 9px; padding: 0 8px; font-size: 11.5px; font-weight: 700; }
-.v13-v-ok { background: #e9f7ef; color: #2f9e62; }
-.v13-v-ko { background: #fbe9e8; color: #d45a55; }
-.v13-v-tete a { font-size: 12px; }
-.v13-v-com { margin-top: 4px; font-size: 12.5px; }
-.v13-v-comparer { align-self: flex-start; }
-/* Document mal place : de → vers, puis Deplacer / Annuler */
-.v13-carte-doc > .v13-dep { margin-bottom: 12px; border: 1px solid #f0c987; border-radius: 10px; background: #fff; overflow: hidden; }
-.v13-dep-tete { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #fff8ec; border-bottom: 1px solid #f6e3bd; }
-.v13-dep-titre { font-weight: 700; color: #2b3a42; }
-.v13-dep-corps { padding: 12px 14px 4px; }
-.v13-dep-doc { font-size: 12.5px; color: #6f7d88; margin-bottom: 8px; }
-.v13-dep-trajet { display: flex; align-items: stretch; gap: 10px; }
-.v13-dep-bout { flex: 1; min-width: 0; border: 1px solid #e3e8ec; border-radius: 8px; padding: 8px 10px; background: #f7f8fa; }
-.v13-dep-bout small { display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8a97a1; }
-.v13-dep-bout b { display: block; font-size: 13.5px; line-height: 1.3; }
-.v13-dep-bout select { width: 100%; margin-top: 2px; }
-.v13-dep-vers { border-color: #9fd8b5; background: #eefaf2; }
-.v13-dep-fleche { align-self: center; font-size: 20px; color: #6f42c1; }
-.v13-dep-motif { font-size: 12.5px; color: #4a5a64; margin: 10px 0 2px; }
-.v13-dep-changer { margin: 4px 0 6px; font-size: 12px; }
-.v13-dep-relance { margin: 10px 0 6px; font-size: 12.5px; color: #2f9e62; font-weight: 600; }
-.v13-dep-relance .fa-spinner { color: #6f42c1; }
-.v13-dep .ia4-c-actions { padding: 10px 14px; border-top: 1px solid #eef1f3; }
-.v13-dep.ia4-refuse .v13-dep-vers { opacity: .5; }
+/* Prototype 13 — propositions de l'IA dans les cases de Feel Francais */
+:root { --v13: #6f42c1; --v13-fonce: #4f2d93; --v13-fond: #f6f1ff; --v13-bord: #b499ee; --v13-vert: #2f9e62; --v13-rouge: #d45a55; --v13-orange: #e07b1a; }
+
+/* ── Case pre-remplie par l'IA : mauve, en attente de Perle ── */
+.v13-pre, textarea.v13-pre, input.v13-pre { background: var(--v13-fond) !important; box-shadow: 0 0 0 2px var(--v13-bord) !important; border-color: var(--v13-bord) !important; }
+.doc-note-card.v13-pre { background: var(--v13-fond) !important; box-shadow: 0 0 0 2px var(--v13-bord); border-radius: 6px; }
+.doc-note-card.v13-pre textarea { background: #fff !important; }
+.select2-selection.v13-pre { background: var(--v13-fond) !important; }
+.v13-pre-groupe { background: var(--v13-fond); box-shadow: 0 0 0 2px var(--v13-bord); border-radius: 6px; }
+/* Leur bouton valid / invalid propose : encadre, pas active */
+.btn.v13-pre-btn { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--v13) !important; position: relative; }
+.btn.v13-pre-btn::after { content: "IA"; position: absolute; top: -9px; right: -9px; background: var(--v13); color: #fff; font: 700 9px/1 Arial, sans-serif; padding: 3px 4px; border-radius: 6px; }
+
+/* ── La barre sous une case : IA · source · Accepter / Refuser ── */
+.v13-prop { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin: 6px 0 10px; padding: 6px 10px; border-radius: 6px; background: var(--v13-fond);
+  border: 1px solid #e0d6f6; font: 12.5px/1.4 Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v13-prop-accepte { background: #f1faf5; border-color: #cdebd9; }
+.v13-prop-refuse { background: #f7f8fa; border-color: #e3e8ec; }
+.v13-ia { flex: none; background: var(--v13); color: #fff; font: 700 10.5px/1 Arial, sans-serif; padding: 3px 6px; border-radius: 5px; letter-spacing: .03em; }
+.v13-prop-accepte .v13-ia, .v13-prop-refuse .v13-ia { background: #aab4bc; }
+.v13-ia-mini { font-size: 9px; padding: 2px 4px; vertical-align: 1px; }
+.v13-avant { min-width: 0; display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.v13-src { color: #5b6a74; min-width: 0; flex: 1 1 220px; }
+.v13-src .fa { color: var(--v13); margin-right: 2px; }
+.v13-src a { font-weight: 600; }
+.v13-sep { flex: 1 1 0; }
+.v13-actions { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.v13-b { border: 1px solid #d5dbe0; background: #fff; color: #2b3a42; border-radius: 5px; padding: 3px 11px; font: 600 12.5px Catamaran, Arial, sans-serif; cursor: pointer; }
+.v13-b:hover { border-color: var(--v13); color: var(--v13); }
+.v13-b-ok { background: var(--v13-vert); border-color: var(--v13-vert); color: #fff; }
+.v13-b-ok:hover { background: #268652; color: #fff; }
+.v13-lien { border: 0; background: none; padding: 0; color: var(--v13); font: 600 12.5px Catamaran, Arial, sans-serif; cursor: pointer; }
+.v13-lien:hover { text-decoration: underline; }
+.v13-fait { font-weight: 700; }
+.v13-fait-accepte { color: var(--v13-vert); }
+.v13-fait-refuse { color: #6f7d88; }
+.v13-note { font: 700 16px/1 Catamaran, Arial, sans-serif; }
+.v13-note small { font-size: 11px; color: #8a97a1; font-weight: 600; }
+.v13-note-ok { color: var(--v13-vert); }
+.v13-note-moyen { color: var(--v13-orange); }
+.v13-note-ko { color: var(--v13-rouge); }
+.v13-prop-section { margin: 4px 15px 12px; }
+.v13-prop-doc { margin: 8px 0 2px; }
+.v13-prop-dep { margin: 0 0 10px; border-color: #f0c987; background: #fff8ec; }
+.v13-prop-dep .v13-ia { background: #d99a2b; }
 .v13-deplace { display: inline-block; margin-left: 8px; background: #fff3dc; color: #9a6400; border: 1px solid #f0c987; border-radius: 10px; padding: 0 8px; font-size: 11px; font-weight: 600; }
-/* Bandeau des etapes : la note de chaque etape, puis ce qui est attendu */
-.v13-etapes { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 18px; margin: 0 0 12px; padding: 10px 12px; border: 1px solid #e3e8ec; border-radius: 6px;
-  background: #fff; font: 13px/1.4 Catamaran, Arial, sans-serif; color: #2b3a42; }
-.v13-e-cases { display: flex; gap: 10px; flex-wrap: wrap; }
-.v13-etape { display: flex; flex-direction: column; min-width: 150px; padding: 8px 12px; border: 1px solid #e0d6f6; border-radius: 8px; background: #faf8ff; }
-.v13-etape-sans { background: #f7f8fa; border-color: #e3e8ec; }
-.v13-e-nom { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #4a5a64; }
-.v13-e-note { font: 700 24px/1.1 Catamaran, Arial, sans-serif; }
-.v13-e-note small { font-size: 13px; font-weight: 600; color: #8a97a1; }
-.v13-e-infos { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 6px; }
-.v13-e-attendus ul { margin: 2px 0 0; padding-left: 18px; }
-.v13-e-attendus .fa, .v13-e-opt .fa { color: #8a97a1; }
-.v13-e-sec { font-weight: 600; }
-.v13-e-sec::after { content: " —"; font-weight: 400; color: #8a97a1; }
-/* Notifications : etat de l'analyse */
+
+/* ── Une carte par etape (au-dessus des documents) ── */
+.v13-etapes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 0 0 16px; font: 13px/1.4 Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v13-etape { border: 1px solid #d9efe2; border-radius: 12px; background: #f6fcf8; padding: 14px 16px 10px; }
+.v13-etape-moyen { border-color: #f6dcc0; background: #fff9f2; }
+.v13-etape-ko { border-color: #f3cfcd; background: #fff6f6; }
+.v13-etape-sans { border-color: #e3e8ec; background: #f7f8fa; }
+.v13-etape-ok { border-color: #d9efe2; background: #f6fcf8; }
+.v13-e-tete { display: flex; align-items: center; gap: 10px; }
+.v13-e-icone { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #e2f4ea; color: var(--v13-vert); font-size: 16px; }
+.v13-etape-moyen .v13-e-icone { background: #fdebd7; color: var(--v13-orange); }
+.v13-etape-ko .v13-e-icone { background: #fbe1e0; color: var(--v13-rouge); }
+.v13-etape-sans .v13-e-icone { background: #eef0f3; color: #8a97a1; }
+.v13-e-nom { flex: 1; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.v13-pill { flex: none; border-radius: 12px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+.v13-pill-ok { background: #e2f4ea; color: var(--v13-vert); }
+.v13-pill-moyen { background: #fdebd7; color: #b65f0f; }
+.v13-pill-ko { background: #fbe1e0; color: #b8433e; }
+.v13-e-note { font: 700 30px/1.1 Catamaran, Arial, sans-serif; margin: 2px 0 8px 46px; }
+.v13-e-note small { font-size: 14px; color: #8a97a1; font-weight: 600; }
+.v13-e-vide { margin: 10px 0 4px 46px; color: #5b6a74; }
+.v13-e-ligne { display: grid; grid-template-columns: 150px minmax(0, 1fr) 46px; align-items: center; gap: 10px; margin: 5px 0; }
+.v13-e-lib { color: #4a5a64; }
+.v13-e-barre { height: 8px; border-radius: 4px; background: #e6e9ed; overflow: hidden; }
+.v13-e-rempli { display: block; height: 100%; border-radius: 4px; }
+.v13-e-ok { background: var(--v13-vert); }
+.v13-e-moyen { background: var(--v13-orange); }
+.v13-e-ko { background: var(--v13-rouge); }
+.v13-e-val { text-align: right; font-weight: 700; }
+.v13-e-val small { color: #8a97a1; font-weight: 600; }
+.v13-e-detail { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 8px; padding: 8px 0 2px; border: 0; border-top: 1px solid rgba(0, 0, 0, .06); background: none;
+  color: #4a5a64; font: 600 12.5px Catamaran, Arial, sans-serif; cursor: pointer; text-align: left; }
+.v13-e-detail:hover { color: var(--v13); }
+.v13-e-chevron { margin-left: auto; transition: transform .15s; }
+.v13-etape-ouverte .v13-e-chevron { transform: rotate(90deg); }
+.v13-e-liste { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.v13-e-titre { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8a97a1; margin: 6px 0 2px; }
+.v13-e-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; border: 0; background: #fff; border-radius: 7px; padding: 6px 8px; text-align: left; font: inherit; color: inherit; }
+button.v13-e-item { cursor: pointer; }
+button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
+.v13-e-item b { display: block; font-size: 12.5px; }
+.v13-e-item small { display: block; color: #5b6a74; font-size: 12px; }
+.v13-e-item-note { flex: none; min-width: 44px; font-weight: 700; }
+.v13-e-manque .fa { color: #8a97a1; margin-top: 3px; width: 44px; text-align: center; }
+
+/* ── Analyse du document DANS leur apercu (#pdfModal) ── */
+.v13-apercu-actif .modal-dialog { width: 96% !important; max-width: 1500px !important; }
+.v13-apercu-actif #pdfModalFrame, .v13-apercu-actif #pdfModalLoader { display: none !important; }
+.v13-apercu { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
+.v13-ap-pdf { overflow: auto; background: #eef1f4; padding: 18px; }
+.v13-ap-ia { overflow: auto; border-left: 1px solid #e3e8ec; background: #fff; }
+.v13-ap-panneau { padding: 14px 18px 18px; font: 13.5px/1.5 Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v13-ap-titre { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.v13-ap-rang { font-size: 12px; font-weight: 600; color: #8a97a1; }
+.v13-ap-partie { padding: 12px 0; border-top: 1px solid #eef1f3; }
+.v13-ap-partie:first-of-type { border-top: 0; }
+.v13-ap-partie h4 { margin: 0 0 8px; font-size: 13.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #2b3a42; }
+.v13-note-grande { font-size: 28px; }
+.v13-note-grande small { font-size: 14px; }
+.v13-ap-constats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.v13-ap-constats li { display: flex; gap: 8px; align-items: flex-start; }
+.v13-c-num { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 700 11px/1 Arial, sans-serif; color: #fff; background: #5b8def; margin-top: 1px; }
+.v13-c-probleme .v13-c-num { background: var(--v13-rouge); }
+.v13-c-a-verifier .v13-c-num { background: #e8a33d; }
+.v13-c-conforme .v13-c-num { background: #3cb371; }
+.v13-seg { display: inline-flex; border: 1px solid #d5dbe0; border-radius: 6px; overflow: hidden; }
+.v13-seg button { border: 0; background: #fff; padding: 6px 14px; font: 600 13px Catamaran, Arial, sans-serif; color: #6f7d88; cursor: pointer; }
+.v13-seg button + button { border-left: 1px solid #d5dbe0; }
+.v13-seg button[data-v="valide"].v13-choisi { background: var(--v13-vert); color: #fff; }
+.v13-seg button[data-v="invalide"].v13-choisi { background: var(--v13-rouge); color: #fff; }
+.v13-seg .v13-choisi .v13-ia { background: rgba(255, 255, 255, .3); }
+.v13-ap-mot { margin: 0; padding: 8px 12px; background: #f7f8fa; border-left: 3px solid #b6c2cc; border-radius: 0 6px 6px 0; font-style: italic; }
+.v13-ap-partie textarea { width: 100%; border: 1px solid #d5dbe0; border-radius: 6px; padding: 8px 10px; font: inherit; resize: vertical; background: var(--v13-fond); }
+.v13-prop-ap { margin-top: 12px; }
+
+/* ── Incoherences (fenetre legere) ── */
+.v13-fen-inc { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(760px, 94vw); max-height: 86vh; overflow: auto; padding: 14px 20px 20px; }
+.v13-inc-tete { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.v13-inc-tete h3 { flex: 1; margin: 0; font-size: 17px; }
+
+/* ── Notifications : etat de l'analyse ── */
 .v13-n-quand { color: #8a97a1; font-weight: 400; }
-.v13-n-cours { color: #6f42c1; }
+.v13-n-cours { color: var(--v13); }
 .v13-n-attente { color: #6f7d88; }
-.v13-n-echec { color: #d45a55; }
-.v13-relancer { border: 1px solid #d45a55; background: #fff; color: #d45a55; border-radius: 4px; padding: 0 6px; font-size: 11px; margin-left: 4px; cursor: pointer; }
+.v13-n-echec { color: var(--v13-rouge); }
+.v13-relancer { border: 1px solid var(--v13-rouge); background: #fff; color: var(--v13-rouge); border-radius: 4px; padding: 0 6px; font-size: 11px; margin-left: 4px; cursor: pointer; }
 .v13-relancer:hover { background: #fbe9e8; }
-/* Titres des parties plus grands dans la fenetre (Note de l'IA, Analyse, Verdict, Commentaire…) */
-.v13-fen .ia4-p-titre { font-size: 13.5px; letter-spacing: .04em; color: #2b3a42; margin-bottom: 8px; }
-.v13-fen .ia4-p-titre .ia4-muet, .v13-fen .ia4-p-titre .ia4-vis { font-size: 12px; letter-spacing: 0; }
-.v13-fen .v13-versions > summary .ia4-p-titre { margin: 0; }
+
+@media (max-width: 900px) {
+  .v13-apercu { grid-template-columns: 1fr; grid-template-rows: 55% 45%; }
+  .v13-ap-ia { border-left: 0; border-top: 1px solid #e3e8ec; }
+  .v13-e-ligne { grid-template-columns: 110px minmax(0, 1fr) 40px; }
+}

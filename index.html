@@ -239,11 +239,10 @@
         <div class="hero">
           <span class="hero-tag">Feel Français · Prévalidation IA</span>
           <h2>Revue des prototypes</h2>
-          <p>13 façons d’ajouter l’IA à la page de Perle. La page Feel Français reste la même, rien n’en est retiré&nbsp;:
-            seule la présentation des propositions de l’IA change.</p>
+          <p>La page de Perle dans Feel Français, avec les propositions de l’IA déjà posées dans ses cases.
+            Perle vérifie la source, puis accepte ou refuse. Rien de sa page n’est retiré.</p>
           <div class="hero-actions">
-            <button type="button" class="bouton" id="aller-final"><i class="fa fa-star"></i> Commencer par le prototype final</button>
-            <button type="button" class="bouton-2" id="aller-debut">Voir depuis le début <i class="fa fa-arrow-right"></i></button>
+            <button type="button" class="bouton" id="aller-final"><i class="fa fa-star"></i> Ouvrir le prototype</button>
           </div>
           <span class="note-fictif"><i class="fa fa-exclamation-triangle"></i> Toutes les données sont fictives</span>
         </div>
@@ -252,7 +251,7 @@
           <h3>Comment faire</h3>
           <div class="etapes">
             <div class="etape"><span class="rond"><i class="fa fa-list"></i></span><div><b>1. Choisir un prototype</b><span class="quoi">dans le menu à gauche</span></div></div>
-            <div class="etape"><span class="rond"><i class="fa fa-hand-pointer-o"></i></span><div><b>2. Tester</b><span class="quoi">changer de page avec les onglets en haut, puis cliquer sur les étiquettes <span class="ia-tag">IA</span></span></div></div>
+            <div class="etape"><span class="rond"><i class="fa fa-hand-pointer-o"></i></span><div><b>2. Tester</b><span class="quoi">les cases en <span class="ia-tag">mauve</span> sont proposées par l’IA : accepter ou refuser ; cliquer sur un document pour voir son analyse</span></div></div>
             <div class="etape"><span class="rond"><i class="fa fa-sticky-note-o"></i></span><div><b>3. Noter ses remarques</b><span class="quoi">bouton « Ajouter un commentaire » en bas à gauche&nbsp;: un seul endroit pour tout</span></div></div>
           </div>
         </div>
@@ -263,8 +262,6 @@
         </div>
 
         <div class="bloc">
-          <h3>L’évolution des prototypes</h3>
-          <div class="fil" id="tours"></div>
           <div class="comparer">Pour comparer&nbsp;: <button type="button" id="aller-origine">les pages d’origine, sans IA <i class="fa fa-arrow-right"></i></button></div>
         </div>
       </div>
@@ -308,49 +305,9 @@
 
   // ── The prototypes ──────────────────────────────────────────────────────
   var TOURS = [
-    { resume: 'Cinq idées de départ, une par prototype.', nav: 'Tour 1 · cinq idées', titre: 'Round 1 · five different ideas', sous: 'First answers to Perle\'s needs, each built around one idea.', ids: [1, 2, 3, 4, 5] },
-    { resume: 'Les meilleures idées combinées, le PDF toujours visible.', nav: 'Tour 2 · les meilleures idées combinées', titre: 'Round 2 · the best ideas mixed', sous: 'After a UX review: shorter texts, the PDF always visible.', ids: [6, 7, 8] },
-    { resume: 'Par document : analyse, verdict, commentaire.', nav: 'Tour 3 · une analyse plus claire', titre: 'Round 3 · a clearer analysis', sous: 'Only three things per document: analysis, verdict, comment.', ids: [9, 10] },
-    { resume: 'La section se décide sur la page ou en haut de la fenêtre.', nav: 'Tour 4 · où se décide la section', titre: 'Round 4 · where the section is decided', sous: 'On the page itself, or at the top of the window.', ids: [11, 12] },
-    { resume: 'La version affinée pour la démo à Perle.', nav: 'Version finale', titre: 'Final', sous: 'The refined version, ready for the demo to Perle.', ids: [13] }
+    { resume: 'La couche IA dans la page de Perle.', nav: 'Prototype', titre: 'Final', sous: '', ids: [13] }
   ];
   var P = {
-    1: { t: 'Fenêtre d’analyse', d: 'One big window per section: PDF on the left, AI findings on the right.',
-      idee: 'Each analysed section gets a coloured outline and a small AI button. It opens a large window: the highlighted PDF on the left, the numbered findings on the right, the proposals underneath and « Valider la section » at the bottom.',
-      voir: ['One section at a time: evidence and finding side by side, with the same numbers.', 'Proposals are accepted or changed at the bottom of the window.'] },
-    2: { t: 'Panneau latéral', d: 'The analysis opens in a panel; Perle watches her own fields fill in.',
-      idee: 'The analysis opens in a panel on the right, the Feel Français page stays visible. Tabs: Findings · Evidence · Proposals · Why. On the notifications page the panel becomes a work queue sorted by urgency.',
-      voir: ['The context never disappears.', 'Tabs limit how much is shown at once.'] },
-    3: { t: 'Dans la section', d: 'No window: each proposal sits exactly where it will be written.',
-      idee: 'The verdict appears under the section header, the comment above Feel Français\'s comment field, the date under the date field. The PDF unfolds inside the section.',
-      voir: ['No back and forth between two places on screen.', 'Uses the most page space.'] },
-    4: { t: 'Mode revue', d: 'A full-screen, keyboard-driven walk-through, section by section.',
-      idee: 'A focused walk-through: one proposal at a time, keyboard shortcuts (A accept, R refuse, E edit, Enter next), progress bar and a final summary.',
-      voir: ['Built for high season, when Perle has about 10 seconds per document.', 'Try it with the keyboard.'] },
-    5: { t: 'Tableau de bord', d: 'An overview first (filters, cross-checks, timeline), details on demand.',
-      idee: 'A summary bar with filters by status, a compact card per section, and overview views: cross-check matrix between documents, dossier timeline, « accept all compliant ».',
-      voir: ['Gives the whole picture of a dossier before the details.'] },
-    6: { t: 'Fenêtre épurée', d: 'Window of #1 with the section list of #4 and fields opening in place (#3).',
-      idee: 'The analysis window with the list of sections on the left and the fields of the top of the page opening right under the field. Large PDF in the centre; always on the right: AI proposal, inconsistencies, good to know, findings.',
-      voir: ['Short texts, nothing that pushes Feel Français\'s layout out of shape.', 'Proposals can be edited and saved for later.'] },
-    7: { t: 'Panneau PDF', d: 'Side panel on the left, so the section being processed stays visible.',
-      idee: 'The side panel of #2, opened on the left: the section being processed stays fully visible on the right. PDF on top, proposals below; home screen = inconsistencies and sections by priority.',
-      voir: ['See the PDF, the proposal and the Feel Français field filling in, all at once.'] },
-    8: { t: 'Revue guidée', d: 'Review mode inside a large window, in the order that saves the most time.',
-      idee: 'The review mode of #4 in a large window: first the inconsistencies side by side, then the sections to fix, then all compliant ones in one step, finally the dossier.',
-      voir: ['The order of work is decided for Perle.', 'The PDF is always visible.'] },
-    9: { t: 'Fenêtre claire', d: '#6 with the analysis redone: a document frame and a section column.',
-      idee: 'In the centre, the DOCUMENT frame: the PDF and, next to it, its analysis (numbered points), verdict and comment. On the right, the SECTION: verdict and general comment, then inconsistencies. One button: « Valider la section ».',
-      voir: ['◀ ▶ arrows go back to the AI\'s wording after an edit.', 'Only three things: analysis, verdict, comment.'] },
-    10: { t: 'Revue claire', d: '#8 with the same clear layout; validate and move on.',
-      idee: 'The guided review with the clear document / section layout. « Valider et continuer » writes into Feel Français and moves to the next item.',
-      voir: ['Made to chain dossiers quickly.'] },
-    11: { t: 'Section sur la page', d: 'Section verdict and general comment decided on the page itself.',
-      idee: 'An « IA » chip next to Feel Français\'s « Commentaire général » button opens the section verdict and general comment right below it. The window is only for documents: section reminder on top, PDF on the left, document analysis, verdict and comment on the right.',
-      voir: ['Every box Perle fills in is covered, internal notes included (optional, never pre-filled).'] },
-    12: { t: 'Section en haut', d: 'Everything in the window: the section on top, the documents below.',
-      idee: 'Top of the window: the section being processed (name, status, verdict, general comment, inconsistencies). Bottom: PDF on the left, document analysis, verdict and comment on the right.',
-      voir: ['You always know which section you are processing.'] },
     13: { t: 'Yukta\'s final prototype', d: 'Built on #11: one « Proposition IA » card everywhere, simple for Perle.', final: true,
       idee: 'One single « Proposition IA » card everywhere (Statut, Zone, Visa, section, document): a real title, its state (⏱ to decide / ✓ decided), then Accepter · Modifier · Refuser · Annuler. The window shows the section card on top (collapsible) and the documents as tabs: PDF on the left; on the right analysis, AI grade /20 with why, verdict, comment with the annotated PDF attached, internal note, previous versions.',
       voir: ['Awa → « Assurance santé »: a document in the wrong section, moved with Feel Français\'s own menu.',
@@ -425,18 +382,6 @@
     b.addEventListener('click', function () { aller(13, d.id); });
     $('dossiers').appendChild(b);
   });
-  $('tours').innerHTML = TOURS.map(function (tr, i) {
-    var final = tr.ids[0] === 13;
-    return '<div class="tour' + (final ? ' final' : '') + '"><span class="pastille-tour">' + (final ? '<i class="fa fa-star"></i>' : i + 1) + '</span>' +
-      '<div class="tour-carte"><b>' + esc(final ? 'Version finale' : 'Tour ' + (i + 1)) + '</b><p>' + esc(tr.resume) + '</p><div class="protos">' +
-      tr.ids.map(function (n) { return '<button type="button" data-proto="' + n + '">' + (final ? '' : '<i>' + n + '</i>') + esc(P[n].t) + '</button>'; }).join('') +
-      '</div></div></div>';
-  }).join('');
-  $('tours').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-proto]');
-    if (b) aller(+b.getAttribute('data-proto'), 'A');
-  });
-  $('aller-debut').addEventListener('click', function () { aller(1, 'A'); });
   $('aller-origine').addEventListener('click', function () { aller('base', 'A'); });
   $('aller-final').addEventListener('click', function () { aller(13, 'A'); });
 
