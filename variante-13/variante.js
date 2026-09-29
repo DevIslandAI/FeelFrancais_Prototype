@@ -146,22 +146,13 @@
     return el;
   }
 
-  // ─── Etiquette sur la bordure de la section (etat de l'analyse) ──────────
+  // ─── Section analysee : seulement la couleur de sa bordure (plus d'etiquette :
+  //     l'analyse s'ouvre en cliquant sur le document) ─────────────────────────
   function marquer(s) {
-    var c = s.el.querySelector('.doc-container');
     s.el.classList.add('ia2-sec', 'ia2-' + s.statut);
-    var tag = o.el('<button type="button" class="ia2-tag ia2-t-' + s.statut + '" title="Voir l’analyse du document"></button>');
-    c.appendChild(tag);
-    tag.addEventListener('click', function (ev) { ev.stopPropagation(); if (docs(s)[0]) ouvrirDocument(docs(s)[0]); });
-    function maj() {
-      var fini = IA.progressionSection(s).finie;
-      s.el.classList.toggle('ia2-fini', fini);
-      tag.innerHTML = '<span class="ia2-point"></span>IA · ' + e(fini ? 'traité' : IA.ui2.COURT[s.statut]);
-      tag.classList.toggle('ia2-tag-fini', fini);
-    }
+    function maj() { s.el.classList.toggle('ia2-fini', IA.progressionSection(s).finie); }
     IA.on('decision', maj);
     maj();
-    s.tag = tag;
   }
 
   // ─── Cases du haut de page : Statut, Texte a l'etudiant, Zone ────────────
