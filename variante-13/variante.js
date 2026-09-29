@@ -296,16 +296,17 @@
     else entete.insertAdjacentElement('afterend', el);
   }
 
-  // ─── Document : leur verdict encadre + leur commentaire pre-rempli ───────
+  // ─── Document : RIEN sur la page. Le verdict et le commentaire proposes
+  //     n'apparaissent que dans l'apercu du document, et ne s'acceptent que la.
   function proposerDocument(s, d, rang, total) {
     var boutons = d.el.querySelector('.doc-info-buttons');
     var SEL = '.changeState';
     var texte = (d.commentaire || {}).etudiant || '';
     var note = noteFF(d.id, 'staff');
-    var ctrl = controles[d.nom] = { s: s, d: d, note: note, texte: texte, choix: d.verdict === 'a-verifier' ? null : d.verdict, rang: rang, total: total };
+    var ctrl = controles[d.nom] = { s: s, d: d, note: note, texte: texte, brouillon: texte,
+      choix: d.verdict === 'a-verifier' ? null : d.verdict, rang: rang, total: total };
     var clesD = function () { return cles(s, 'doc:' + d.nom + ':'); };
-    ctrl.proposer = function () { if (note && texte) note.poser(texte, true); encadrer(boutons, SEL, ctrl.choix); };
-    ctrl.choisir = function (v) { ctrl.choix = v; encadrer(boutons, SEL, v); IA.emettre('decision', {}); };
+    ctrl.choisir = function (v) { ctrl.choix = v; };
     ctrl.p = {
       id: 'doc:' + d.nom,
       memo: { local: null, snap: null },
@@ -313,40 +314,27 @@
       action: function (a) {
         if (a === 'valide' || a === 'invalide') ctrl.choix = a;
         if (!ctrl.choix) { o.toast('Choisissez d’abord valid ou invalid.'); return false; }
-        var snap = { verdict: verdictActif(boutons, SEL) };
-        IA.ecrire.verdictDocument(d, ctrl.choix === 'valide');
-        if (note && note.zone.value.trim()) IA.ecrire.commentaire(d.id, 'staff', note.zone.value);
+        var snap = { verdict: verdictActif(boutons, SEL), staff: note ? note.zone.value : '' };
+        var com = (ctrl.brouillon || '').trim();
+        IA.ecrire.verdictDocument(d, ctrl.choix === 'valide');  // leur bouton, sur la page
+        if (com) IA.ecrire.commentaire(d.id, 'staff', com);      // leur commentaire, sur la page
         if (existe(s, 'doc:' + d.nom + ':verdict')) IA.decider('doc:' + d.nom + ':verdict', ctrl.choix === d.verdict ? 'accepte' : 'modifie', ctrl.choix);
-        if (existe(s, 'doc:' + d.nom + ':etudiant')) IA.decider('doc:' + d.nom + ':etudiant', note && note.zone.value.trim() === texte ? 'accepte' : 'modifie', note ? note.zone.value : null);
+        if (existe(s, 'doc:' + d.nom + ':etudiant')) IA.decider('doc:' + d.nom + ':etudiant', com === texte ? 'accepte' : 'modifie', com || null);
         if (existe(s, 'doc:' + d.nom + ':interne')) IA.decider('doc:' + d.nom + ':interne', 'refuse', null);
-        encadrer(boutons, SEL, null);
-        if (note) note.carte.classList.remove('v13-pre');
         return snap;
       },
-      refuser: function () {
-        clesD().forEach(function (k) { IA.decider(k, 'refuse', null); });
-        encadrer(boutons, SEL, null);
-        if (note) note.restaurer();
-      },
+      refuser: function () { clesD().forEach(function (k) { IA.decider(k, 'refuse', null); }); },
       annuler: function (snap) {
         if ('verdict' in snap) remettreVerdict(boutons, SEL, snap.verdict, function (v) { IA.ecrire.verdictDocument(d, v); });
+        if ('staff' in snap && note && note.zone.value !== snap.staff) {
+          if (snap.staff) IA.ecrire.commentaire(d.id, 'staff', snap.staff);
+          else note.restaurer();
+        }
         clesD().forEach(function (k) { IA.annuler(k); });
-        ctrl.proposer();
       }
     };
     // L'IA ne tranche pas sur ce document : Perle choisit directement, en un clic.
     if (!ctrl.choix) ctrl.p.boutons = [['valide', 'valid', true], ['invalide', 'invalid']];
-    ctrl.proposer();
-    var n = d.note;
-    var p = Object.assign({}, ctrl.p, {
-      avant: (n ? '<span class="v13-note v13-note-' + (n.valeur >= n.seuil ? 'ok' : 'ko') + '">' + n.valeur + '<small>/20</small></span>' : '') +
-        '<button type="button" class="v13-lien v13-voir" data-voir>Voir l’analyse</button>'
-    });
-    var el = barre(p);
-    el.classList.add('v13-prop-doc');
-    el.addEventListener('click', function (ev) { if (ev.target.closest('[data-voir]')) ouvrirDocument(d); }, true);
-    var groupe = d.el.querySelector('.doc-item-comments');
-    (groupe || d.el).appendChild(el);
   }
 
   // ─── Analyse du document dans LEUR apercu (« Aperçu du document ») ───────
@@ -406,8 +394,10 @@
     if (r && ctrl.rang === ctrl.total) partie('Commentaire de l’étudiant', '<blockquote class="v13-ap-mot">« ' + e(r.texte) + ' »</blockquote>');
     var com = partie('Commentaire', '<textarea rows="4" placeholder="Aucun commentaire proposé"></textarea>');
     var zone = com.querySelector('textarea');
-    zone.value = ctrl.note ? ctrl.note.zone.value : ctrl.texte;
-    zone.addEventListener('input', function () { if (ctrl.note) { ctrl.note.carte.style.display = ''; ctrl.note.zone.value = zone.value; } });
+    // Decide : ce qui est enregistre dans Feel Francais ; sinon la proposition (ou la version de Perle).
+    var decide = ctrl.p.cles().length ? ctrl.p.cles().every(function (k) { return IA.decision(k); }) : !!ctrl.p.memo.local;
+    zone.value = decide && ctrl.note ? ctrl.note.zone.value : ctrl.brouillon;
+    zone.addEventListener('input', function () { ctrl.brouillon = zone.value; });
     var b = barre(ctrl.p);
     b.classList.add('v13-prop-ap');
     p.appendChild(b);
@@ -433,7 +423,6 @@
             var ctrl = controles[d.nom];
             if (ctrl) ctrl.choix = v;
             if (existe(s, 'doc:' + d.nom + ':verdict')) IA.decider('doc:' + d.nom + ':verdict', 'modifie', v);
-            encadrer(d.el.querySelector('.doc-info-buttons'), '.changeState', null);
           });
         }
       });
