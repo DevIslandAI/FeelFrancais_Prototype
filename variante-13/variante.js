@@ -25,10 +25,10 @@
 
   IA.on('pret', function () {
     if (!IA.dossier) return notifications();
-    var ligne = IA.ui2.ligne([
-      { html: '<i class="fa fa-link"></i> Incohérences', action: ouvrirIncoherences }
-    ]);
-    ligne.parentNode.insertBefore(bandeauEtapes(), ligne.nextSibling);
+    // Au-dessus des documents : seulement les cartes des etapes (les incoherences
+    // sont dans « Voir le detail » de chaque carte).
+    var bloc = IA.blocDocuments();
+    bloc.parentNode.insertBefore(bandeauEtapes(), bloc);
     IA.dossier.champs.forEach(proposerChamp);
     proposerCampusFrance();
     (IA.dossier.etapesVisa || []).forEach(proposerEtape);
@@ -558,18 +558,6 @@
     b.appendChild(carte('eef', 'Études en France', 'fa-graduation-cap'));
     b.appendChild(carte('visa', 'Visa Center', 'fa-university'));
     return b;
-  }
-
-  // ─── Incoherences entre documents (fenetre legere) ───────────────────────
-  function ouvrirIncoherences() {
-    var f = IA.ui.fenetre({ titre: 'Incohérences entre documents', classe: 'v13-fen-inc' });
-    f.el.innerHTML = '<div class="v13-inc-tete"><h3>Incohérences entre documents</h3><button type="button" class="v13-b" data-fermer><i class="fa fa-times"></i></button></div>';
-    f.el.querySelector('[data-fermer]').addEventListener('click', f.fermer);
-    f.el.appendChild(IA.ui2.incoherencesDossier(function (s) {
-      f.fermer();
-      s.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      o.flash(s.el.querySelector('.doc-container'));
-    }));
   }
 
   // ─── Notifications : l'etat de l'analyse de chaque dossier ───────────────

@@ -80,6 +80,7 @@
 .v13-e-chevron { margin-left: auto; transition: transform .15s; }
 .v13-etape-ouverte .v13-e-chevron { transform: rotate(90deg); }
 .v13-e-liste { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.v13-e-liste[hidden] { display: none; }
 .v13-e-titre { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8a97a1; margin: 6px 0 2px; }
 .v13-e-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; border: 0; background: #fff; border-radius: 7px; padding: 6px 8px; text-align: left; font: inherit; color: inherit; }
 button.v13-e-item { cursor: pointer; }
@@ -118,11 +119,6 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-ap-mot { margin: 0; padding: 8px 12px; background: #f7f8fa; border-left: 3px solid #b6c2cc; border-radius: 0 6px 6px 0; font-style: italic; }
 .v13-ap-partie textarea { width: 100%; border: 1px solid #d5dbe0; border-radius: 6px; padding: 8px 10px; font: inherit; resize: vertical; background: var(--v13-fond); }
 .v13-prop-ap { margin-top: 12px; }
-
-/* ── Incoherences (fenetre legere) ── */
-.v13-fen-inc { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(760px, 94vw); max-height: 86vh; overflow: auto; padding: 14px 20px 20px; }
-.v13-inc-tete { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.v13-inc-tete h3 { flex: 1; margin: 0; font-size: 17px; }
 
 /* ── Notifications : etat de l'analyse ── */
 .v13-n-quand { color: #8a97a1; font-weight: 400; }
