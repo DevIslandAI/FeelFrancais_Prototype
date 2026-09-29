@@ -62,6 +62,23 @@
   function jq(el) { return window.jQuery ? window.jQuery(el) : null; }
   function seuil() { return (IA.dossier.bareme || {}).seuil || 17; }
   function nomDoc(d) { return d.sousType || d.fichier; }
+  // Les PREUVES : les documents d'ou l'IA tire une proposition. Un clic les ouvre
+  // dans leur apercu (avec l'analyse de l'IA quand le document en a une).
+  var NOMS_FICHIERS = { 'enrollment-letter': 'Lettre d’inscription', passport: 'Passeport' };
+  function trouverDoc(nom) {
+    var r = null;
+    IA.dossier.sections.forEach(function (s) { (s.documents || []).forEach(function (d) { if (d.nom === nom) r = d; }); });
+    return r;
+  }
+  function libelleDoc(nom, fichier) { var d = trouverDoc(nom); return d ? nomDoc(d) : (NOMS_FICHIERS[fichier] || fichier || nom); }
+  function preuve(nom, fichier) { return nom ? { nom: nom, libelle: libelleDoc(nom, fichier) } : null; }
+  function ouvrirPreuve(nom) {
+    if (controles[nom]) return ouvrirDocument(controles[nom].d);
+    var item = Array.prototype.filter.call(document.querySelectorAll('.doc-orginal-name'), function (x) { return x.textContent.trim() === nom; })[0];
+    var canvas = item && item.closest('.doc-item') && item.closest('.doc-item').querySelector('.pdf-canvas');
+    if (canvas) return canvas.click();  // leur apercu du document
+    window.open(IA.urlDocument(nom), '_blank', 'noopener');
+  }
   function ouvrirDocument(d) {  // le geste de Perle : clic sur l'apercu du document
     var c = d.el && d.el.querySelector('.pdf-canvas');
     if (c) c.click();
@@ -125,8 +142,11 @@
       // Seul l'etat change : les autres classes (section, pied de commentaire…) restent.
       el.classList.remove('v13-prop-attente', 'v13-prop-accepte', 'v13-prop-refuse');
       el.classList.add('v13-prop-' + x);
-      var src = p.source ? '<span class="v13-src" title="D’où l’IA tire cette proposition"><i class="fa fa-search"></i> ' + e(p.source) +
-        (p.lien ? ' <a href="' + e(p.lien) + '" target="_blank" rel="noopener">voir</a>' : '') + '</span>' : '';
+      var preuves = (p.preuves || []).filter(Boolean).map(function (x) {
+        return '<button type="button" class="v13-preuve" data-preuve="' + e(x.nom) + '" title="Ouvrir ce document"><i class="fa fa-file-pdf-o"></i> ' + e(x.libelle) + '</button>';
+      }).join('');
+      var src = p.source || preuves ? '<span class="v13-src" title="D’où l’IA tire cette proposition"><i class="fa fa-search"></i> ' + e(p.source || 'Preuve :') +
+        (preuves ? ' <span class="v13-preuves">' + preuves + '</span>' : '') + '</span>' : '';
       var act = x === 'attente'
         ? (p.boutons || [['accepter', 'Accepter', true], ['refuser', 'Refuser']]).map(function (b) {
           var icone = OPTS.icones && ICONES_B[b[0]];
@@ -141,6 +161,8 @@
       if (p.surEtat) p.surEtat(x);
     }
     el.addEventListener('click', function (ev) {
+      var pr = ev.target.closest('[data-preuve]');
+      if (pr) { ouvrirPreuve(pr.getAttribute('data-preuve')); return; }
       var b = ev.target.closest('[data-a]');
       if (!b) return;
       var a = b.getAttribute('data-a');
@@ -193,7 +215,8 @@
     var cadre = s2 ? (s2.querySelector('.select2-selection') || s2) : champ;
     poserChamp(champ, c, c.propose);
     placerSous(champ, barre({
-      id: cle, libelle: c.libelle, resume: court(c.proposeLibelle || c.propose, 90), source: c.motif, lien: c.source && c.source.nom ? IA.urlDocument(c.source.nom) : null,
+      id: cle, libelle: c.libelle, resume: court(c.proposeLibelle || c.propose, 90), source: c.motif,
+      preuves: [c.source ? preuve(c.source.nom, c.source.fichier) : null],
       cles: function () { return [cle]; },
       action: function () {
         var v = valeurChamp(champ);
@@ -238,6 +261,7 @@
     poser({ coche: x.coche, le: x.le });
     groupe.parentNode.insertBefore(barre({
       id: 'visa:' + x.cle, libelle: 'Visa · ' + x.libelle, resume: x.coche ? 'Cocher · ' + (x.le || '') : 'Laisser décoché', source: x.motif,
+      preuves: [x.source ? preuve(x.source.nom, x.source.fichier) : null],
       action: function () {
         if (jq(cb)) { jq(cb).trigger('change'); jq(date).trigger('change'); }
         o.flash(groupe);
@@ -272,7 +296,8 @@
     var p = {
       id: 'sec:' + s.alias,
       libelle: 'Section · ' + IA.ui2.nom(s),
-      source: docs(s).length > 1 ? 'd’après les ' + docs(s).length + ' documents de la section' : 'd’après : ' + docs(s).map(nomDoc).join(''),
+      source: 'd’après :',
+      preuves: docs(s).map(function (d) { return preuve(d.nom); }),
       cles: clesSec,
       action: function (a) {
         var snap = { verdict: verdictActif(entete, SEL) };
@@ -295,7 +320,11 @@
         proposer();
       }
     };
-    if (s.statut === 'alerte' && s.alerte.source) p.source = s.alerte.source;
+    if (s.statut === 'alerte' && s.alerte.source) {
+      p.source = s.alerte.source;
+      var x = (s.croisements || [])[0];
+      if (x) p.preuves = [preuve(x.a.nom, x.a.fichier), preuve(x.b.nom, x.b.fichier)];
+    }
     if (!verdict) {
       // L'IA ne tranche pas (a verifier, provisoire) : Perle choisit, en un clic.
       p.avant = s.statut === 'provisoire' ? 'Pièces encore attendues : pas de verdict pour l’instant.' : 'À vérifier : l’IA ne tranche pas.';

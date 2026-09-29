@@ -23,6 +23,11 @@
 .v13-src { color: #5b6a74; min-width: 0; flex: 1 1 220px; }
 .v13-src .fa { color: var(--v13); margin-right: 2px; }
 .v13-src a { font-weight: 600; }
+/* Preuves : les documents sources, cliquables */
+.v13-preuves { display: inline-flex; flex-wrap: wrap; gap: 4px 6px; vertical-align: middle; }
+.v13-preuve { border: 1px solid #d9ccf3; background: #fff; color: var(--v13-fonce); border-radius: 12px; padding: 0 8px; font: 600 11.5px/1.7 Catamaran, Arial, sans-serif; cursor: pointer; }
+.v13-preuve:hover { background: var(--v13); border-color: var(--v13); color: #fff; }
+.v13-preuve .fa { margin-right: 2px; }
 .v13-sep { flex: 1 1 0; }
 .v13-actions { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .v13-b { border: 1px solid #d5dbe0; background: #fff; color: #2b3a42; border-radius: 5px; padding: 3px 11px; font: 600 12.5px Catamaran, Arial, sans-serif; cursor: pointer; }

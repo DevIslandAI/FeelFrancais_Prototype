@@ -146,7 +146,11 @@ window.IA_DONNEES = {
      "libelle": "Create your Études en France account",
      "coche": true,
      "le": "21/09/2026",
-     "motif": "Le diplôme a été déposé pour l'étape Études en France le 21/09 : le compte existe."
+     "motif": "Le diplôme a été déposé pour l'étape Études en France le 21/09 : le compte existe.",
+     "source": {
+      "fichier": "licence-professionnelle",
+      "nom": "FF__618_89_awa-kouassi__licence-professionnelle_21_09_2026.pdf"
+     }
     }
    ],
    "sections": [
