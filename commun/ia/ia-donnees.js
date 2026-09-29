@@ -136,16 +136,6 @@ window.IA_DONNEES = {
      "actuel": "",
      "motif": "Résumé des corrections demandées, dans la langue de l'étudiante (français).",
      "propose": "Bonjour Awa, merci pour vos dépôts. Il reste quelques corrections avant le rendez-vous au centre de visa :\n1. Relevés bancaires : ajoutez le relevé de juillet 2026.\n2. Lettre de votre père : elle doit être signée.\n3. CV : complétez la période depuis octobre 2025 et indiquez votre niveau d'études.\n4. Formulaire de visa : corrigez les cases 22 et 26.\n5. Assurance santé voyage : déposez votre attestation d'assurance.\nLe détail est indiqué sous chaque document."
-    },
-    {
-     "cle": "adminComment",
-     "selecteur": "#visa_cursus_date_adminComment",
-     "type": "texte",
-     "libelle": "Comment for FF staff",
-     "actuel": "",
-     "interne": true,
-     "motif": "Note interne : deux points à arbitrer par l'équipe.",
-     "propose": "IA 25/09 : passeport validé mais expire le 14/02/2028, avant la fin du cursus (30/06/2028) — à arbitrer. Garant : 400 000 XOF/mois = 609,80 €, légèrement sous le barème de 615 €."
     }
    ],
    "etapesVisa": [
@@ -1520,16 +1510,6 @@ window.IA_DONNEES = {
      "actuel": "",
      "motif": "Message dans la langue de l'étudiant (anglais).",
      "propose": "Hello Lucas, all your documents have been checked and validated. You can now book your appointment at the visa center in Toronto and bring the originals with you."
-    },
-    {
-     "cle": "adminComment",
-     "selecteur": "#visa_cursus_date_adminComment",
-     "type": "texte",
-     "libelle": "Comment for FF staff",
-     "actuel": "",
-     "interne": true,
-     "motif": "Note interne : dossier complet, rien à relancer.",
-     "propose": "IA 25/09 : dossier complet, 10 sections conformes. Ressources personnelles (pas de garant)."
     }
    ],
    "etapesVisa": [
@@ -2223,16 +2203,6 @@ window.IA_DONNEES = {
      "propose": "invalid-visa-center",
      "proposeLibelle": "invalid (visa center)",
      "motif": "La section ressources doit être complétée."
-    },
-    {
-     "cle": "adminComment",
-     "selecteur": "#visa_cursus_date_adminComment",
-     "type": "texte",
-     "libelle": "Comment for FF staff",
-     "actuel": "",
-     "interne": true,
-     "motif": "Note interne sur ce qui bloque.",
-     "propose": "IA 25/09 : lettre de motivation v3 conforme (3e dépôt). Garant : Ousmane Diallo, 1 relevé sur 3, lettre de prise en charge absente."
     }
    ],
    "etapesVisa": [
