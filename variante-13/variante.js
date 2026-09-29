@@ -109,7 +109,9 @@
     }
     function dessiner() {
       var x = etat();
-      el.className = 'v13-prop v13-prop-' + x;
+      // Seul l'etat change : les autres classes (section, pied de commentaire…) restent.
+      el.classList.remove('v13-prop-attente', 'v13-prop-accepte', 'v13-prop-refuse');
+      el.classList.add('v13-prop-' + x);
       var src = p.source ? '<span class="v13-src" title="D’où l’IA tire cette proposition"><i class="fa fa-search"></i> ' + e(p.source) +
         (p.lien ? ' <a href="' + e(p.lien) + '" target="_blank" rel="noopener">voir</a>' : '') + '</span>' : '';
       var act = x === 'attente'
@@ -288,12 +290,22 @@
       // L'IA ne tranche pas (a verifier, provisoire) : Perle choisit, en un clic.
       p.avant = s.statut === 'provisoire' ? 'Pièces encore attendues : pas de verdict pour l’instant.' : 'À vérifier : l’IA ne tranche pas.';
       p.boutons = [['valide', 'valid', true], ['invalide', 'invalid']];
+    } else {
+      p.avant = 'Verdict proposé : <span class="v13-verdict v13-verdict-' + verdict + '">' + (verdict === 'valide' ? 'valid' : 'invalid') + '</span>';
     }
     proposer();
     var el = barre(p);
     el.classList.add('v13-prop-section');
-    if (rangee) rangee.parentNode.insertBefore(el, rangee.nextSibling);
-    else entete.insertAdjacentElement('afterend', el);
+    // Un seul bloc : leur « Commentaire general » pre-rempli, et juste dessous,
+    // colles a lui, le verdict propose, la source et Accepter / Refuser.
+    // Sans commentaire propose : le bloc se pose sous l'en-tete de la section.
+    if (note && texte) {
+      note.carte.classList.add('v13-attache');
+      note.carte.insertAdjacentElement('afterend', el);
+      el.classList.add('v13-prop-pied');
+    } else {
+      entete.insertAdjacentElement('afterend', el);
+    }
   }
 
   // ─── Document : RIEN sur la page. Le verdict et le commentaire proposes

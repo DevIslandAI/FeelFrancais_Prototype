@@ -39,7 +39,20 @@
 .v13-note-ok { color: var(--v13-vert); }
 .v13-note-moyen { color: var(--v13-orange); }
 .v13-note-ko { color: var(--v13-rouge); }
-.v13-prop-section { margin: 4px 15px 12px; }
+.v13-prop-section { margin: 8px 15px 10px; }
+/* Commentaire general + sa ligne IA = un seul bloc */
+.doc-note-card.v13-attache { border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; margin-bottom: 0 !important; }
+/* Leur zone met 10px entre ses elements : on les annule pour coller la ligne IA au commentaire,
+   et on s'aligne sur l'anneau mauve (2px) de la carte. */
+.v13-prop-pied { margin: -10px -2px 0; border: 2px solid var(--v13-bord); border-top: 1px dashed #d5c6f3; border-radius: 0 0 8px 8px; padding: 8px 12px; }
+.doc-note-card.v13-attache:not(.v13-pre) + .v13-prop-pied { border-color: #cdebd9; border-top-color: #e3efe8; }
+.doc-note-card.v13-attache[style*="display: none"] + .v13-prop-pied { border-top: 2px solid #e3e8ec; border-radius: 8px; }
+.v13-prop-section .v13-src { flex-basis: 100%; order: 3; }
+.v13-prop-section .v13-sep { display: none; }
+.v13-prop-section .v13-actions { order: 4; margin-left: auto; }
+.v13-verdict { display: inline-block; border-radius: 5px; padding: 0 8px; font-weight: 700; }
+.v13-verdict-valide { background: #e2f4ea; color: var(--v13-vert); }
+.v13-verdict-invalide { background: #fbe1e0; color: #b8433e; }
 .v13-prop-dep { margin: 0 0 10px; border-color: #f0c987; background: #fff8ec; }
 .v13-prop-dep .v13-ia { background: #d99a2b; }
 .v13-deplace { display: inline-block; margin-left: 8px; background: #fff3dc; color: #9a6400; border: 1px solid #f0c987; border-radius: 10px; padding: 0 8px; font-size: 11px; font-weight: 600; }
