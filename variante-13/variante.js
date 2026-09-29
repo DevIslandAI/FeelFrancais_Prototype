@@ -348,8 +348,9 @@
         clesD().forEach(function (k) { IA.annuler(k); });
       }
     };
-    // L'IA ne tranche pas sur ce document : Perle choisit directement, en un clic.
-    if (!ctrl.choix) ctrl.p.boutons = [['valide', 'valid', true], ['invalide', 'invalid']];
+    // L'IA ne tranche pas sur ce document : Perle choisit valid / invalid dans
+    // « Verdict », puis un seul bouton, Accepter.
+    if (!ctrl.choix) ctrl.p.boutons = [['accepter', 'Accepter', true]];
   }
 
   // ─── Analyse du document dans LEUR apercu (« Aperçu du document ») ───────
