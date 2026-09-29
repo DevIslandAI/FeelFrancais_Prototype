@@ -8,6 +8,10 @@ COPY base ./base
 COPY commun ./commun
 COPY documents ./documents
 COPY variante-13 ./variante-13
+COPY variante-14 ./variante-14
+COPY variante-15 ./variante-15
+COPY variante-16 ./variante-16
+COPY variante-17 ./variante-17
 COPY outils/serveur.py ./outils/serveur.py
 
 # Les notes de revue sont ecrites dans /data : monter un volume sur ce dossier

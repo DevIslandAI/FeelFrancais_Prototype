@@ -1,0 +1,23 @@
+/* Variante A · Tout sur place — la ligne IA fait corps avec la case, analyse dans la marge du PDF */
+
+/* La ligne IA colle a la case : meme bord mauve, pas d'espace */
+.v13-style-a .v13-prop:not(.v13-prop-ap):not(.v13-prop-pied) { margin: -2px 0 12px; border: 2px solid var(--v13-bord); border-top: 0; border-radius: 0 0 8px 8px;
+  padding: 5px 8px 5px 10px; background: var(--v13-fond); }
+.v13-style-a .v13-prop-accepte:not(.v13-prop-ap) { border-color: #cdebd9; }
+.v13-style-a .v13-prop-refuse:not(.v13-prop-ap) { border-color: #e3e8ec; }
+.v13-style-a textarea.v13-pre, .v13-style-a input.v13-pre, .v13-style-a .select2-selection.v13-pre { border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+.v13-style-a .v13-prop-section:not(.v13-prop-pied) { border-top: 2px solid var(--v13-bord) !important; border-radius: 8px !important; margin: 8px 15px 10px !important; }
+.v13-style-a .v13-ia { font-size: 9.5px; padding: 2px 5px; }
+.v13-style-a .v13-src { font-size: 12px; }
+
+/* Accepter / Refuser : deux icones rondes */
+.v13-style-a .v13-b-icone { width: 30px; height: 30px; padding: 0; border-radius: 50%; display: inline-grid; place-items: center; font-size: 14px; }
+.v13-style-a .v13-b-icone.v13-b-ok { box-shadow: 0 1px 3px rgba(47, 158, 98, .35); }
+.v13-style-a .v13-b-icone:not(.v13-b-ok):hover { border-color: var(--v13-rouge); color: var(--v13-rouge); }
+.v13-style-a .v13-prop-ap .v13-b-icone { width: 40px; height: 40px; font-size: 17px; }
+
+/* Apercu : l'analyse est dans la marge du PDF ; tous les points restent visibles */
+.v13-style-a .v13-ap-pdf .ia-surlignage.ia-t-conforme:not(.ia-actif), .v13-style-a .v13-ap-pdf .ia-surlignage.ia-t-info:not(.ia-actif) { opacity: .55; pointer-events: auto; }
+.v13-style-a .v13-ap-pdf .ia-v-note { font-size: 12.5px; cursor: pointer; }
+.v13-style-a .v13-ap-marge { margin: 0; color: #5b6a74; font-size: 13px; }
+.v13-style-a .v13-ap-marge .fa { color: var(--v13); margin-right: 4px; }

@@ -8,6 +8,10 @@
 !/commun/
 !/documents/
 !/variante-13/
+!/variante-14/
+!/variante-15/
+!/variante-16/
+!/variante-17/
 # Du dossier outils, seul le petit serveur du site est publie.
 !/outils/
 /outils/*

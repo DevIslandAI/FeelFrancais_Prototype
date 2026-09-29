@@ -1,0 +1,29 @@
+/* Variante D · Tableau de decision — toutes les propositions dans un tableau en haut de la page */
+
+/* Les lignes IA sous les cases sont remplacees par le tableau (elles restent dans la page) */
+.v13-style-d .v13-prop:not(.v13-prop-ap) { display: none !important; }
+.v13-style-d .doc-note-card.v13-attache { border-radius: 8px !important; margin-bottom: 10px !important; }
+
+.v17-tableau { margin: 0 0 18px; border: 1px solid #e0d6f6; border-radius: 12px; background: #fff; overflow: hidden; font: 13px/1.4 Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v17-tete { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--v13-fond); border-bottom: 1px solid #e0d6f6; }
+.v17-tete b { font-size: 14.5px; color: var(--v13-fonce); }
+.v17-compte { margin-left: auto; color: #5b6a74; }
+.v17-ok { color: var(--v13-vert); font-weight: 700; }
+.v17-corps { max-height: 460px; overflow: auto; }
+.v17-groupe { padding: 8px 14px 4px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a97a1; background: #fafbfc; border-top: 1px solid #eef1f3; }
+.v17-ligne { display: grid; grid-template-columns: minmax(150px, 1.1fr) minmax(0, 1.3fr) minmax(0, 1.5fr) auto; gap: 10px; align-items: center; padding: 7px 14px; border-top: 1px solid #f0f2f4; }
+.v17-l-accepte { background: #f6fcf8; }
+.v17-l-refuse { background: #f7f8fa; }
+.v17-quoi { border: 0; background: none; padding: 0; text-align: left; font: 700 13px Catamaran, Arial, sans-serif; color: #2b3a42; cursor: pointer; }
+.v17-quoi:hover { color: var(--v13); text-decoration: underline; }
+.v17-prop { color: #2b3a42; }
+.v17-src { color: #7d8a93; font-size: 12px; }
+.v17-dec { display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap; }
+.v17-b { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #d5dbe0; background: #fff; color: #6f7d88; cursor: pointer; display: inline-grid; place-items: center; font-size: 13px; }
+.v17-b:not(.v17-b-ok):hover { border-color: var(--v13-rouge); color: var(--v13-rouge); }
+.v17-b-ok { background: var(--v13-vert); border-color: var(--v13-vert); color: #fff; }
+.v17-fait { font-weight: 700; font-size: 12.5px; }
+.v17-accepte { color: var(--v13-vert); }
+.v17-refuse { color: #7d8a93; }
+.v17-aide { color: #7d8a93; font-size: 12px; }
+@media (max-width: 1100px) { .v17-ligne { grid-template-columns: 1fr auto; } .v17-prop, .v17-src { grid-column: 1; } }

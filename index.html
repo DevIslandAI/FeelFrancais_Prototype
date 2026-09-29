@@ -305,9 +305,14 @@
 
   // ── The prototypes ──────────────────────────────────────────────────────
   var TOURS = [
-    { resume: 'La couche IA dans la page de Perle.', nav: 'Prototype', titre: 'Final', sous: '', ids: [13] }
+    { resume: 'La couche IA dans la page de Perle.', nav: 'Prototype', titre: 'Final', sous: '', ids: [13] },
+    { resume: 'Mêmes fonctionnalités, autre présentation.', nav: 'Variantes de présentation', titre: 'Variantes', sous: '', ids: [14, 15, 16, 17] }
   ];
   var P = {
+    14: { t: 'Tout sur place', lettre: 'A', d: '', idee: '', voir: [] },
+    15: { t: 'Pas à pas', lettre: 'B', d: '', idee: '', voir: [] },
+    16: { t: 'Épurée', lettre: 'C', d: '', idee: '', voir: [] },
+    17: { t: 'Tableau de décision', lettre: 'D', d: '', idee: '', voir: [] },
     13: { t: 'Yukta\'s final prototype', d: 'Built on #11: one « Proposition IA » card everywhere, simple for Perle.', final: true,
       idee: 'One single « Proposition IA » card everywhere (Statut, Zone, Visa, section, document): a real title, its state (⏱ to decide / ✓ decided), then Accepter · Modifier · Refuser · Annuler. The window shows the section card on top (collapsible) and the documents as tabs: PDF on the left; on the right analysis, AI grade /20 with why, verdict, comment with the annotated PDF attached, internal note, previous versions.',
       voir: ['Awa → « Assurance santé »: a document in the wrong section, moved with Feel Français\'s own menu.',
@@ -327,7 +332,8 @@
 
   function fichier(page) { return page === 'notifications' ? 'notifications.html' : 'profil-' + page + '.html'; }
   function dossierDe(n) { return n === 'base' ? 'base/' : 'variante-' + n + '/'; }
-  function nomProto(n) { return n === 'base' ? ORIGINE.t : (P[n].final ? '' : 'Prototype ' + n + ' · ') + P[n].t; }
+  function prefixe(n) { return P[n].lettre ? 'Variante ' + P[n].lettre + ' · ' : P[n].final ? '' : 'Prototype ' + n + ' · '; }
+  function nomProto(n) { return n === 'base' ? ORIGINE.t : prefixe(n) + P[n].t; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
 
@@ -338,7 +344,7 @@
     b.type = 'button';
     b.className = 'item' + (info.final ? ' final' : '');
     b.setAttribute('data-proto', n);
-    b.innerHTML = '<span class="n">' + (n === 'base' ? '<i class="fa fa-eye-slash"></i>' : info.final ? '<i class="fa fa-star"></i>' : n) + '</span>' +
+    b.innerHTML = '<span class="n">' + (n === 'base' ? '<i class="fa fa-eye-slash"></i>' : info.final ? '<i class="fa fa-star"></i>' : info.lettre || n) + '</span>' +
       '<span class="t">' + esc(info.t) + '</span>';
     b.title = info.t;
     b.addEventListener('click', action || function () { aller(n, etat.page || 'A'); });
@@ -519,7 +525,7 @@
     var n = etat.proto;
     var info = n === 'base' ? ORIGINE : P[n];
     return { id: String(n), num: n === 'base' ? '—' : n, nom: info.t, final: !!info.final,
-      libelle: n === 'base' ? info.t : 'Prototype ' + n + ' · ' + info.t };
+      libelle: n === 'base' ? info.t : prefixe(n) + info.t };
   }
   function nomPage(id) { var pg = PAGES.filter(function (p) { return p.id === id; })[0]; return pg ? pg.t : ''; }
   function majContexte() {
@@ -544,7 +550,7 @@
   function libelleNote(n) {
     if (n.proto && (n.proto === 'base' || P[n.proto])) {
       var info = n.proto === 'base' ? ORIGINE : P[n.proto];
-      return (n.proto === 'base' || info.final ? info.t : 'Prototype ' + n.proto + ' · ' + info.t);
+      return (n.proto === 'base' || info.final ? info.t : prefixe(n.proto) + info.t);
     }
     return n.context || 'Sans prototype';
   }
