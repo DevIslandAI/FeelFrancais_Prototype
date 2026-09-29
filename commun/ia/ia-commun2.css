@@ -1,0 +1,165 @@
+/*
+ * Couche IA — styles des variantes 6 a 8 (apres revue UX).
+ * Sobre : on reprend la bordure grise existante de leurs sections en la
+ * teintant legerement, avec un fin liseré a gauche, et une etiquette posee sur
+ * la bordure. Aucune hauteur de leur page ne change.
+ */
+:root {
+  --ia2-rouge: #d45a55; --ia2-rouge-doux: #efc9c7;
+  --ia2-orange: #d48a2a; --ia2-orange-doux: #f1dcbc;
+  --ia2-vert: #2f9e62; --ia2-vert-doux: #c7e6d4;
+  --ia2-gris: #8a97a1; --ia2-gris-doux: #dfe4e8;
+  --ia2-violet: #6f42c1; --ia2-violet-doux: #ddd2f4;
+  --ia2-fond: #fafbfc; --ia2-ligne: #e6e9ed; --ia2-texte: #2b3a42; --ia2-muet: #7b8a95;
+}
+
+/* ── Sections : liseré + bordure teintee ── */
+fieldset.ia2-sec > .doc-container { position: relative; }
+fieldset.ia2-a-corriger > .doc-container { border-color: var(--ia2-rouge-doux); box-shadow: inset 3px 0 0 var(--ia2-rouge); }
+fieldset.ia2-a-verifier > .doc-container { border-color: var(--ia2-orange-doux); box-shadow: inset 3px 0 0 var(--ia2-orange); }
+fieldset.ia2-conforme > .doc-container { border-color: var(--ia2-vert-doux); box-shadow: inset 3px 0 0 var(--ia2-vert); }
+fieldset.ia2-provisoire > .doc-container { border-color: var(--ia2-gris-doux); box-shadow: inset 3px 0 0 var(--ia2-gris); }
+fieldset.ia2-alerte > .doc-container { border-color: var(--ia2-violet-doux); box-shadow: inset 3px 0 0 var(--ia2-violet); }
+fieldset.ia2-sec.ia2-fini > .doc-container { border-color: #dce0e0; box-shadow: inset 3px 0 0 var(--ia2-gris-doux); }
+fieldset.ia2-sec.ia2-courant > .doc-container { border-color: var(--ia2-violet); box-shadow: inset 3px 0 0 var(--ia2-violet), 0 0 0 3px rgba(111, 66, 193, .12); }
+
+.ia2-tag {
+  position: absolute; top: -10px; right: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 5px;
+  height: 20px; padding: 0 9px; border-radius: 10px; background: #fff; border: 1px solid var(--ia2-ligne);
+  font: 700 11px/1 Catamaran, Arial, sans-serif; color: var(--ia2-texte); cursor: pointer; white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+}
+.ia2-tag:hover, .ia2-tag:focus-visible { border-color: var(--ia2-violet); color: var(--ia2-violet); outline: none; }
+.ia2-point { width: 7px; height: 7px; border-radius: 50%; background: var(--ia2-violet); flex: none; }
+.ia2-t-a-corriger .ia2-point { background: var(--ia2-rouge); }
+.ia2-t-a-verifier .ia2-point { background: var(--ia2-orange); }
+.ia2-t-conforme .ia2-point { background: var(--ia2-vert); }
+.ia2-t-provisoire .ia2-point { background: var(--ia2-gris); }
+.ia2-tag-fini { color: var(--ia2-muet); }
+.ia2-tag-fini .ia2-point { background: var(--ia2-gris-doux); }
+
+/* ── Blocs et titres ── */
+.ia2-bloc { margin: 0 0 14px; font-family: Catamaran, Arial, sans-serif; color: var(--ia2-texte); }
+.ia2-titre { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font: 700 13.5px/1.3 Catamaran, Arial, sans-serif; color: var(--ia2-texte); }
+.ia2-titre .fa { color: var(--ia2-violet); width: 14px; text-align: center; }
+.ia2-compte { background: var(--ia2-rouge); color: #fff; border-radius: 9px; padding: 0 6px; font-size: 11px; line-height: 17px; }
+.ia2-muet { color: var(--ia2-muet); font-weight: 400; }
+.ia2-rouge { color: var(--ia2-rouge); }
+.ia2-vert { color: var(--ia2-vert); }
+.ia2-sep { flex: 1; }
+.ia2-barre { text-decoration: line-through; color: var(--ia2-muet); }
+
+/* ── Boutons ── */
+.ia2-btn {
+  height: 26px; padding: 0 10px; border: 1px solid #d5dbe0; border-radius: 5px; background: #fff; color: var(--ia2-texte);
+  font: 700 12px/24px Catamaran, Arial, sans-serif; cursor: pointer; white-space: nowrap;
+}
+.ia2-btn:hover { border-color: var(--ia2-violet); color: var(--ia2-violet); }
+.ia2-btn:focus-visible, .ia2-lien:focus-visible, .ia2-puce:focus-visible { outline: 2px solid var(--ia2-violet); outline-offset: 1px; }
+.ia2-ok { background: var(--ia2-vert); border-color: var(--ia2-vert); color: #fff; }
+.ia2-ok:hover { background: #268353; border-color: #268353; color: #fff; }
+.ia2-non { border-color: transparent; background: none; color: var(--ia2-muet); }
+.ia2-non:hover { border-color: transparent; color: var(--ia2-rouge); }
+.ia2-principal { background: var(--ia2-violet); border-color: var(--ia2-violet); color: #fff; }
+.ia2-principal:hover { background: #56329a; color: #fff; }
+.ia2-lien { border: 0; background: none; padding: 0 4px; color: var(--ia2-violet); font: 700 12px Catamaran, Arial, sans-serif; cursor: pointer; }
+.ia2-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+/* ── Proposition de texte ── */
+.ia2-prop { background: var(--ia2-fond); border: 1px solid var(--ia2-ligne); border-radius: 6px; padding: 8px 10px; margin: 0 0 8px; }
+.ia2-prop-tete { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.ia2-prop-titre { font-weight: 700; }
+.ia2-discret { color: #b3bcc3; font-size: 11px; }
+.ia2-etat { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--ia2-muet); }
+.ia2-prop textarea {
+  display: block; width: 100%; margin-top: 5px; resize: vertical; border: 1px solid transparent; border-radius: 4px; background: #fff;
+  padding: 5px 7px; font: 13px/1.45 Catamaran, Arial, sans-serif; color: var(--ia2-texte); min-height: 32px;
+}
+.ia2-prop textarea:hover { border-color: var(--ia2-ligne); }
+.ia2-prop textarea:focus { outline: none; border-color: var(--ia2-violet); }
+.ia2-prop.ia2-applique { background: #f3faf6; border-color: var(--ia2-vert-doux); }
+.ia2-prop.ia2-applique .ia2-etat { color: var(--ia2-vert); }
+.ia2-prop.ia2-enregistre { background: #faf7ff; border-color: var(--ia2-violet-doux); }
+.ia2-prop.ia2-enregistre .ia2-etat { color: var(--ia2-violet); }
+.ia2-prop.ia2-ignore { opacity: .6; }
+.ia2-prop.ia2-ignore textarea { text-decoration: line-through; }
+.ia2-statut-propose { margin-top: 5px; font-weight: 700; font-size: 13px; }
+
+/* ── Verdict sur une ligne ── */
+.ia2-verdict { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 0; border-bottom: 1px solid #f0f2f4; font-size: 12.5px; }
+.ia2-verdict:last-of-type { margin-bottom: 8px; }
+.ia2-verdict-lib { font-weight: 700; min-width: 0; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ia2-v { padding: 0 8px; border-radius: 9px; font-weight: 700; font-size: 11.5px; line-height: 19px; }
+.ia2-v-valide { background: #e3f4ea; color: var(--ia2-vert); }
+.ia2-v-invalide { background: #fbe9e8; color: var(--ia2-rouge); }
+.ia2-v-doute { background: #fbf1e2; color: var(--ia2-orange); }
+
+/* ── Incoherences ── */
+.ia2-inc { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f0f2f4; font-size: 12.5px; }
+.ia2-inc > .fa { margin-top: 3px; }
+.ia2-inc-texte { flex: 1; min-width: 0; }
+.ia2-inc-valeurs { display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
+.ia2-inc-valeurs span { background: #fbe9e8; color: #a8413d; border-radius: 4px; padding: 0 6px; font-weight: 700; }
+.ia2-inc-valeurs .fa { color: var(--ia2-muet); }
+.ia2-ok-liste { margin-top: 6px; font-size: 12px; }
+.ia2-ok-liste summary { cursor: pointer; color: var(--ia2-muet); }
+.ia2-ok-ligne { padding: 2px 0 2px 18px; }
+
+/* ── A savoir ── */
+.ia2-info { font-size: 12.5px; line-height: 1.5; padding: 6px 0 6px 10px; border-left: 2px solid var(--ia2-ligne); margin-bottom: 8px; }
+.ia2-info-alerte { border-left-color: var(--ia2-violet); }
+.ia2-info-attention { border-left-color: var(--ia2-orange); }
+.ia2-mois { display: inline-block; padding: 0 6px; border-radius: 4px; margin: 2px 2px 0 0; font-weight: 700; font-size: 11.5px; }
+.ia2-mois-ok, .ia2-mois-doublon { background: #e3f4ea; color: var(--ia2-vert); }
+.ia2-mois-manquant { background: #fbe9e8; color: var(--ia2-rouge); }
+.ia2-chiffres { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.ia2-version { margin-top: 3px; }
+
+/* ── Details ── */
+.ia2-details { font-size: 12px; margin: 4px 0 10px; }
+.ia2-details summary { cursor: pointer; color: var(--ia2-muet); font-weight: 700; }
+.ia2-regle { padding: 3px 0 3px 4px; }
+
+/* ── Constats ── */
+.ia2-constats { list-style: none; margin: 0; padding: 0; }
+.ia2-c { display: flex; align-items: flex-start; gap: 8px; padding: 5px 6px; border-radius: 5px; cursor: pointer; font-size: 12.5px; line-height: 1.45; }
+.ia2-c:hover, .ia2-c.ia2-actif { background: #f3f5f7; }
+.ia2-c-texte { flex: 1; }
+.ia2-num { width: 18px; height: 18px; border-radius: 50%; color: #fff; display: grid; place-items: center; font: 700 10.5px/1 Arial, sans-serif; flex: none; margin-top: 1px; }
+.ia2-c-probleme .ia2-num { background: var(--ia2-rouge); }
+.ia2-c-a-verifier .ia2-num { background: var(--ia2-orange); }
+.ia2-c-conforme .ia2-num { background: var(--ia2-vert); }
+.ia2-c-info .ia2-num { background: #3a7bd5; }
+.ia2-c .ia-signalement { opacity: 0; transition: opacity .15s; }
+.ia2-c:hover .ia-signalement, .ia2-c:focus-within .ia-signalement { opacity: 1; }
+
+/* ── Haut de page : pastille IA et proposition sous le champ ── */
+.ia2-puce {
+  display: inline-flex; align-items: center; gap: 4px; margin: 0 6px; height: 18px; padding: 0 7px; border-radius: 9px;
+  border: 1px solid var(--ia2-violet-doux); background: #f7f4fd; color: var(--ia2-violet); font: 700 10.5px/1 Catamaran, Arial, sans-serif;
+  cursor: pointer; vertical-align: 1px;
+}
+.ia2-puce:hover, .ia2-puce[aria-expanded="true"] { background: var(--ia2-violet); color: #fff; border-color: var(--ia2-violet); }
+.ia2-puce[aria-expanded="true"] .ia2-point { background: #fff; }
+.ia2-puce-fini { background: #fff; border-color: var(--ia2-ligne); color: var(--ia2-muet); }
+.ia2-puce-fini .ia2-point { background: var(--ia2-vert); }
+.ia2-champ { margin: 6px 0 12px; }
+.ia2-champ .ia2-prop { margin: 0; background: #faf8ff; border-color: var(--ia2-violet-doux); }
+.ia2-champ-propose { box-shadow: 0 0 0 1px #c9b8f0 !important; }
+
+/* ── Ligne discrete au-dessus des documents ── */
+.ia2-ligne {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; padding: 6px 10px; border: 1px solid #e8e2f6;
+  border-radius: 6px; background: #fcfbff; font: 13px/1.4 Catamaran, Arial, sans-serif; color: var(--ia2-texte);
+}
+.ia2-ligne-marque { font-weight: 700; color: var(--ia2-violet); }
+
+/* ── Notifications ── */
+.ia2-notif { display: inline-flex; align-items: center; gap: 5px; margin-top: 3px; font: 700 11px/1.4 Catamaran, Arial, sans-serif; color: var(--ia2-muet); white-space: nowrap; }
+
+/* ── Visionneuse : menu « Telecharger » ── */
+.ia-v-menu { position: relative; }
+.ia-v-menu-liste { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; min-width: 170px; background: #fff; border: 1px solid var(--ia2-ligne); border-radius: 6px; box-shadow: 0 8px 20px rgba(0, 0, 0, .12); padding: 4px; }
+.ia-v-menu-liste:not([hidden]) { display: flex; flex-direction: column; }
+.ia-v-menu-item { display: flex; gap: 6px; align-items: center; padding: 6px 8px; border-radius: 4px; color: var(--ia2-texte); font-size: 12.5px; text-decoration: none; }
+.ia-v-menu-item:hover { background: #f3f5f7; color: var(--ia2-violet); text-decoration: none; }

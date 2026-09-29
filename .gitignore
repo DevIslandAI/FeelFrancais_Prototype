@@ -1,0 +1,14 @@
+# Depot = le site des prototypes, rien d'autre (liste blanche).
+/*
+!/.gitignore
+!/.dockerignore
+!/Dockerfile
+!/index.html
+!/base/
+!/commun/
+!/documents/
+!/variante-*/
+# Du dossier outils, seul le petit serveur du site est publie.
+!/outils/
+/outils/*
+!/outils/serveur.py

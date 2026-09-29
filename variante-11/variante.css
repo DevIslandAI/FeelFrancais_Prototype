@@ -1,0 +1,33 @@
+/* Variante 11 — Section sur la page */
+.v11-fen { inset: 2.5vh 1.5vw; flex-direction: row; font-family: Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v11-nav { width: 180px; flex: none; background: #f6f7f9; border-right: 1px solid #e6e9ed; padding: 12px 8px; overflow: auto; }
+.v11-nav-titre { margin: 14px 8px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #8a97a1; }
+.v11-item { display: flex; align-items: center; gap: 7px; width: 100%; border: 0; background: none; text-align: left; padding: 6px 8px; border-radius: 5px;
+  font: 600 12.5px/1.3 Catamaran, Arial, sans-serif; color: #2b3a42; cursor: pointer; }
+.v11-item:hover { background: #eceef1; }
+.v11-item.v11-actif { background: #fff; box-shadow: 0 0 0 1px #ddd2f4; color: #6f42c1; }
+.v11-item .fa { width: 14px; text-align: center; }
+.v11-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v11-fini .v11-nom { color: #8a97a1; }
+.v11-principal { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v11-fermer { position: absolute; top: 8px; right: 8px; z-index: 3; }
+.v11-corps { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.v11-corps.v11-simple { display: block; overflow: auto; padding: 18px max(24px, calc((100% - 760px) / 2)); }
+.v11-h { font-size: 17px; margin: 0 0 14px; }
+.v11-haut { flex: none; max-height: 44%; overflow: auto; }
+.v11-bas { flex: 1; min-height: 0; }
+.v11-bas .ia3-doc { grid-template-columns: minmax(0, 1fr) 380px; }
+.v11-pied { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-top: 1px solid #e6e9ed; background: #fafbfc; }
+.v11-valider { height: 30px; padding: 0 16px; font-size: 13px; }
+@media (max-width: 1150px) { .v11-nav { width: 150px; } .v11-bas .ia3-doc { grid-template-columns: minmax(0, 1fr) 320px; } }
+@media (max-width: 900px) {
+  .v11-fen { inset: 0; flex-direction: column; border-radius: 0; }
+  .v11-principal { position: static; }
+  .v11-nav { width: auto; display: flex; gap: 4px; overflow-x: auto; padding: 6px 40px 6px 6px; border-right: 0; border-bottom: 1px solid #e6e9ed; }
+  .v11-nav-titre { display: none; }
+  .v11-item { width: auto; flex: none; }
+  .v11-corps { overflow: auto; display: block; }
+  .v11-haut { max-height: none; }
+  .v11-bas { height: 80vh; }
+  .ia3-decision-section { grid-template-columns: 1fr; }
+}

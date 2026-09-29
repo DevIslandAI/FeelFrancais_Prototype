@@ -1,0 +1,112 @@
+/*
+ * Couche IA — presentation de l'analyse des variantes 9 et 10.
+ * Deux zones nettes : le cadre DOCUMENT (PDF + son analyse) et la colonne
+ * SECTION (verdict + commentaire general). Trois choses : Analyse, Verdict, Commentaire.
+ */
+.ia3-etiquette { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #8a97a1; }
+.ia3-muet { color: #7b8a95; font-weight: 400; }
+.ia3-sep { flex: 1; }
+.ia3-discret { color: #b3bcc3; font-size: 11px; }
+
+/* ── Colonne SECTION ── */
+.ia3-section-col { font-family: Catamaran, Arial, sans-serif; color: #2b3a42; }
+.ia3-s-tete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; }
+.ia3-s-resume { font-size: 12.5px; color: #5d6d77; margin: 4px 0 12px; }
+
+/* ── Verdict : deux boutons, la proposition de l'IA preselectionnee ── */
+.ia3-verdict { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+.ia3-verdict-titre { font-weight: 700; font-size: 13px; min-width: 120px; }
+.ia3-seg { display: inline-flex; border: 1px solid #d5dbe0; border-radius: 6px; overflow: hidden; }
+.ia3-seg button { border: 0; background: #fff; padding: 5px 14px; font: 700 12.5px/1.2 Catamaran, Arial, sans-serif; color: #7b8a95; cursor: pointer; position: relative; }
+.ia3-seg button + button { border-left: 1px solid #d5dbe0; }
+.ia3-seg button:hover { color: #2b3a42; }
+.ia3-seg button[data-v="valide"].ia3-choisi { background: #2f9e62; color: #fff; }
+.ia3-seg button[data-v="invalide"].ia3-choisi { background: #d45a55; color: #fff; }
+.ia3-seg button.ia3-propose { padding-right: 22px; }  /* place pour le badge « IA » */
+.ia3-seg button.ia3-propose::after {
+  content: "IA"; position: absolute; top: -1px; right: 2px; font-size: 8.5px; line-height: 1; padding: 1px 3px; border-radius: 3px;
+  background: #6f42c1; color: #fff; letter-spacing: .02em;
+}
+.ia3-seg button:focus-visible { outline: 2px solid #6f42c1; outline-offset: -2px; }
+.ia3-verdict-note { font-size: 11.5px; }
+
+/* ── Commentaire : texte + fleches de versions ── */
+.ia3-com { border: 1px solid #e6e9ed; border-radius: 6px; background: #fff; margin: 0 0 12px; }
+.ia3-com-tete { display: flex; align-items: center; gap: 6px; padding: 6px 8px 0 10px; font-size: 12.5px; }
+.ia3-com-titre { font-weight: 700; }
+.ia3-versions { display: inline-flex; align-items: center; gap: 2px; font-size: 11.5px; color: #6f42c1; font-weight: 700; }
+.ia3-versions[hidden] { display: none; }
+.ia3-version { padding: 0 4px; white-space: nowrap; }
+.ia3-fleche { width: 22px; height: 22px; border: 1px solid #e6e9ed; border-radius: 4px; background: #fff; color: #6f42c1; cursor: pointer; font-size: 10px; }
+.ia3-fleche:hover:not(:disabled) { border-color: #6f42c1; }
+.ia3-fleche:disabled { color: #cfd5da; cursor: default; }
+.ia3-com textarea {
+  display: block; width: 100%; border: 0; border-radius: 0 0 6px 6px; padding: 6px 10px 9px; resize: vertical; min-height: 40px;
+  font: 13px/1.5 Catamaran, Arial, sans-serif; color: #2b3a42; background: transparent;
+}
+.ia3-com textarea:focus { outline: none; }
+.ia3-com:focus-within { border-color: #6f42c1; box-shadow: 0 0 0 3px rgba(111, 66, 193, .10); }
+.ia3-com.ia3-com-perso { border-color: #ddd2f4; background: #fcfbff; }
+
+/* ── Cadre DOCUMENT : PDF + analyse du document, dans un meme cadre ── */
+.ia3-docs { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+.ia3-onglets { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px 10px 0; border-bottom: 1px solid #e6e9ed; background: #fff; }
+.ia3-onglets[hidden] { display: none; }
+.ia3-onglet {
+  display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e6e9ed; border-bottom: 0; border-radius: 6px 6px 0 0; background: #f6f7f9;
+  padding: 6px 11px; font: 600 12.5px Catamaran, Arial, sans-serif; color: #4a5a64; cursor: pointer; margin-bottom: -1px;
+}
+.ia3-onglet.ia3-actif { background: #fff; color: #2b3a42; border-color: #e6e9ed; box-shadow: inset 0 2px 0 #6f42c1; }
+.ia3-pastille-doc { width: 8px; height: 8px; border-radius: 50%; background: #2f9e62; }
+.ia3-pd-invalide { background: #d45a55; }
+.ia3-pd-a-verifier { background: #d48a2a; }
+.ia3-nb { background: #fbe9e8; color: #d45a55; border-radius: 8px; padding: 0 6px; font-size: 11px; font-weight: 700; }
+.ia3-doc { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 320px; }
+.ia3-pdf { min-height: 0; border-radius: 0; }
+.ia3-docs .ia-v-onglets { display: none; }  /* les onglets sont ceux du cadre */
+.ia3-analyse { overflow: auto; border-left: 1px solid #e6e9ed; background: #fcfcfd; padding: 12px 14px; min-height: 0; }
+.ia3-a-tete { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13.5px; }
+.ia3-a-titre { font-weight: 700; font-size: 13px; margin: 0 0 4px; }
+.ia3-a-titre .fa { color: #6f42c1; }
+.ia3-points { margin-bottom: 14px; }
+.ia3-lien-verdict { font-size: 12px; margin: 0 0 10px; }
+
+/* ── Champs du haut de page ── */
+.ia3-champ-prop .ia3-com { margin-bottom: 6px; }
+.ia3-actions { display: flex; align-items: center; gap: 8px; }
+.ia3-champ-lib { font-weight: 700; font-size: 12.5px; margin: 12px 0 5px; }
+
+/* ── Note interne facultative ── */
+.ia3-note { margin: -4px 0 12px; }
+.ia3-note-lien { border: 0; background: none; padding: 2px 0; color: #7b8a95; font: 600 12px Catamaran, Arial, sans-serif; cursor: pointer; }
+.ia3-note-lien:hover { color: #6f42c1; }
+.ia3-note textarea { display: block; width: 100%; margin-top: 4px; border: 1px dashed #d5dbe0; border-radius: 6px; padding: 6px 10px; resize: vertical;
+  font: 13px/1.5 Catamaran, Arial, sans-serif; background: #fafbfc; }
+.ia3-note textarea[hidden] { display: none; }
+.ia3-petit { font-size: 11.5px; margin-top: -6px; }
+
+/* ── Bandeau SECTION en haut de la fenetre ── */
+.ia3-bandeau { padding: 12px 16px 10px; border-bottom: 1px solid #e6e9ed; background: #fbfaff; font-family: Catamaran, Arial, sans-serif; color: #2b3a42; }
+.ia3-b-titre { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 16px; padding-right: 36px; }
+.ia3-b-resume { font-size: 12.5px; flex: 1 1 260px; }
+.ia3-decision-section { display: grid; grid-template-columns: minmax(250px, 34%) minmax(0, 1fr); gap: 16px; margin-top: 10px; align-items: start; }
+.ia3-decision-section .ia3-verdict { margin-bottom: 8px; }
+.ia3-decision-section .ia3-com { margin-bottom: 8px; }
+.ia3-decision-section .ia2-info-alerte { margin: 0; background: #fff; border-radius: 0 6px 6px 0; padding: 8px 10px; }
+.ia3-inc { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 6px; padding-top: 8px; border-top: 1px dashed #e0d8f3; font-size: 12.5px; }
+.ia3-inc-titre { font-weight: 700; color: #6f42c1; }
+.ia3-inc-item b { color: #a8413d; }
+.ia3-rappel { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; }
+.ia3-rappel-com { flex: 1 1 300px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #4a5a64; }
+
+/* ── Bloc SECTION pose sur la page, sous leur « Commentaire general » (variante 11) ── */
+.ia3-page { margin: 8px 0 10px; padding: 10px 12px; border: 1px solid #e0d8f3; border-radius: 6px; background: #fcfbff; }
+.ia3-page[hidden] { display: none; }
+.ia3-page .ia3-decision-section { grid-template-columns: 1fr; gap: 0; margin-top: 4px; }
+.ia3-page-titre { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #6f42c1; }
+.ia3-page-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 1200px) {
+  .ia3-doc { grid-template-columns: 1fr; grid-template-rows: 58% 42%; }
+  .ia3-analyse { border-left: 0; border-top: 1px solid #e6e9ed; }
+}

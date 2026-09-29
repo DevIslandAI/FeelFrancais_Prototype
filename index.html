@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Revue des prototypes</title>
+<link rel="stylesheet" href="commun/vendor/maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+<style>
+  :root {
+    --ia: #6f42c1; --ia-fonce: #4f2d93; --ia-clair: #f4f0fc; --ia-bord: #d9ccf3;
+    --texte: #22313a; --gris: #66757f; --gris-clair: #8a97a1; --bord: #e3e8ec; --fond: #f6f7f9; --panneau: #fff;
+    --side: #1e2a30; --side-texte: #d7e0e5; --side-gris: #8fa1ab; --side-hover: #273740; --side-actif: #33254f;
+    --or: #e0a526;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--fond); color: var(--texte); font: 14px/1.5 "Segoe UI", Catamaran, Arial, sans-serif; overflow: hidden; }
+  button { font: inherit; }
+  a { color: var(--ia); }
+
+  /* ── Layout ── */
+  .app { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 100vh; transition: grid-template-columns .15s; }
+  .app.replie { grid-template-columns: 60px minmax(0, 1fr); }
+
+  /* ── Sidebar (blanche, repliable en une colonne de numeros) ── */
+  .side { background: #fff; color: var(--texte); border-right: 1px solid var(--bord); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .side-tete { display: flex; align-items: center; gap: 8px; padding: 14px 12px 12px 16px; border-bottom: 1px solid var(--bord); }
+  .side-tete .textes { flex: 1; min-width: 0; }
+  .side-tete .marque { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ia); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .side-tete h1 { margin: 1px 0 0; font-size: 16px; white-space: nowrap; }
+  .plier { flex: none; width: 30px; height: 30px; border: 1px solid var(--bord); background: #fff; border-radius: 6px; color: var(--gris); cursor: pointer; }
+  .plier:hover { border-color: var(--ia); color: var(--ia); }
+  .side-liste { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 6px 8px 16px; }
+  .groupe { margin: 14px 8px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--gris-clair); line-height: 1.35; }
+  .item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: none; color: inherit; padding: 6px 8px; border-radius: 7px; cursor: pointer; }
+  .item:hover { background: #f3f4f6; }
+  .item.actif { background: var(--ia-clair); box-shadow: inset 3px 0 0 var(--ia); }
+  .item .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: #eef0f3; color: var(--gris); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .item.actif .n { background: var(--ia); color: #fff; }
+  .item .t { font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item.actif .t { color: var(--ia-fonce); }
+  .item.final { margin-top: 2px; border: 1px solid #f0dca8; background: #fffaf0; }
+  .item.final:hover { background: #fdf3dc; }
+  .item.final.actif { background: #fdf0d2; box-shadow: inset 3px 0 0 var(--or); }
+  .item.final .n { background: var(--or); color: #fff; }
+  .item.final .t { color: #7a5a0c; }
+  .item .n .fa { font-size: 12px; }
+  /* Place en bas pour le bouton flottant « Ajouter un commentaire » */
+  .side-pied { border-top: 1px solid var(--bord); padding: 10px 16px 72px; font-size: 12px; color: var(--gris); }
+  .side-pied button { background: #fff; border: 1px solid var(--bord); color: var(--texte); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 12px; white-space: nowrap; }
+  .side-pied button:hover { border-color: var(--ia); color: var(--ia); }
+  .fictif { display: flex; gap: 6px; align-items: center; color: #b3261e; margin-bottom: 8px; white-space: nowrap; }
+  /* Repliee : seuls les numeros restent, le titre s'affiche au survol */
+  .app.replie .side-tete { padding: 14px 0 12px; justify-content: center; }
+  .app.replie .side-tete .textes, .app.replie .item .t, .app.replie .side-pied .libelle { display: none; }
+  .app.replie .side-liste { padding: 6px 6px 16px; }
+  .app.replie .item { justify-content: center; padding: 6px 0; }
+  .app.replie .groupe { display: block; height: 1px; margin: 8px 6px; background: var(--bord); font-size: 0; }
+  .app.replie .side-pied { padding: 10px 6px 72px; text-align: center; }
+  .app.replie .fictif { justify-content: center; }
+
+  /* ── Main ── */
+  .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .barre { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--panneau); border-bottom: 1px solid var(--bord); flex-wrap: wrap; }
+  .icone-btn { border: 1px solid var(--bord); background: #fff; border-radius: 6px; width: 34px; height: 34px; cursor: pointer; color: var(--gris); flex: none; }
+  .icone-btn:hover { border-color: var(--ia); color: var(--ia); }
+  .titre { min-width: 0; flex: 1; }
+  .titre h2 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .titre h2 .pastille { font-size: 11px; font-weight: 700; color: var(--ia); background: var(--ia-clair); border-radius: 10px; padding: 1px 8px; }
+  .titre h2 .pastille.or { color: #7a5a0c; background: #fbf1d8; }
+  .titre p { margin: 2px 0 0; font-size: 12.5px; color: var(--gris); }
+  .onglets { display: flex; gap: 4px; background: #f0f2f4; padding: 3px; border-radius: 8px; }
+  .onglets button { border: 0; background: none; border-radius: 6px; padding: 5px 12px; cursor: pointer; color: var(--gris); font-weight: 600; font-size: 13px; }
+  .onglets button small { display: block; font-weight: 400; font-size: 10.5px; color: var(--gris-clair); line-height: 1.1; }
+  .onglets button.actif { background: #fff; color: var(--texte); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+  .cadre { flex: 1; min-height: 0; position: relative; background: #fff; }
+  .cadre iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* ── Page d'accueil ── */
+  .apercu { flex: 1; overflow-y: auto; background: linear-gradient(180deg, #f7f3ff 0, #f6f7f9 340px); }
+  .apercu-in { max-width: 980px; margin: 0 auto; padding: 44px 28px 120px; }
+  .hero { text-align: center; max-width: 680px; margin: 0 auto 40px; }
+  .hero-tag { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ia); background: #fff;
+    border: 1px solid var(--ia-bord); border-radius: 20px; padding: 3px 12px; }
+  .hero h2 { font-size: 32px; line-height: 1.2; margin: 14px 0 10px; letter-spacing: -.01em; }
+  .hero p { font-size: 16px; color: var(--gris); margin: 0 0 22px; }
+  .hero-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .bouton { display: inline-flex; align-items: center; gap: 8px; border: 0; background: var(--ia); color: #fff; font-weight: 700; padding: 11px 20px; border-radius: 10px;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(111, 66, 193, .28); }
+  .bouton:hover { background: var(--ia-fonce); }
+  .bouton .fa-star { color: #ffd66b; }
+  .bouton-2 { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--bord); background: #fff; color: var(--texte); font-weight: 600; padding: 11px 18px;
+    border-radius: 10px; cursor: pointer; }
+  .bouton-2:hover { border-color: var(--ia); color: var(--ia); }
+  .note-fictif { display: inline-flex; align-items: center; gap: 6px; color: #a3302a; font-size: 12.5px; font-weight: 600; }
+  .bloc { margin-top: 40px; }
+  .bloc > h3 { font-size: 13px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--gris-clair); margin: 0 0 14px; text-align: center; }
+  /* Comment faire : 3 etapes */
+  .etapes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .etape { background: #fff; border: 1px solid var(--bord); border-radius: 14px; padding: 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .etape .rond { flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--ia-clair); color: var(--ia); display: grid; place-items: center; font-size: 16px; }
+  .etape b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .etape .quoi { color: var(--gris); font-size: 13.5px; }
+  .ia-tag { display: inline-block; background: #fff; border: 1px solid #b499ee; color: var(--ia); border-radius: 10px; padding: 0 6px; font-size: 11px; font-weight: 700; }
+  /* Les dossiers de demo */
+  .dossiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .dossier { background: #fff; border: 1px solid var(--bord); border-radius: 14px; padding: 18px; text-align: left; cursor: pointer; font: inherit; color: inherit;
+    display: flex; flex-direction: column; gap: 12px; transition: border-color .12s, box-shadow .12s; }
+  .dossier:hover { border-color: var(--ia-bord); box-shadow: 0 6px 18px rgba(40, 20, 90, .08); }
+  .dossier-tete { display: flex; align-items: center; gap: 12px; }
+  .avatar { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; }
+  .dossier-tete b { display: block; font-size: 15px; }
+  .dossier-tete small { color: var(--gris); font-size: 12.5px; }
+  .cas { align-self: flex-start; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 2px 9px; }
+  .puces { display: flex; flex-wrap: wrap; gap: 6px; }
+  .puces span { font-size: 12px; background: #f3f4f6; color: #45545e; border-radius: 6px; padding: 3px 8px; }
+  .dossier .ouvrir { margin-top: auto; font-size: 12.5px; font-weight: 600; color: var(--ia); }
+  /* L'evolution : un fil de 5 etapes */
+  .fil { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; position: relative; }
+  .fil::before { content: ""; position: absolute; left: 8%; right: 8%; top: 17px; height: 2px; background: var(--ia-bord); }
+  .tour { position: relative; text-align: center; }
+  .tour .pastille-tour { position: relative; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 2px solid var(--ia);
+    color: var(--ia); font-weight: 700; margin-bottom: 10px; }
+  .tour.final .pastille-tour { background: var(--or); border-color: var(--or); color: #fff; }
+  .tour-carte { background: #fff; border: 1px solid var(--bord); border-radius: 12px; padding: 12px 10px; }
+  .tour.final .tour-carte { border-color: #f0dca8; background: #fffaf0; }
+  .tour-carte b { display: block; font-size: 13.5px; margin-bottom: 2px; }
+  .tour-carte p { margin: 0 0 8px; font-size: 12px; color: var(--gris); line-height: 1.4; }
+  .protos { display: flex; flex-direction: column; gap: 4px; }
+  .protos button { border: 0; background: #f6f7f9; border-radius: 6px; padding: 4px 8px; font-size: 12.5px; text-align: left; cursor: pointer; color: var(--texte); }
+  .protos button:hover { background: var(--ia-clair); color: var(--ia-fonce); }
+  .protos button i { color: var(--gris-clair); font-style: normal; font-weight: 700; margin-right: 4px; }
+  .tour.final .protos button { background: var(--or); color: #fff; font-weight: 700; text-align: center; }
+  .tour.final .protos button:hover { background: #c98f14; }
+  .comparer { text-align: center; margin-top: 30px; font-size: 13px; color: var(--gris); }
+  .comparer button { border: 0; background: none; color: var(--ia); font-weight: 600; cursor: pointer; padding: 0; }
+
+  /* ── Notes de revue (fenetre flottante) ── */
+  .notes { position: fixed; left: 16px; bottom: 16px; z-index: 50; font-size: 13px; }
+  .notes-pastille { display: inline-flex; align-items: center; gap: 8px; border: 0; background: var(--ia); color: #fff; font-weight: 700; padding: 10px 16px;
+    border-radius: 24px; cursor: pointer; box-shadow: 0 6px 20px rgba(40, 20, 90, .35); }
+  .notes-pastille:hover { background: var(--ia-fonce); }
+  .notes-pastille .compte { background: #fff; color: var(--ia); border-radius: 10px; padding: 0 7px; font-size: 12px; }
+  .notes-panneau { width: min(420px, calc(100vw - 32px)); height: min(680px, calc(100vh - 32px)); background: #fff; border: 1px solid var(--bord); border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(20, 30, 40, .28); display: flex; flex-direction: column; overflow: hidden; }
+  .notes-tete { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: var(--ia); color: #fff; }
+  .notes-tete b { flex: 1; font-size: 14px; }
+  .notes-tete button { border: 0; background: rgba(255, 255, 255, .16); color: #fff; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; }
+  .notes-tete button:hover { background: rgba(255, 255, 255, .3); }
+  .notes-defile { flex: 1; overflow-y: auto; }
+  .notes-bloc { padding: 12px 14px; border-bottom: 1px solid var(--bord); }
+  .notes-bloc h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); }
+  .notes-bloc h4 .sep { flex: 1; }
+  .notes-bloc h4 small { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--gris-clair); }
+  .notes-bloc textarea { width: 100%; border: 1px solid #d5dbe0; border-radius: 6px; padding: 7px 9px; font: inherit; color: var(--texte); resize: vertical; }
+  .notes-bloc textarea:focus { outline: 2px solid var(--ia-bord); border-color: var(--ia); }
+  #notes-general { min-height: 90px; }
+  #notes-texte { min-height: 64px; }
+  .proto-courant { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 10px; border-radius: 8px; background: var(--ia-clair); color: var(--ia-fonce); font-weight: 700; }
+  .proto-courant .num { flex: none; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px; background: var(--ia); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .proto-courant.final { background: #fdf3dc; color: #7a5a0c; }
+  .proto-courant.final .num { background: var(--or); }
+  .proto-courant small { display: block; font-weight: 400; color: var(--gris); font-size: 11.5px; }
+  .proto-aucun { color: var(--gris); font-size: 12.5px; background: #f6f7f9; border-radius: 8px; padding: 10px; }
+  .notes-ligne { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .notes-ligne .aide { flex: 1; font-size: 11.5px; color: var(--gris-clair); }
+  .notes-ajouter { border: 0; background: var(--ia); color: #fff; font-weight: 700; padding: 7px 14px; border-radius: 6px; cursor: pointer; }
+  .notes-ajouter:hover { background: var(--ia-fonce); }
+  .notes-ajouter:disabled { background: #c9bde6; cursor: default; }
+  .filtre { display: flex; gap: 4px; background: #f0f2f4; padding: 3px; border-radius: 7px; margin: 0 0 4px; }
+  .filtre button { flex: 1; border: 0; background: none; border-radius: 5px; padding: 4px 8px; cursor: pointer; color: var(--gris); font-size: 12px; font-weight: 600; }
+  .filtre button.actif { background: #fff; color: var(--texte); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+  .notes-vide { color: var(--gris-clair); font-style: italic; padding: 10px 0; }
+  .note { padding: 10px 0; border-bottom: 1px solid #f0f2f4; }
+  .note:last-child { border-bottom: 0; }
+  .note-meta { display: flex; gap: 6px; align-items: center; font-size: 11.5px; color: var(--gris-clair); }
+  .note-meta .ctx { background: var(--ia-clair); color: var(--ia); border-radius: 8px; padding: 0 7px; font-weight: 600; }
+  .note-meta .sep { flex: 1; }
+  .note-meta button { border: 0; background: none; color: var(--gris-clair); cursor: pointer; padding: 0 3px; }
+  .note-meta button:hover { color: var(--ia); }
+  .note-texte { white-space: pre-wrap; word-wrap: break-word; margin-top: 3px; }
+  .note textarea { width: 100%; min-height: 70px; margin-top: 4px; border: 1px solid var(--ia); border-radius: 6px; padding: 6px 8px; font: inherit; }
+  .note .actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; }
+  .note .actions button { border: 1px solid var(--bord); background: #fff; border-radius: 5px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
+  .note .actions button.ok { background: var(--ia); color: #fff; border-color: var(--ia); }
+  .notes-pied { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-top: 1px solid var(--bord); background: #fafbfc; font-size: 11.5px; color: var(--gris); }
+  .notes-pied .etat { flex: 1; }
+  .notes-pied button { border: 1px solid var(--bord); background: #fff; border-radius: 5px; padding: 4px 9px; cursor: pointer; font-size: 12px; color: var(--texte); }
+  .notes-pied button:hover { border-color: var(--ia); color: var(--ia); }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: #22313a; color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 60; font-size: 13px; }
+
+  @media (max-width: 900px) {
+    body { overflow: auto; }
+    .app, .app.replie { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; min-height: 100vh; }
+    .side { max-height: 45vh; }
+    /* Replie sur telephone : seule la ligne du titre (et son bouton) reste */
+    .app.replie .side-liste, .app.replie .side-pied { display: none; }
+    .app.replie .side-tete { justify-content: flex-start; padding: 10px 16px; }
+    .app.replie .side-tete .textes { display: block; }
+    .side-liste { padding-bottom: 12px; }
+    .side-pied { padding-bottom: 10px; display: flex; gap: 12px; align-items: center; }
+    .fictif { margin: 0; }
+    .cadre { min-height: 80vh; }
+    .etapes, .dossiers, .fil { grid-template-columns: 1fr; }
+    .fil::before { display: none; }
+    .hero h2 { font-size: 26px; }
+    .notes { left: 12px; bottom: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" aria-label="Prototypes">
+    <div class="side-tete">
+      <div class="textes">
+        <div class="marque">Prévalidation IA</div>
+        <h1>Revue des prototypes</h1>
+      </div>
+      <button type="button" class="plier" id="replier" title="Replier le menu" aria-expanded="true"><i class="fa fa-angle-double-left"></i></button>
+    </div>
+    <nav class="side-liste" id="liste"></nav>
+    <div class="side-pied">
+      <div class="fictif" title="Données fictives : personnes, documents et écoles inventés"><i class="fa fa-exclamation-triangle"></i><span class="libelle"> Données fictives</span></div>
+      <button type="button" id="reinitialiser" title="Remet toutes les maquettes à zéro dans ce navigateur"><i class="fa fa-undo"></i><span class="libelle"> Réinitialiser la démo</span></button>
+    </div>
+  </aside>
+
+  <section class="main">
+    <div class="barre" id="barre" hidden>
+      <div class="titre"><h2 id="titre"></h2></div>
+      <div class="onglets" id="pages" role="tablist" aria-label="Page du prototype"></div>
+    </div>
+    <div class="cadre" id="cadre" hidden><iframe id="vue" title="Prototype"></iframe></div>
+
+    <div class="apercu" id="apercu">
+      <div class="apercu-in">
+        <div class="hero">
+          <span class="hero-tag">Feel Français · Prévalidation IA</span>
+          <h2>Revue des prototypes</h2>
+          <p>13 façons d’ajouter l’IA à la page de Perle. La page Feel Français reste la même, rien n’en est retiré&nbsp;:
+            seule la présentation des propositions de l’IA change.</p>
+          <div class="hero-actions">
+            <button type="button" class="bouton" id="aller-final"><i class="fa fa-star"></i> Commencer par le prototype final</button>
+            <button type="button" class="bouton-2" id="aller-debut">Voir depuis le début <i class="fa fa-arrow-right"></i></button>
+          </div>
+          <span class="note-fictif"><i class="fa fa-exclamation-triangle"></i> Toutes les données sont fictives</span>
+        </div>
+
+        <div class="bloc">
+          <h3>Comment faire</h3>
+          <div class="etapes">
+            <div class="etape"><span class="rond"><i class="fa fa-list"></i></span><div><b>1. Choisir un prototype</b><span class="quoi">dans le menu à gauche</span></div></div>
+            <div class="etape"><span class="rond"><i class="fa fa-hand-pointer-o"></i></span><div><b>2. Tester</b><span class="quoi">changer de page avec les onglets en haut, puis cliquer sur les étiquettes <span class="ia-tag">IA</span></span></div></div>
+            <div class="etape"><span class="rond"><i class="fa fa-sticky-note-o"></i></span><div><b>3. Noter ses remarques</b><span class="quoi">bouton « Ajouter un commentaire » en bas à gauche&nbsp;: un seul endroit pour tout</span></div></div>
+          </div>
+        </div>
+
+        <div class="bloc">
+          <h3>Les 3 dossiers de démonstration</h3>
+          <div class="dossiers" id="dossiers"></div>
+        </div>
+
+        <div class="bloc">
+          <h3>L’évolution des prototypes</h3>
+          <div class="fil" id="tours"></div>
+          <div class="comparer">Pour comparer&nbsp;: <button type="button" id="aller-origine">les pages d’origine, sans IA <i class="fa fa-arrow-right"></i></button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="notes" id="notes">
+  <button type="button" class="notes-pastille" id="notes-ouvrir" aria-expanded="false"><i class="fa fa-comment-o"></i> Ajouter un commentaire <span class="compte" id="notes-compte">0</span></button>
+  <div class="notes-panneau" id="notes-panneau" role="dialog" aria-label="Notes de revue" hidden>
+    <div class="notes-tete"><i class="fa fa-sticky-note-o"></i><b>Notes de revue</b>
+      <button type="button" id="notes-fermer" title="Réduire"><i class="fa fa-minus"></i></button></div>
+    <div class="notes-defile">
+      <div class="notes-bloc">
+        <h4><i class="fa fa-globe"></i> Commentaire général <span class="sep"></span><small id="general-etat"></small></h4>
+        <textarea id="notes-general" maxlength="20000" placeholder="Votre avis d’ensemble sur les prototypes… (enregistré automatiquement)"></textarea>
+      </div>
+      <div class="notes-bloc">
+        <h4><i class="fa fa-map-marker"></i> Remarque sur le prototype ouvert</h4>
+        <div id="proto-courant"></div>
+        <div id="proto-saisie">
+          <textarea id="notes-texte" maxlength="5000" placeholder="Votre remarque sur ce prototype…"></textarea>
+          <div class="notes-ligne"><span class="aide">Ctrl + Entrée pour ajouter</span><button type="button" class="notes-ajouter" id="notes-ajouter" disabled>Ajouter</button></div>
+        </div>
+      </div>
+      <div class="notes-bloc">
+        <h4><i class="fa fa-list"></i> Remarques par prototype</h4>
+        <div class="filtre" role="tablist"><button type="button" data-filtre="courant" class="actif">Ce prototype</button><button type="button" data-filtre="tous">Tous les prototypes</button></div>
+        <div id="notes-liste"></div>
+      </div>
+    </div>
+    <div class="notes-pied"><span class="etat" id="notes-etat"></span>
+      <button type="button" id="notes-copier" title="Copier le commentaire général et toutes les remarques"><i class="fa fa-clone"></i> Copier tout</button>
+      <button type="button" id="notes-telecharger" title="Télécharger tout dans un fichier"><i class="fa fa-download"></i> Télécharger</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── The prototypes ──────────────────────────────────────────────────────
+  var TOURS = [
+    { resume: 'Cinq idées de départ, une par prototype.', nav: 'Tour 1 · cinq idées', titre: 'Round 1 · five different ideas', sous: 'First answers to Perle\'s needs, each built around one idea.', ids: [1, 2, 3, 4, 5] },
+    { resume: 'Les meilleures idées combinées, le PDF toujours visible.', nav: 'Tour 2 · les meilleures idées combinées', titre: 'Round 2 · the best ideas mixed', sous: 'After a UX review: shorter texts, the PDF always visible.', ids: [6, 7, 8] },
+    { resume: 'Par document : analyse, verdict, commentaire.', nav: 'Tour 3 · une analyse plus claire', titre: 'Round 3 · a clearer analysis', sous: 'Only three things per document: analysis, verdict, comment.', ids: [9, 10] },
+    { resume: 'La section se décide sur la page ou en haut de la fenêtre.', nav: 'Tour 4 · où se décide la section', titre: 'Round 4 · where the section is decided', sous: 'On the page itself, or at the top of the window.', ids: [11, 12] },
+    { resume: 'La version affinée pour la démo à Perle.', nav: 'Version finale', titre: 'Final', sous: 'The refined version, ready for the demo to Perle.', ids: [13] }
+  ];
+  var P = {
+    1: { t: 'Fenêtre d’analyse', d: 'One big window per section: PDF on the left, AI findings on the right.',
+      idee: 'Each analysed section gets a coloured outline and a small AI button. It opens a large window: the highlighted PDF on the left, the numbered findings on the right, the proposals underneath and « Valider la section » at the bottom.',
+      voir: ['One section at a time: evidence and finding side by side, with the same numbers.', 'Proposals are accepted or changed at the bottom of the window.'] },
+    2: { t: 'Panneau latéral', d: 'The analysis opens in a panel; Perle watches her own fields fill in.',
+      idee: 'The analysis opens in a panel on the right, the Feel Français page stays visible. Tabs: Findings · Evidence · Proposals · Why. On the notifications page the panel becomes a work queue sorted by urgency.',
+      voir: ['The context never disappears.', 'Tabs limit how much is shown at once.'] },
+    3: { t: 'Dans la section', d: 'No window: each proposal sits exactly where it will be written.',
+      idee: 'The verdict appears under the section header, the comment above Feel Français\'s comment field, the date under the date field. The PDF unfolds inside the section.',
+      voir: ['No back and forth between two places on screen.', 'Uses the most page space.'] },
+    4: { t: 'Mode revue', d: 'A full-screen, keyboard-driven walk-through, section by section.',
+      idee: 'A focused walk-through: one proposal at a time, keyboard shortcuts (A accept, R refuse, E edit, Enter next), progress bar and a final summary.',
+      voir: ['Built for high season, when Perle has about 10 seconds per document.', 'Try it with the keyboard.'] },
+    5: { t: 'Tableau de bord', d: 'An overview first (filters, cross-checks, timeline), details on demand.',
+      idee: 'A summary bar with filters by status, a compact card per section, and overview views: cross-check matrix between documents, dossier timeline, « accept all compliant ».',
+      voir: ['Gives the whole picture of a dossier before the details.'] },
+    6: { t: 'Fenêtre épurée', d: 'Window of #1 with the section list of #4 and fields opening in place (#3).',
+      idee: 'The analysis window with the list of sections on the left and the fields of the top of the page opening right under the field. Large PDF in the centre; always on the right: AI proposal, inconsistencies, good to know, findings.',
+      voir: ['Short texts, nothing that pushes Feel Français\'s layout out of shape.', 'Proposals can be edited and saved for later.'] },
+    7: { t: 'Panneau PDF', d: 'Side panel on the left, so the section being processed stays visible.',
+      idee: 'The side panel of #2, opened on the left: the section being processed stays fully visible on the right. PDF on top, proposals below; home screen = inconsistencies and sections by priority.',
+      voir: ['See the PDF, the proposal and the Feel Français field filling in, all at once.'] },
+    8: { t: 'Revue guidée', d: 'Review mode inside a large window, in the order that saves the most time.',
+      idee: 'The review mode of #4 in a large window: first the inconsistencies side by side, then the sections to fix, then all compliant ones in one step, finally the dossier.',
+      voir: ['The order of work is decided for Perle.', 'The PDF is always visible.'] },
+    9: { t: 'Fenêtre claire', d: '#6 with the analysis redone: a document frame and a section column.',
+      idee: 'In the centre, the DOCUMENT frame: the PDF and, next to it, its analysis (numbered points), verdict and comment. On the right, the SECTION: verdict and general comment, then inconsistencies. One button: « Valider la section ».',
+      voir: ['◀ ▶ arrows go back to the AI\'s wording after an edit.', 'Only three things: analysis, verdict, comment.'] },
+    10: { t: 'Revue claire', d: '#8 with the same clear layout; validate and move on.',
+      idee: 'The guided review with the clear document / section layout. « Valider et continuer » writes into Feel Français and moves to the next item.',
+      voir: ['Made to chain dossiers quickly.'] },
+    11: { t: 'Section sur la page', d: 'Section verdict and general comment decided on the page itself.',
+      idee: 'An « IA » chip next to Feel Français\'s « Commentaire général » button opens the section verdict and general comment right below it. The window is only for documents: section reminder on top, PDF on the left, document analysis, verdict and comment on the right.',
+      voir: ['Every box Perle fills in is covered, internal notes included (optional, never pre-filled).'] },
+    12: { t: 'Section en haut', d: 'Everything in the window: the section on top, the documents below.',
+      idee: 'Top of the window: the section being processed (name, status, verdict, general comment, inconsistencies). Bottom: PDF on the left, document analysis, verdict and comment on the right.',
+      voir: ['You always know which section you are processing.'] },
+    13: { t: 'Yukta\'s final prototype', d: 'Built on #11: one « Proposition IA » card everywhere, simple for Perle.', final: true,
+      idee: 'One single « Proposition IA » card everywhere (Statut, Zone, Visa, section, document): a real title, its state (⏱ to decide / ✓ decided), then Accepter · Modifier · Refuser · Annuler. The window shows the section card on top (collapsible) and the documents as tabs: PDF on the left; on the right analysis, AI grade /20 with why, verdict, comment with the annotated PDF attached, internal note, previous versions.',
+      voir: ['Awa → « Assurance santé »: a document in the wrong section, moved with Feel Français\'s own menu.',
+        'Mariam → « Lettre de motivation »: the student\'s note and the AI\'s answer.',
+        'Step bar above the documents: overall grade per step, what is still expected, optional documents.',
+        'Notifications: analysis in progress / waiting / failed with « Relancer ».',
+        'Every decided card shows who decided and when; « Copier » on every text.'] }
+  };
+  var PAGES = [
+    { id: 'notifications', t: 'Notifications', s: 'file de travail' },
+    { id: 'A', t: 'Awa', s: 'cas complet' },
+    { id: 'B', t: 'Lucas', s: 'tout conforme' },
+    { id: 'C', t: 'Mariam', s: '3e tentative' }
+  ];
+  var ORIGINE = { t: 'Pages d’origine, sans IA', d: 'Feel Français as it is today, for comparison.',
+    idee: 'The same pages with no AI layer at all: exactly what Perle uses today.', voir: ['Compare with any prototype to see what was added.'] };
+
+  function fichier(page) { return page === 'notifications' ? 'notifications.html' : 'profil-' + page + '.html'; }
+  function dossierDe(n) { return n === 'base' ? 'base/' : 'variante-' + n + '/'; }
+  function nomProto(n) { return n === 'base' ? ORIGINE.t : (P[n].final ? '' : 'Prototype ' + n + ' · ') + P[n].t; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+
+  // ── Sidebar ──
+  var liste = $('liste');
+  function item(n, info, action) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'item' + (info.final ? ' final' : '');
+    b.setAttribute('data-proto', n);
+    b.innerHTML = '<span class="n">' + (n === 'base' ? '<i class="fa fa-eye-slash"></i>' : info.final ? '<i class="fa fa-star"></i>' : n) + '</span>' +
+      '<span class="t">' + esc(info.t) + '</span>';
+    b.title = info.t;
+    b.addEventListener('click', action || function () { aller(n, etat.page || 'A'); });
+    return b;
+  }
+  var accueil = item('apercu', { t: 'Vue d’ensemble' },
+    function () { history.pushState(null, '', location.pathname); afficherApercu(); });
+  accueil.querySelector('.n').innerHTML = '<i class="fa fa-home"></i>';
+  liste.appendChild(accueil);
+  TOURS.forEach(function (tour) {
+    var g = document.createElement('div');
+    g.className = 'groupe';
+    g.textContent = tour.nav;
+    liste.appendChild(g);
+    tour.ids.forEach(function (n) { liste.appendChild(item(n, P[n])); });
+  });
+  var g0 = document.createElement('div');
+  g0.className = 'groupe';
+  g0.textContent = 'Pour comparer';
+  liste.appendChild(g0);
+  liste.appendChild(item('base', ORIGINE));
+
+  // Page d'accueil : les dossiers et le fil des tours
+  var DOSSIERS = [
+    { id: 'A', nom: 'Awa Kouassi', pays: 'Côte d’Ivoire', cas: 'Le cas complet', couleur: '#6f42c1', fond: '#f4f0fc',
+      puces: ['Alerte sur un passeport déjà validé', 'Relevés bancaires regroupés', 'Document mal placé', 'Pièce optionnelle'] },
+    { id: 'B', nom: 'Lucas Ferreira', pays: 'Canada', cas: 'Tout est conforme', couleur: '#2f9e62', fond: '#e9f7ef',
+      puces: ['Pas d’étape Études en France', 'Tout accepter en quelques clics', 'Message en anglais'] },
+    { id: 'C', nom: 'Mariam Diallo', pays: 'Sénégal', cas: '3e tentative', couleur: '#d98a1c', fond: '#fdf3e2',
+      puces: ['Versions comparées', 'Mot de l’étudiante', 'Questions Campus France'] }
+  ];
+  DOSSIERS.forEach(function (d) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'dossier';
+    b.innerHTML = '<div class="dossier-tete"><span class="avatar" style="background:' + d.couleur + '">' + esc(d.nom.split(' ').map(function (x) { return x[0]; }).join('')) +
+      '</span><div><b>' + esc(d.nom) + '</b><small>' + esc(d.pays) + '</small></div></div>' +
+      '<span class="cas" style="color:' + d.couleur + ';background:' + d.fond + '">' + esc(d.cas) + '</span>' +
+      '<div class="puces">' + d.puces.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>' +
+      '<span class="ouvrir">Ouvrir dans le prototype final <i class="fa fa-arrow-right"></i></span>';
+    b.addEventListener('click', function () { aller(13, d.id); });
+    $('dossiers').appendChild(b);
+  });
+  $('tours').innerHTML = TOURS.map(function (tr, i) {
+    var final = tr.ids[0] === 13;
+    return '<div class="tour' + (final ? ' final' : '') + '"><span class="pastille-tour">' + (final ? '<i class="fa fa-star"></i>' : i + 1) + '</span>' +
+      '<div class="tour-carte"><b>' + esc(final ? 'Version finale' : 'Tour ' + (i + 1)) + '</b><p>' + esc(tr.resume) + '</p><div class="protos">' +
+      tr.ids.map(function (n) { return '<button type="button" data-proto="' + n + '">' + (final ? '' : '<i>' + n + '</i>') + esc(P[n].t) + '</button>'; }).join('') +
+      '</div></div></div>';
+  }).join('');
+  $('tours').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-proto]');
+    if (b) aller(+b.getAttribute('data-proto'), 'A');
+  });
+  $('aller-debut').addEventListener('click', function () { aller(1, 'A'); });
+  $('aller-origine').addEventListener('click', function () { aller('base', 'A'); });
+  $('aller-final').addEventListener('click', function () { aller(13, 'A'); });
+
+  // Page tabs
+  var pages = $('pages');
+  PAGES.forEach(function (p) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('data-page', p.id);
+    b.innerHTML = esc(p.t) + '<small>' + esc(p.s) + '</small>';
+    b.addEventListener('click', function () { aller(etat.proto, p.id); });
+    pages.appendChild(b);
+  });
+
+  // ── Routing: #p13/A ──
+  var etat = { proto: null, page: null };
+  function aller(n, page) { location.hash = 'p' + n + '/' + page; }
+  function lireHash() {
+    var m = /^#p(\d+|base)\/(notifications|A|B|C)$/.exec(location.hash);
+    if (!m || (m[1] !== 'base' && !P[m[1]])) return afficherApercu();
+    afficher(m[1] === 'base' ? 'base' : +m[1], m[2]);
+  }
+  function marquerActif(n) {
+    liste.querySelectorAll('.item').forEach(function (b) { b.classList.toggle('actif', String(b.getAttribute('data-proto')) === String(n)); });
+  }
+  function afficherApercu() {
+    etat.proto = null;
+    $('apercu').hidden = false;
+    $('barre').hidden = true;
+    $('cadre').hidden = true;
+    $('vue').removeAttribute('src');
+    marquerActif('apercu');
+    majContexte();
+  }
+  function afficher(n, page) {
+    var info = n === 'base' ? ORIGINE : P[n];
+
+    etat.proto = n;
+    etat.page = page;
+    $('apercu').hidden = true;
+    $('barre').hidden = false;
+    $('cadre').hidden = false;
+    $('titre').innerHTML = esc(nomProto(n)) + (info.final ? ' <span class="pastille or">final</span>' : n !== 'base' ? ' <span class="pastille">' + esc(tourDe(n)) + '</span>' : '');
+    pages.querySelectorAll('button').forEach(function (b) {
+      var actif = b.getAttribute('data-page') === page;
+      b.classList.toggle('actif', actif);
+      b.setAttribute('aria-selected', actif);
+    });
+    var url = dossierDe(n) + fichier(page);
+    var vue = $('vue');
+    if (!vue.src || vue.getAttribute('src') !== url) vue.setAttribute('src', url);
+    marquerActif(n);
+    majContexte();
+    document.title = nomProto(n) + ' · Revue des prototypes';
+  }
+  function tourDe(n) {
+    for (var i = 0; i < TOURS.length; i++) if (TOURS[i].ids.indexOf(n) >= 0) return TOURS[i].nav.split(' · ')[0];
+    return '';
+  }
+  function replier(oui) {
+    $('app').classList.toggle('replie', oui);
+    $('replier').innerHTML = '<i class="fa fa-angle-double-' + (oui ? 'right' : 'left') + '"></i>';
+    $('replier').title = oui ? 'Déplier le menu' : 'Replier le menu';
+    $('replier').setAttribute('aria-expanded', !oui);
+    lsEcrire('revue:menu-replie', oui);
+  }
+  $('replier').addEventListener('click', function () { replier(!$('app').classList.contains('replie')); });
+  window.addEventListener('hashchange', lireHash);
+
+  // Links clicked inside a prototype (e.g. a row of the notifications list) → keep tabs in sync.
+  $('vue').addEventListener('load', function () {
+    try {
+      var chemin = this.contentWindow.location.pathname;
+      var m = /\/(variante-(\d+)|base)\/(notifications|profil-([ABC]))\.html$/.exec(chemin);
+      if (!m) return;
+      var n = m[1] === 'base' ? 'base' : +m[2];
+      var page = m[3] === 'notifications' ? 'notifications' : m[4];
+      if (n !== etat.proto || page !== etat.page) {
+        history.replaceState(null, '', '#p' + n + '/' + page);
+        afficher(n, page);
+      }
+    } catch (e) { /* page d'une autre origine : rien a synchroniser */ }
+  });
+
+  $('reinitialiser').addEventListener('click', function () {
+    var n = 0;
+    try {
+      Object.keys(localStorage).forEach(function (k) {
+        if (k.indexOf('ia-demo:') === 0) { localStorage.removeItem(k); n++; }
+      });
+    } catch (e) { /* stockage indisponible */ }
+    toast(n ? 'Démo réinitialisée : chaque prototype repart de zéro.' : 'Rien à réinitialiser.');
+    if (etat.proto) $('vue').contentWindow.location.reload();
+  });
+
+  function toast(msg) {
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.setAttribute('role', 'status');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 2600);
+  }
+
+  // ── Notes de revue ─────────────────────────────────────────────────────
+  // Un commentaire general (un seul, en haut) et des remarques rattachees au
+  // prototype ouvert au moment ou elles sont ecrites. Enregistres sur le serveur
+  // (outils/serveur.py : tout le monde voit les memes) ; sinon dans ce navigateur.
+  var CLE_LOCALE = 'revue:notes', CLE_GENERAL = 'revue:general', CLE_OUVERT = 'revue:notes-ouvert';
+  var notes = [], general = { text: '', at: null }, serveur = null, enEdition = null, filtre = 'courant', minuterieGeneral = null;
+  function lsLire(k, def) { try { var v = localStorage.getItem(k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } }
+  function lsEcrire(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+
+  function api(methode, chemin, corps) {
+    return fetch(chemin, { method: methode, headers: corps ? { 'Content-Type': 'application/json' } : {}, body: corps ? JSON.stringify(corps) : undefined, credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  function charger() {
+    return Promise.all([api('GET', 'api/notes'), api('GET', 'api/general')]).then(function (r) {
+      serveur = true; notes = r[0]; general = r[1];
+    }, function () {
+      serveur = false; notes = lsLire(CLE_LOCALE, []); general = lsLire(CLE_GENERAL, { text: '', at: null });
+    }).then(function () {
+      // Ne pas ecraser ce que la personne est en train de taper.
+      if (document.activeElement !== $('notes-general') && !minuterieGeneral) $('notes-general').value = general.text || '';
+      majGeneralEtat();
+      dessinerNotes();
+    });
+  }
+
+  // Le prototype ouvert : numero + nom (ce qui est enregistre avec la remarque).
+  function protoCourant() {
+    if (!etat.proto) return null;
+    var n = etat.proto;
+    var info = n === 'base' ? ORIGINE : P[n];
+    return { id: String(n), num: n === 'base' ? '—' : n, nom: info.t, final: !!info.final,
+      libelle: n === 'base' ? info.t : 'Prototype ' + n + ' · ' + info.t };
+  }
+  function nomPage(id) { var pg = PAGES.filter(function (p) { return p.id === id; })[0]; return pg ? pg.t : ''; }
+  function majContexte() {
+    var c = protoCourant();
+    var z = $('proto-courant');
+    if (!c) {
+      z.innerHTML = '<div class="proto-aucun"><i class="fa fa-hand-o-left"></i> Ouvrez un prototype dans le menu pour lui ajouter une remarque. ' +
+        'Pour un avis d’ensemble, utilisez le commentaire général ci-dessus.</div>';
+      $('proto-saisie').hidden = true;
+    } else {
+      z.innerHTML = '<div class="proto-courant' + (c.final ? ' final' : '') + '"><span class="num">' + (c.final ? '<i class="fa fa-star"></i>' : esc(c.num)) + '</span>' +
+        '<span>' + esc(c.final ? c.nom : c.libelle) + '<small>page ouverte : ' + esc(nomPage(etat.page)) + '</small></span></div>';
+      $('proto-saisie').hidden = false;
+    }
+    dessinerNotes();
+  }
+  function quand(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+  function libelleNote(n) {
+    if (n.proto && (n.proto === 'base' || P[n.proto])) {
+      var info = n.proto === 'base' ? ORIGINE : P[n.proto];
+      return (n.proto === 'base' || info.final ? info.t : 'Prototype ' + n.proto + ' · ' + info.t);
+    }
+    return n.context || 'Sans prototype';
+  }
+  function dessinerNotes() {
+    var total = notes.length + (general.text ? 1 : 0);
+    $('notes-compte').textContent = total;
+    $('notes-etat').innerHTML = serveur ? '<i class="fa fa-cloud"></i> Partagé : tous les relecteurs voient ces notes'
+      : '<i class="fa fa-laptop"></i> Enregistré dans ce navigateur';
+    var c = protoCourant();
+    document.querySelectorAll('.filtre button').forEach(function (b) {
+      var n = b.getAttribute('data-filtre') === 'courant' ? notes.filter(function (x) { return c && x.proto === c.id; }).length : notes.length;
+      b.textContent = (b.getAttribute('data-filtre') === 'courant' ? 'Ce prototype' : 'Tous les prototypes') + ' (' + n + ')';
+      b.classList.toggle('actif', b.getAttribute('data-filtre') === filtre);
+    });
+    var visibles = filtre === 'courant' ? notes.filter(function (x) { return c && x.proto === c.id; }) : notes;
+    var l = $('notes-liste');
+    if (!visibles.length) {
+      l.innerHTML = '<div class="notes-vide">' + (filtre === 'courant' ? (c ? 'Aucune remarque sur ce prototype pour l’instant.' : 'Aucun prototype ouvert.') : 'Aucune remarque pour l’instant.') + '</div>';
+      return;
+    }
+    l.innerHTML = visibles.slice().reverse().map(function (n) {
+      var edite = enEdition === n.id;
+      return '<div class="note" data-id="' + esc(n.id) + '"><div class="note-meta"><span class="ctx">' + esc(libelleNote(n)) + '</span>' +
+        (n.page ? '<span>' + esc(nomPage(n.page)) + '</span>' : '') + '<span>· ' + esc(quand(n.at)) + (n.edited ? ' · modifiée' : '') + '</span><span class="sep"></span>' +
+        (edite ? '' : '<button type="button" data-a="editer" title="Modifier"><i class="fa fa-pencil"></i></button><button type="button" data-a="suppr" title="Supprimer"><i class="fa fa-trash-o"></i></button>') +
+        '</div>' + (edite ? '<textarea maxlength="5000">' + esc(n.text) + '</textarea><div class="actions"><button type="button" data-a="annuler">Annuler</button>' +
+        '<button type="button" class="ok" data-a="enregistrer">Enregistrer</button></div>' : '<div class="note-texte">' + esc(n.text) + '</div>') + '</div>';
+    }).join('');
+    var z = l.querySelector('textarea');
+    if (z) { z.focus(); z.setSelectionRange(z.value.length, z.value.length); }
+  }
+
+  // Commentaire general : enregistre tout seul, une seconde apres la derniere frappe.
+  function majGeneralEtat(texte) {
+    $('general-etat').textContent = texte || (general.at && general.text ? 'enregistré ' + quand(general.at) : '');
+  }
+  function enregistrerGeneral() {
+    minuterieGeneral = null;
+    var texte = $('notes-general').value;
+    if (texte === (general.text || '')) return;
+    var fin = function (g) { general = g; majGeneralEtat(); dessinerNotes(); };
+    if (serveur) api('PUT', 'api/general', { text: texte }).then(fin, function () { majGeneralEtat('non enregistré — réessayez'); });
+    else { var g = { text: texte, at: new Date().toISOString() }; lsEcrire(CLE_GENERAL, g); fin(g); }
+  }
+  $('notes-general').addEventListener('input', function () {
+    majGeneralEtat('…');
+    clearTimeout(minuterieGeneral);
+    minuterieGeneral = setTimeout(enregistrerGeneral, 1000);
+  });
+  $('notes-general').addEventListener('blur', function () { if (minuterieGeneral) { clearTimeout(minuterieGeneral); enregistrerGeneral(); } });
+
+  function ajouter() {
+    var c = protoCourant();
+    var texte = $('notes-texte').value.trim();
+    if (!texte || !c) return;
+    var note = { text: texte, proto: c.id, page: etat.page, context: c.libelle + ' · ' + nomPage(etat.page) };
+    $('notes-ajouter').disabled = true;
+    var fin = function () { $('notes-texte').value = ''; $('notes-texte').focus(); filtre = 'courant'; dessinerNotes(); };
+    if (serveur) {
+      api('POST', 'api/notes', note).then(function (n) { notes.push(n); fin(); },
+        function () { $('notes-ajouter').disabled = false; toast('La remarque n’a pas pu être enregistrée : réessayez.'); });
+    } else {
+      note.id = Date.now().toString(36); note.at = new Date().toISOString(); note.edited = null;
+      notes.push(note); lsEcrire(CLE_LOCALE, notes); fin();
+    }
+  }
+  $('notes-texte').addEventListener('input', function () { $('notes-ajouter').disabled = !this.value.trim(); });
+  $('notes-texte').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ajouter(); } });
+  $('notes-ajouter').addEventListener('click', ajouter);
+  document.querySelector('.filtre').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-filtre]');
+    if (b) { filtre = b.getAttribute('data-filtre'); dessinerNotes(); }
+  });
+  $('notes-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]');
+    if (!b) return;
+    var id = b.closest('.note').getAttribute('data-id');
+    var n = notes.filter(function (x) { return x.id === id; })[0];
+    var a = b.getAttribute('data-a');
+    if (a === 'editer') { enEdition = id; dessinerNotes(); }
+    else if (a === 'annuler') { enEdition = null; dessinerNotes(); }
+    else if (a === 'enregistrer') {
+      var t = b.closest('.note').querySelector('textarea').value.trim();
+      if (!t) return;
+      if (serveur) api('PUT', 'api/notes/' + encodeURIComponent(id), { text: t }).then(function (m) { Object.assign(n, m); enEdition = null; dessinerNotes(); },
+        function () { toast('La modification n’a pas pu être enregistrée.'); });
+      else { n.text = t; n.edited = new Date().toISOString(); lsEcrire(CLE_LOCALE, notes); enEdition = null; dessinerNotes(); }
+    } else if (a === 'suppr') {
+      if (!confirm('Supprimer cette remarque ?')) return;
+      var retirer = function () { notes = notes.filter(function (x) { return x.id !== id; }); if (!serveur) lsEcrire(CLE_LOCALE, notes); dessinerNotes(); };
+      if (serveur) api('DELETE', 'api/notes/' + encodeURIComponent(id)).then(retirer, function () { toast('La remarque n’a pas pu être supprimée.'); });
+      else retirer();
+    }
+  });
+
+  // Export : le commentaire general, puis les remarques groupees par prototype (ordre du menu).
+  function enTexte() {
+    var ordre = [];
+    TOURS.forEach(function (tr) { tr.ids.forEach(function (n) { ordre.push(String(n)); }); });
+    ordre.push('base');
+    var groupes = {};
+    notes.forEach(function (n) { var k = n.proto || '?'; (groupes[k] = groupes[k] || []).push(n); });
+    Object.keys(groupes).forEach(function (k) { if (ordre.indexOf(k) < 0) ordre.push(k); });
+    var lignes = ['# Notes de revue des prototypes', '', 'Exporté le ' + quand(new Date().toISOString()), '', '## Commentaire général', '',
+      (general.text || '').trim() || '_(aucun)_', '', '## Remarques par prototype', ''];
+    var aucune = true;
+    ordre.forEach(function (k) {
+      if (!groupes[k]) return;
+      aucune = false;
+      lignes.push('### ' + libelleNote(groupes[k][0]), '');
+      groupes[k].forEach(function (n) {
+        lignes.push('- ' + (n.page ? '_' + nomPage(n.page) + '_ · ' : '') + quand(n.at) + '  ', '  ' + n.text.replace(/\n/g, '\n  '));
+      });
+      lignes.push('');
+    });
+    if (aucune) lignes.push('_(aucune remarque)_', '');
+    return lignes.join('\n');
+  }
+  function copierTexte(texte) {
+    // Presse-papiers moderne, sinon l'ancienne methode (fonctionne aussi hors HTTPS).
+    function secours() {
+      var z = document.createElement('textarea');
+      z.value = texte;
+      z.setAttribute('readonly', '');
+      z.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(z);
+      z.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      z.remove();
+      return ok ? Promise.resolve() : Promise.reject();
+    }
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(texte).catch(secours);
+    return secours();
+  }
+  $('notes-copier').addEventListener('click', function () {
+    enregistrerGeneral();
+    copierTexte(enTexte()).then(function () { toast('Tout est copié : collez-le où vous voulez.'); },
+      function () { toast('Copie impossible dans ce navigateur : utilisez « Télécharger ».'); });
+  });
+  $('notes-telecharger').addEventListener('click', function () {
+    enregistrerGeneral();
+    var url = URL.createObjectURL(new Blob(['\ufeff' + enTexte()], { type: 'text/markdown;charset=utf-8' }));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'notes-revue-prototypes.md';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    toast('Fichier téléchargé : notes-revue-prototypes.md');
+  });
+  function ouvrirNotes(oui) {
+    $('notes-panneau').hidden = !oui;
+    $('notes-ouvrir').hidden = oui;
+    $('notes-ouvrir').setAttribute('aria-expanded', oui);
+    lsEcrire(CLE_OUVERT, oui);
+    if (oui) { charger(); setTimeout(function () { (protoCourant() ? $('notes-texte') : $('notes-general')).focus(); }, 0); }
+  }
+  $('notes-ouvrir').addEventListener('click', function () { ouvrirNotes(true); });
+  $('notes-fermer').addEventListener('click', function () { enregistrerGeneral(); ouvrirNotes(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('notes-panneau').hidden && !enEdition) { enregistrerGeneral(); ouvrirNotes(false); } });
+  // Les notes des autres relecteurs apparaissent pendant que la fenetre est ouverte.
+  setInterval(function () { if (!$('notes-panneau').hidden && serveur && !enEdition && !$('notes-texte').value) charger(); }, 20000);
+
+  replier(lsLire('revue:menu-replie', false));
+  charger();
+  lireHash();
+  if (lsLire(CLE_OUVERT, false)) ouvrirNotes(true);
+})();
+</script>
+</body>
+</html>

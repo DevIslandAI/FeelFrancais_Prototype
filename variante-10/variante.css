@@ -1,0 +1,41 @@
+/* Variante 10 — Revue claire */
+.v10-fen { inset: 2.5vh 1.5vw; font-family: Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v10-tete { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid #e6e9ed; }
+.v10-marque { color: #6f42c1; white-space: nowrap; }
+.v10-etapes { flex: 1; display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; overflow-x: auto; }
+.v10-etape {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px; border: 1px solid #e6e9ed; background: #fff;
+  font: 600 12px/1 Catamaran, Arial, sans-serif; color: #4a5a64; cursor: pointer; white-space: nowrap;
+}
+.v10-etape.v10-active { border-color: #6f42c1; color: #6f42c1; background: #f7f4fd; }
+.v10-etape.v10-finie { color: #8a97a1; }
+.v10-etape.v10-finie .fa { color: #2f9e62; }
+.v10-corps { flex: 1; min-height: 0; }
+.v10-deux { display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
+.v10-simple { overflow: auto; padding: 18px max(24px, calc((100% - 760px) / 2)); }
+.v10-gauche { min-height: 0; border-right: 1px solid #e6e9ed; background: #e9edf0; }
+.v10-droite { overflow: auto; padding: 16px; min-height: 0; background: #fff; }
+.v10-h { font-size: 16px; margin: 0 0 8px; }
+.v10-h .fa { color: #6f42c1; }
+.v10-p { font-size: 12.5px; margin: 0 0 10px; }
+.v10-pied { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 1px solid #e6e9ed; background: #fafbfc; }
+.v10-aide .ia-kbd { margin: 0 1px; }
+.v10-etat { margin-left: 8px; }
+.v10-ok { height: 30px; padding: 0 16px; font-size: 13px; }
+.v10-inc, .v10-conf { display: flex; align-items: flex-start; gap: 8px; width: 100%; text-align: left; border: 1px solid transparent; border-radius: 6px;
+  background: none; padding: 8px; cursor: pointer; font-size: 12.5px; margin-bottom: 4px; }
+.v10-inc > span, .v10-conf > span { display: flex; flex-direction: column; gap: 2px; }
+.v10-inc:hover, .v10-conf:hover { background: #f6f7f9; }
+.v10-inc-actif { border-color: #ddd2f4; background: #f7f4fd; }
+.v10-inc .fa, .v10-conf .fa { margin-top: 3px; }
+.v10-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+.v10-duo > div { display: flex; flex-direction: column; min-height: 0; }
+.v10-duo-titre { font-size: 12.5px; padding: 0 4px 6px; }
+.v10-duo .ia-v-zone { flex: 1; overflow: auto; background: #dfe4e8; border-radius: 6px; }
+@media (max-width: 900px) {
+  .v10-fen { inset: 0; border-radius: 0; }
+  .v10-marque, .v10-aide { display: none; }
+  .v10-deux { grid-template-columns: 1fr; grid-template-rows: 58% 42%; }
+  .v10-gauche { border-right: 0; border-bottom: 1px solid #e6e9ed; }
+  .v10-duo { grid-template-columns: 1fr; }
+}

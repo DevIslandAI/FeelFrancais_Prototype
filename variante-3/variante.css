@@ -1,0 +1,21 @@
+/* Variante 3 — Dans la section */
+.v3-bandeau { margin: 6px 0 10px; padding: 8px 10px; border-radius: 6px; background: var(--ia-clair); border: 1px solid var(--ia-bord); }
+.v3-bandeau.v3-fini { background: #fff; }
+.v3-ligne { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.v3-resume { flex: 1 1 200px; font-size: 12.5px; line-height: 1.4; }
+.v3-actions .ia-prop, .v3-actions .ia-bloc { margin: 8px 0 0; }
+.v3-pose { margin: 6px 0; }
+.v3-pose.ia-props-doc > .ia-meta:first-child { display: none; }
+.v3-detail { margin-top: 8px; }
+.v3-grille { display: flex; flex-direction: column; gap: 8px; }
+.v3-pdf { height: 62vh; }
+.v3-constats { background: #fff; border: 1px solid #e3e8ec; border-radius: 6px; padding: 6px 8px; }
+.v3-champ { margin: 6px 0 10px; padding: 8px 10px; border: 1px dashed var(--ia); border-radius: 6px; background: #fff; }
+.v3-nav {
+  /* 66 px : hauteur de leur entete fixe */
+  position: sticky; top: 70px; z-index: 20; display: flex; align-items: center; gap: 8px; margin: 0 0 12px;
+  padding: 7px 10px; background: #fff; border: 1px solid var(--ia-bord); border-radius: 6px; box-shadow: 0 2px 8px rgba(33, 22, 66, .08);
+}
+.v3-comptes { display: flex; gap: 3px; align-items: center; margin-top: 3px; flex-wrap: wrap; }
+.v3-compte { display: inline-flex; align-items: center; gap: 2px; padding: 0 5px; border-radius: 8px; font: 700 10.5px/1.6 Catamaran, Arial, sans-serif; }
+.v3-campus { margin: 0 0 12px; }

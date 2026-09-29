@@ -1,0 +1,244 @@
+/*
+ * Couche IA — styles communs aux 5 variantes.
+ * Regles de conception (charge cognitive, Sweller et al.) :
+ *  - une seule couleur d'identite pour l'IA (violet), absente de Feel Francais :
+ *    Perle distingue d'un coup d'oeil proposition IA et decision humaine (D12) ;
+ *  - les statuts gardent partout la meme couleur et la meme icone (signalement) ;
+ *  - la typographie, les boutons et les champs restent ceux de Feel Francais
+ *    (familiarite : rien a reapprendre) ;
+ *  - le detail est replie par defaut (« Pourquoi ? ») : on montre d'abord le
+ *    verdict, la raison en une ligne et le texte a envoyer.
+ * Tous les elements ajoutes portent data-ia : ils se retirent sans rien laisser.
+ */
+:root {
+  --ia: #6f42c1;
+  --ia-fonce: #56329a;
+  --ia-clair: #f4f0fc;
+  --ia-bord: #d9ccf3;
+  --ia-rouge: #d9534f;
+  --ia-rouge-clair: #fdf1f0;
+  --ia-orange: #d98a1c;
+  --ia-orange-clair: #fdf6ea;
+  --ia-vert: #2f9e62;
+  --ia-vert-clair: #eef8f2;
+  --ia-bleu: #3a7bd5;
+  --ia-bleu-clair: #eef4fc;
+  --ia-gris: #7b8a95;
+  --ia-gris-clair: #f3f5f7;
+  --ia-texte: #2b3a42;
+  --ia-ombre: 0 10px 30px rgba(33, 22, 66, .18);
+  --ia-rayon: 6px;
+}
+
+[data-ia], [data-ia] * { box-sizing: border-box; }
+[data-ia] { font-family: Catamaran, Arial, Helvetica, sans-serif; color: var(--ia-texte); }
+
+/* ── Conteneurs analyses : contour selon le verdict propose ── */
+fieldset.ia-section > .doc-container { border-radius: var(--ia-rayon); transition: box-shadow .2s; }
+fieldset.ia-statut-a-corriger > .doc-container { box-shadow: 0 0 0 2px var(--ia-rouge); }
+fieldset.ia-statut-a-verifier > .doc-container { box-shadow: 0 0 0 2px var(--ia-orange); }
+fieldset.ia-statut-conforme > .doc-container { box-shadow: 0 0 0 2px var(--ia-vert); }
+fieldset.ia-statut-provisoire > .doc-container { box-shadow: 0 0 0 2px var(--ia-gris); outline: 2px dashed #fff; outline-offset: -2px; }
+fieldset.ia-statut-alerte > .doc-container { box-shadow: 0 0 0 2px var(--ia); }
+fieldset.ia-decide > .doc-container { box-shadow: 0 0 0 1px var(--ia-bord); }
+fieldset.ia-focus > .doc-container { box-shadow: 0 0 0 3px var(--ia), 0 0 0 8px rgba(111, 66, 193, .15); }
+
+/* Bouton IA dans l'entete de la section (a cote de leurs boutons valid/invalid) */
+.ia-bouton {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; margin-right: 6px;
+  border: 1px solid var(--ia); border-radius: 13px; background: var(--ia-clair); color: var(--ia);
+  font: 700 11.5px/1 Catamaran, Arial, sans-serif; cursor: pointer; vertical-align: middle; white-space: nowrap;
+}
+.ia-bouton:hover, .ia-bouton:focus-visible { background: var(--ia); color: #fff; outline: none; }
+.ia-bouton .ia-point { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.ia-bouton[data-statut="a-corriger"] .ia-point { background: var(--ia-rouge); }
+.ia-bouton[data-statut="a-verifier"] .ia-point { background: var(--ia-orange); }
+.ia-bouton[data-statut="conforme"] .ia-point { background: var(--ia-vert); }
+.ia-bouton[data-statut="provisoire"] .ia-point { background: var(--ia-gris); }
+.ia-bouton[data-statut="alerte"] .ia-point { background: var(--ia); box-shadow: 0 0 0 2px #fff inset; }
+.ia-bouton.ia-fait { border-color: var(--ia-bord); background: #fff; color: var(--ia-gris); }
+
+/* ── Pastilles de statut ── */
+.ia-pastille {
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 11px;
+  font: 700 11px/1.6 Catamaran, Arial, sans-serif; white-space: nowrap;
+}
+.ia-pastille i { font-size: 11px; }
+.ia-p-a-corriger { background: var(--ia-rouge-clair); color: var(--ia-rouge); }
+.ia-p-a-verifier { background: var(--ia-orange-clair); color: var(--ia-orange); }
+.ia-p-conforme { background: var(--ia-vert-clair); color: var(--ia-vert); }
+.ia-p-provisoire { background: var(--ia-gris-clair); color: var(--ia-gris); }
+.ia-p-alerte { background: var(--ia-clair); color: var(--ia); }
+.ia-p-humain { background: var(--ia-gris-clair); color: var(--ia-gris); }
+.ia-p-ia { background: var(--ia); color: #fff; }
+.ia-p-decide { background: #fff; color: var(--ia-gris); border: 1px solid #dfe4e8; }
+
+/* ── Constats ── */
+.ia-constats { list-style: none; margin: 0; padding: 0; }
+.ia-constat {
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: start; padding: 7px 8px;
+  border-radius: 5px; cursor: pointer; font-size: 13px; line-height: 1.45;
+}
+.ia-constat:hover, .ia-constat.ia-actif { background: var(--ia-gris-clair); }
+.ia-num {
+  width: 20px; height: 20px; border-radius: 50%; color: #fff; display: grid; place-items: center;
+  font: 700 11px/1 Arial, sans-serif; margin-top: 1px;
+}
+.ia-t-probleme .ia-num { background: var(--ia-rouge); }
+.ia-t-a-verifier .ia-num { background: var(--ia-orange); }
+.ia-t-conforme .ia-num { background: var(--ia-vert); }
+.ia-t-info .ia-num { background: var(--ia-bleu); }
+.ia-type { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.ia-t-probleme .ia-type { color: var(--ia-rouge); }
+.ia-t-a-verifier .ia-type { color: var(--ia-orange); }
+.ia-t-conforme .ia-type { color: var(--ia-vert); }
+.ia-t-info .ia-type { color: var(--ia-bleu); }
+.ia-lieu { font-size: 11px; color: var(--ia-gris); white-space: nowrap; }
+
+/* ── Visionneuse PDF ── */
+.ia-visionneuse { display: flex; flex-direction: column; min-height: 0; background: #e9edf0; border-radius: var(--ia-rayon); overflow: hidden; }
+.ia-v-barre {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 8px; background: #fff;
+  border-bottom: 1px solid #dfe4e8; font-size: 12px;
+}
+.ia-v-barre .ia-sep { flex: 1; }
+.ia-v-onglets { display: flex; gap: 4px; flex-wrap: wrap; }
+.ia-v-onglet {
+  border: 1px solid #dfe4e8; background: #fff; border-radius: 4px; padding: 3px 8px; font-size: 11.5px;
+  cursor: pointer; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ia-v-onglet.ia-actif { border-color: var(--ia); color: var(--ia); background: var(--ia-clair); font-weight: 700; }
+.ia-v-zone { position: relative; flex: 1; overflow: auto; padding: 14px; min-height: 0; }
+.ia-v-page { position: relative; margin: 0 auto; background: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); }
+.ia-v-page canvas { display: block; }
+.ia-surlignage {
+  position: absolute; border: 2px solid; border-radius: 3px; cursor: pointer; transition: box-shadow .2s, background .2s;
+}
+.ia-surlignage.ia-t-probleme { border-color: var(--ia-rouge); background: rgba(217, 83, 79, .14); }
+.ia-surlignage.ia-t-a-verifier { border-color: var(--ia-orange); background: rgba(232, 163, 61, .16); }
+.ia-surlignage.ia-t-conforme { border-color: var(--ia-vert); background: rgba(47, 158, 98, .12); }
+.ia-surlignage.ia-t-info { border-color: var(--ia-bleu); background: rgba(58, 123, 213, .10); }
+.ia-surlignage.ia-actif { box-shadow: 0 0 0 4px rgba(111, 66, 193, .35); animation: ia-pulse 1s ease 2; }
+.ia-surlignage .ia-num { position: absolute; right: -11px; top: -11px; box-shadow: 0 0 0 2px #fff; }
+@keyframes ia-pulse { 50% { box-shadow: 0 0 0 9px rgba(111, 66, 193, .18); } }
+/* Vue etudiant : explications des surlignages dans la marge */
+.ia-v-page.ia-v-page-notes { margin-right: 230px; margin-left: 10px; }
+.ia-v-note {
+  position: absolute; left: calc(100% + 14px); width: 212px; padding: 6px 8px 6px 30px; background: #fff; border-radius: 6px;
+  border: 1px solid #e3e8ec; border-left: 3px solid; font: 12px/1.4 Catamaran, Arial, sans-serif; color: var(--ia-texte);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08); cursor: pointer;
+}
+.ia-v-note .ia-num { position: absolute; left: 6px; top: 6px; }
+.ia-v-note.ia-t-probleme { border-left-color: var(--ia-rouge); }
+.ia-v-note.ia-t-a-verifier { border-left-color: var(--ia-orange); }
+.ia-v-note.ia-t-info { border-left-color: var(--ia-bleu); }
+.ia-v-fil { position: absolute; height: 0; border-top: 1px dashed; opacity: .55; pointer-events: none; }
+.ia-v-fil.ia-t-probleme { border-color: var(--ia-rouge); }
+.ia-v-fil.ia-t-a-verifier { border-color: var(--ia-orange); }
+.ia-vue-bascule { display: inline-flex; border: 1px solid #cfd6dc; border-radius: 4px; overflow: hidden; }
+.ia-vue-bascule button { border: 0; background: #fff; padding: 3px 9px; font-size: 11.5px; cursor: pointer; }
+.ia-vue-bascule button.ia-actif { background: var(--ia); color: #fff; }
+.ia-mini { border: 1px solid #cfd6dc; background: #fff; border-radius: 4px; padding: 3px 8px; font-size: 11.5px; cursor: pointer; color: var(--ia-texte); text-decoration: none; display: inline-flex; gap: 4px; align-items: center; }
+.ia-mini:hover { border-color: var(--ia); color: var(--ia); text-decoration: none; }
+.ia-bandeau-etudiant { background: var(--ia); color: #fff; font-size: 11.5px; padding: 4px 10px; text-align: center; }
+
+/* ── Propositions (commentaire, verdict, champ) : accepter / modifier / refuser ── */
+.ia-prop { border: 1px solid var(--ia-bord); border-left: 3px solid var(--ia); border-radius: 5px; background: #fff; padding: 9px 10px; margin: 8px 0; }
+.ia-prop-tete { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: var(--ia-fonce); }
+.ia-prop-tete .ia-cible { font-weight: 400; color: var(--ia-gris); font-size: 11.5px; }
+.ia-prop-tete .ia-sep { flex: 1; }
+.ia-prop textarea {
+  width: 100%; min-height: 58px; resize: vertical; border: 1px solid #dfe4e8; border-radius: 4px; padding: 6px 8px;
+  font: 13px/1.45 Catamaran, Arial, sans-serif; color: var(--ia-texte); background: #fcfcfd;
+}
+.ia-prop textarea:focus { outline: none; border-color: var(--ia); background: #fff; }
+.ia-prop-actions { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; align-items: center; }
+.ia-btn {
+  border: 1px solid #cfd6dc; background: #fff; color: var(--ia-texte); border-radius: 4px; padding: 5px 11px;
+  font: 700 12px/1.2 Catamaran, Arial, sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+}
+.ia-btn:hover { border-color: var(--ia); color: var(--ia); }
+.ia-btn:focus-visible { outline: 2px solid var(--ia); outline-offset: 1px; }
+.ia-btn-ok { background: var(--ia-vert); border-color: var(--ia-vert); color: #fff; }
+.ia-btn-ok:hover { background: #268353; color: #fff; border-color: #268353; }
+.ia-btn-non:hover { border-color: var(--ia-rouge); color: var(--ia-rouge); }
+.ia-btn-ia { background: var(--ia); border-color: var(--ia); color: #fff; }
+.ia-btn-ia:hover { background: var(--ia-fonce); color: #fff; border-color: var(--ia-fonce); }
+.ia-btn[disabled] { opacity: .45; cursor: default; }
+.ia-prop.ia-accepte { border-left-color: var(--ia-vert); background: var(--ia-vert-clair); }
+.ia-prop.ia-modifie { border-left-color: var(--ia-bleu); background: var(--ia-bleu-clair); }
+.ia-prop.ia-refuse { border-left-color: #b5bec5; background: var(--ia-gris-clair); }
+.ia-prop.ia-refuse textarea { text-decoration: line-through; color: var(--ia-gris); }
+.ia-decision { font-size: 11.5px; color: var(--ia-gris); }
+.ia-decision b { color: var(--ia-texte); }
+.ia-etiquette-etu { font-size: 10.5px; color: var(--ia-gris); display: inline-flex; gap: 3px; align-items: center; }
+
+/* ── Champs Feel Francais que l'IA propose de changer (contour + « Voir la proposition ») ── */
+.ia-champ-propose { outline: 2px solid var(--ia) !important; outline-offset: 2px; border-radius: 3px; }
+.ia-champ-propose + .select2 .select2-selection { outline: 2px solid var(--ia); outline-offset: 2px; }
+.ia-voir {
+  display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 1px 8px; border-radius: 10px;
+  border: 1px solid var(--ia); background: var(--ia-clair); color: var(--ia); font: 700 11px/1.6 Catamaran, Arial, sans-serif;
+  cursor: pointer; vertical-align: middle;
+}
+.ia-voir:hover { background: var(--ia); color: #fff; }
+.ia-bulle {
+  position: absolute; z-index: 1060; width: 360px; background: #fff; border: 1px solid var(--ia-bord); border-radius: 7px;
+  box-shadow: var(--ia-ombre); padding: 12px; font-size: 13px;
+}
+.ia-bulle-titre { font-weight: 700; color: var(--ia-fonce); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.ia-avant-apres { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.ia-avant-apres > div { background: var(--ia-gris-clair); border-radius: 4px; padding: 6px 8px; font-size: 12.5px; white-space: pre-wrap; }
+.ia-avant-apres > div:last-child { background: var(--ia-clair); }
+.ia-avant-apres small { display: block; color: var(--ia-gris); font-size: 10.5px; text-transform: uppercase; }
+
+/* ── Blocs d'information ── */
+.ia-bloc { border: 1px solid #e3e8ec; border-radius: 6px; padding: 9px 11px; margin: 8px 0; background: #fff; font-size: 12.5px; }
+.ia-bloc h6 { margin: 0 0 6px; font: 700 11.5px/1.3 Catamaran, Arial, sans-serif; text-transform: uppercase; letter-spacing: .04em; color: var(--ia-gris); display: flex; gap: 6px; align-items: center; }
+.ia-bloc-alerte { border-color: var(--ia); background: var(--ia-clair); }
+.ia-bloc-alerte h6 { color: var(--ia); }
+.ia-bloc-attention { border-color: #f0c77c; background: var(--ia-orange-clair); }
+.ia-bloc-attention h6 { color: var(--ia-orange); }
+details.ia-pourquoi { margin: 8px 0; }
+details.ia-pourquoi > summary { cursor: pointer; color: var(--ia); font-weight: 700; font-size: 12.5px; list-style: none; }
+details.ia-pourquoi > summary::-webkit-details-marker { display: none; }
+details.ia-pourquoi > summary::before { content: "\25B8"; display: inline-block; width: 14px; transition: transform .15s; }
+details.ia-pourquoi[open] > summary::before { transform: rotate(90deg); }
+.ia-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ia-table th { text-align: left; color: var(--ia-gris); font-weight: 700; font-size: 10.5px; text-transform: uppercase; padding: 4px 6px; border-bottom: 1px solid #e3e8ec; }
+.ia-table td { padding: 5px 6px; border-bottom: 1px solid #f0f3f5; vertical-align: top; }
+.ia-ok { color: var(--ia-vert); font-weight: 700; }
+.ia-ko { color: var(--ia-rouge); font-weight: 700; }
+.ia-doute { color: var(--ia-orange); font-weight: 700; }
+.ia-meta { font-size: 11.5px; color: var(--ia-gris); line-height: 1.5; }
+.ia-meta b { color: var(--ia-texte); font-weight: 700; }
+.ia-reperes { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--ia-gris); }
+.ia-reperes b { color: var(--ia-texte); }
+.ia-obsolete { text-decoration: line-through; color: var(--ia-gris); }
+.ia-signaler { background: none; border: 0; color: var(--ia-gris); font-size: 11px; cursor: pointer; padding: 0; text-decoration: underline dotted; }
+.ia-signaler:hover { color: var(--ia-rouge); }
+.ia-signale { font-size: 11px; color: var(--ia-rouge); }
+
+/* ── Fenetres communes ── */
+.ia-voile { position: fixed; inset: 0; background: rgba(20, 24, 32, .45); z-index: 1050; }
+.ia-fenetre {
+  position: fixed; z-index: 1055; background: #fff; border-radius: 8px; box-shadow: var(--ia-ombre);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.ia-fenetre-cote { inset: 4vh 3vw; z-index: 1065; }
+.ia-fenetre-cote ~ .ia-voile, .ia-voile + .ia-fenetre-cote { z-index: 1065; }
+.ia-cote-tete { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #e3e8ec; font-size: 14px; }
+.ia-cote-corps { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-height: 0; padding: 10px; background: #e9edf0; }
+.ia-cote-corps > div { display: flex; flex-direction: column; min-height: 0; }
+.ia-cote-legende { font-size: 12.5px; padding: 2px 4px 6px; }
+.ia-toast {
+  position: fixed; right: 20px; bottom: 20px; z-index: 100001; background: var(--ia-fonce); color: #fff; padding: 10px 16px;
+  border-radius: 6px; font: 13px/1.4 Catamaran, Arial, sans-serif; box-shadow: var(--ia-ombre);
+}
+.ia-kbd { display: inline-block; min-width: 18px; padding: 0 5px; border: 1px solid #cfd6dc; border-bottom-width: 2px; border-radius: 3px; font: 700 10.5px/16px Arial, sans-serif; text-align: center; background: #fff; color: var(--ia-texte); }
+
+/* ── Page des notifications : indicateur IA ── */
+.ia-notif { display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; padding: 1px 7px; border-radius: 9px; font: 700 10.5px/1.6 Catamaran, Arial, sans-serif; white-space: nowrap; }
+.ia-notif.ia-p-a-corriger, .ia-notif.ia-p-conforme, .ia-notif.ia-p-a-verifier, .ia-notif.ia-p-provisoire { }
+
+@media (prefers-reduced-motion: reduce) { .ia-surlignage.ia-actif { animation: none; } }

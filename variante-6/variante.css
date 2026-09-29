@@ -1,0 +1,33 @@
+/* Variante 6 — Fenêtre épurée */
+.v6-fen { inset: 3vh 2vw; flex-direction: row; }
+.v6-nav { width: 210px; flex: none; background: #f6f7f9; border-right: 1px solid #e6e9ed; padding: 12px 8px; overflow: auto; font-family: Catamaran, Arial, sans-serif; }
+.v6-nav-titre { margin: 14px 8px 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8a97a1; }
+.v6-item { display: flex; align-items: center; gap: 7px; width: 100%; border: 0; background: none; text-align: left; padding: 6px 8px; border-radius: 5px;
+  font: 600 12.5px/1.3 Catamaran, Arial, sans-serif; color: #2b3a42; cursor: pointer; }
+.v6-item:hover { background: #eceef1; }
+.v6-item.v6-actif { background: #fff; box-shadow: 0 0 0 1px #ddd2f4; color: #6f42c1; }
+.v6-item .fa { width: 14px; text-align: center; }
+.v6-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v6-fini .v6-nom { color: #8a97a1; }
+.v6-revoir { color: #6f42c1; }
+.v6-principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v6-tete { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #e6e9ed; }
+.v6-titre { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 14px; overflow: hidden; }
+.v6-titre .ia2-muet { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v6-corps { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
+.v6-corps.v6-simple { display: block; overflow: auto; padding: 16px max(20px, calc((100% - 760px) / 2)); }
+.v6-pdf { border-radius: 0; min-height: 0; }
+.v6-droite { overflow: auto; padding: 14px 16px; border-left: 1px solid #e6e9ed; min-height: 0; }
+.v6-pied { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-top: 1px solid #e6e9ed; background: #fafbfc; }
+.v6-champ-lib { font-weight: 700; font-size: 12.5px; margin: 10px 0 4px; }
+@media (max-width: 1150px) { .v6-corps { grid-template-columns: minmax(0, 1fr) 340px; } .v6-nav { width: 170px; } }
+/* Ecran etroit : sommaire replie en bande horizontale, PDF au-dessus des propositions */
+@media (max-width: 900px) {
+  .v6-fen { inset: 0; flex-direction: column; border-radius: 0; }
+  .v6-nav { width: auto; display: flex; gap: 4px; overflow-x: auto; padding: 6px; border-right: 0; border-bottom: 1px solid #e6e9ed; }
+  .v6-nav-titre { display: none; }
+  .v6-item { width: auto; flex: none; }
+  .v6-corps { grid-template-columns: 1fr; grid-template-rows: 45% 55%; }
+  .v6-droite { border-left: 0; border-top: 1px solid #e6e9ed; }
+  .v6-titre .ia2-muet { display: none; }
+}

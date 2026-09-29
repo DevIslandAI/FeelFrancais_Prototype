@@ -1,0 +1,154 @@
+/*
+ * Couche IA — variante 13 : la carte « Proposition IA » unique.
+ * Plus mauve et plus lisible que les variantes 9 a 12 (retours du 28/09) :
+ * en-tete teinte avec un vrai titre, parties separees par des filets,
+ * etat a l'icone (⏱ a decider / ✓ decide), barre d'actions toujours en bas.
+ */
+:root {
+  --ia4: #6f42c1; --ia4-fonce: #4f2d93; --ia4-fond: #f4eefe; --ia4-tete: #e6dbfb; --ia4-bord: #b499ee;
+  --ia4-texte: #2b3a42; --ia4-muet: #6f7d88; --ia4-vert: #2f9e62; --ia4-rouge: #d45a55;
+}
+.ia4-muet { color: var(--ia4-muet); font-weight: 400; }
+.ia4-sep { flex: 1; }
+
+/* ── La carte ── */
+.ia4-carte {
+  border: 1.5px solid var(--ia4-bord); border-radius: 8px; background: var(--ia4-fond); margin: 0 0 12px;
+  font-family: Catamaran, Arial, sans-serif; color: var(--ia4-texte); overflow: hidden;
+}
+.ia4-c-tete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: var(--ia4-tete); border-bottom: 1px solid var(--ia4-bord); }
+.ia4-c-marque { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ia4); white-space: nowrap; }
+.ia4-c-titre { font-size: 14.5px; font-weight: 700; color: var(--ia4-fonce); }
+.ia4-c-sous { font-size: 12px; }
+.ia4-etat { display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border-radius: 10px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.ia4-etat-attente { background: #fff; color: var(--ia4); border: 1px solid var(--ia4-bord); }
+.ia4-etat-accepte { background: var(--ia4-vert); color: #fff; }
+.ia4-etat-refuse { background: #7b8a95; color: #fff; }
+.ia4-c-corps { padding: 2px 12px; }
+.ia4-c-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 9px 12px; border-top: 1px solid var(--ia4-bord); background: #fbf9ff; }
+.ia4-accepte .ia4-c-actions, .ia4-refuse .ia4-c-actions { background: #fff; }
+.ia4-accepte { border-color: #9fd6b7; }
+.ia4-accepte .ia4-c-tete { background: #e3f4ea; border-bottom-color: #9fd6b7; }
+.ia4-refuse { border-color: #cfd6dc; }
+.ia4-refuse .ia4-c-tete { background: #eef1f3; border-bottom-color: #cfd6dc; }
+.ia4-refuse .ia4-p-val { opacity: .6; }
+
+/* Carte repliable : l'en-tete se clique ; repliee, une seule ligne */
+.ia4-repliable > .ia4-c-tete { cursor: pointer; }
+.ia4-repliable > .ia4-c-tete:hover { filter: brightness(.98); }
+.ia4-plier { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border: 1px solid var(--ia4-bord); border-radius: 12px; background: #fff;
+  color: var(--ia4); font: 700 11.5px Catamaran, Arial, sans-serif; cursor: pointer; }
+.ia4-plier:hover { background: var(--ia4); color: #fff; }
+.ia4-carte.ia4-replie > .ia4-c-corps, .ia4-carte.ia4-replie > .ia4-c-actions { display: none; }
+.ia4-replie > .ia4-c-tete { border-bottom: 0; }
+.ia4-c-resume { display: inline-flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 200px; font-size: 12.5px; color: var(--ia4-texte); overflow: hidden; }
+.ia4-c-resume .ia4-r-com { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ia4-muet); }
+.ia4-r-v { flex: none; padding: 0 8px; border-radius: 9px; font-weight: 700; font-size: 11.5px; line-height: 19px; }
+.ia4-r-valide { background: #e3f4ea; color: var(--ia4-vert); }
+.ia4-r-invalide { background: #fbe9e8; color: var(--ia4-rouge); }
+.ia4-r-doute { background: #fbf1e2; color: #d48a2a; }
+
+/* Parties separees par un filet, chacune avec un vrai titre */
+.ia4-partie { padding: 10px 0; }
+.ia4-partie + .ia4-partie { border-top: 1px solid #ddd0f5; }
+.ia4-p-titre { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; font-size: 11.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; color: var(--ia4-fonce); }
+.ia4-p-titre .ia4-muet { text-transform: none; letter-spacing: 0; font-size: 11.5px; }
+.ia4-vis { text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 11px; color: var(--ia4-muet); }
+.ia4-info { color: var(--ia4-bord); cursor: help; }
+.ia4-texte { background: #fff; border: 1px solid #e3dbf4; border-radius: 6px; padding: 7px 10px; font-size: 13px; line-height: 1.5; }
+.ia4-valeur-forte { font-weight: 700; font-size: 13.5px; }
+.ia4-p-val textarea, .ia4-p-val select, .ia4-p-val .ia4-date {
+  width: 100%; border: 1.5px solid var(--ia4); border-radius: 6px; padding: 6px 9px; font: 13px/1.5 Catamaran, Arial, sans-serif; background: #fff;
+}
+.ia4-p-val .ia4-date { width: 140px; }
+.ia4-p-val textarea { min-height: 70px; resize: vertical; }
+.ia4-case { font-weight: 700; margin-right: 10px; }
+
+/* Versions ◀ ▶ */
+.ia4-versions { display: inline-flex; align-items: center; gap: 4px; text-transform: none; letter-spacing: 0; color: var(--ia4); font-size: 11.5px; }
+.ia4-versions button { width: 22px; height: 22px; border: 1px solid var(--ia4-bord); border-radius: 4px; background: #fff; color: var(--ia4); cursor: pointer; font-size: 10px; }
+.ia4-versions button:disabled { color: #cfd5da; border-color: #e3e8ec; cursor: default; }
+
+/* Verdict : la proposition de l'IA marquee DANS le bouton (rien ne deborde) */
+.ia4-seg { display: inline-flex; border: 1.5px solid #cfc2ec; border-radius: 7px; overflow: hidden; background: #fff; vertical-align: middle; }
+.ia4-opt { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; font: 700 13px/1.2 Catamaran, Arial, sans-serif; color: #8a97a1; border: 0; background: #fff; }
+button.ia4-opt { cursor: pointer; }
+.ia4-opt + .ia4-opt { border-left: 1.5px solid #cfc2ec; }
+.ia4-opt-valide.ia4-choisi { background: var(--ia4-vert); color: #fff; }
+.ia4-opt-invalide.ia4-choisi { background: var(--ia4-rouge); color: #fff; }
+.ia4-ia { display: inline-block; padding: 0 5px; border-radius: 4px; background: var(--ia4); color: #fff; font-size: 10px; line-height: 16px; letter-spacing: .03em; }
+.ia4-choisi .ia4-ia { background: rgba(255, 255, 255, .28); }
+
+/* Boutons */
+.ia4-btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 13px; border: 1.5px solid #cfc2ec; border-radius: 6px; background: #fff;
+  color: var(--ia4-texte); font: 700 12.5px Catamaran, Arial, sans-serif; cursor: pointer; white-space: nowrap; }
+.ia4-btn:hover { border-color: var(--ia4); color: var(--ia4); }
+.ia4-btn:focus-visible { outline: 2px solid var(--ia4); outline-offset: 2px; }
+.ia4-ok { background: var(--ia4-vert); border-color: var(--ia4-vert); color: #fff; }
+.ia4-ok:hover { background: #268353; border-color: #268353; color: #fff; }
+.ia4-non:hover { border-color: var(--ia4-rouge); color: var(--ia4-rouge); }
+.ia4-principal { background: var(--ia4); border-color: var(--ia4); color: #fff; }
+.ia4-principal:hover { background: var(--ia4-fonce); color: #fff; }
+.ia4-lien { border: 0; background: none; padding: 2px 0; color: var(--ia4); font: 700 12.5px Catamaran, Arial, sans-serif; cursor: pointer; }
+.ia4-mini { border: 0; background: none; color: #a894d8; cursor: pointer; padding: 0 4px; }
+.ia4-mini:hover { color: var(--ia4); }
+
+/* Piece jointe : le PDF annote qui part avec le commentaire */
+.ia4-joint { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; margin-top: 7px; padding: 5px 10px; border-radius: 8px; background: #fff; border: 1px dashed var(--ia4);
+  color: var(--ia4-fonce); font-size: 12px; font-weight: 700; text-decoration: none; }
+.ia4-p-titre-seul:empty { display: none; }
+.ia4-p-titre-seul { margin-bottom: 4px; }
+.ia4-joint:hover { background: var(--ia4-fond); text-decoration: none; }
+.ia4-joint .ia4-muet { font-weight: 400; }
+
+/* Analyse : constats modifiables + ajouts de Perle */
+.ia4-constats { list-style: none; margin: 0; padding: 0; }
+.ia4-constat { display: flex; align-items: flex-start; gap: 8px; padding: 6px 6px; border-radius: 6px; font-size: 13px; line-height: 1.45; cursor: pointer; }
+.ia4-constat:hover, .ia4-constat.ia4-actif { background: #fff; }
+.ia4-constat.ia4-actif { box-shadow: 0 0 0 1.5px var(--ia4-bord); }
+.ia4-c-texte { flex: 1; }
+.ia4-c-probleme .ia2-num { background: var(--ia4-rouge); }
+.ia4-c-a-verifier .ia2-num { background: #d48a2a; }
+.ia4-c-conforme .ia2-num { background: var(--ia4-vert); }
+.ia4-c-info .ia2-num { background: #3a7bd5; }
+.ia4-constat .ia-signalement { opacity: 0; font-size: 11px; }
+.ia4-constat:hover .ia-signalement { opacity: 1; }
+.ia4-modifie { font-size: 10.5px; font-weight: 700; color: var(--ia4); background: #fff; border: 1px solid var(--ia4-bord); border-radius: 8px; padding: 0 6px; }
+.ia4-edit-constat { flex: 1; border: 1.5px solid var(--ia4); border-radius: 5px; padding: 4px 7px; font: 13px/1.45 Catamaran, Arial, sans-serif; }
+.ia4-num-perle { width: 18px; height: 18px; border-radius: 50%; background: var(--ia4-fonce); color: #fff; display: grid; place-items: center; font: 700 11px/1 Arial; flex: none; margin-top: 1px; }
+.ia4-type-perle { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--ia4-fonce); letter-spacing: .03em; }
+.ia4-ajout { margin-top: 6px; }
+.ia4-ajout-form { display: grid; grid-template-columns: 170px 1fr auto; gap: 6px; margin-top: 6px; align-items: start; }
+.ia4-ajout-form[hidden] { display: none; }
+.ia4-ajout-form select, .ia4-ajout-form textarea { border: 1.5px solid #cfc2ec; border-radius: 6px; padding: 5px 8px; font: 13px Catamaran, Arial, sans-serif; }
+
+/* Alerte (piece deja validee) et versions precedentes */
+.ia4-alerte { margin: 10px 0 2px; padding: 8px 10px; background: #fff; border-left: 3px solid var(--ia4); border-radius: 0 6px 6px 0; font-size: 13px; }
+.ia4-version { display: flex; gap: 10px; padding: 6px 0; font-size: 12.5px; }
+.ia4-v-num { width: 26px; height: 22px; border-radius: 5px; background: #fff; border: 1px solid var(--ia4-bord); display: grid; place-items: center; font-weight: 700; color: var(--ia4); flex: none; font-size: 11px; }
+
+/* ── Sur la page : pastille, carte sous le champ, cadre plus visible ── */
+.ia4-puce {
+  display: inline-flex; align-items: center; gap: 5px; margin: 0 6px; height: 20px; padding: 0 8px; border-radius: 10px; vertical-align: 1px;
+  border: 1.5px solid var(--ia4); background: var(--ia4-fond); color: var(--ia4); font: 700 11px/1 Catamaran, Arial, sans-serif; cursor: pointer; white-space: nowrap;
+}
+.ia4-puce:hover, .ia4-puce[aria-expanded="true"] { background: var(--ia4); color: #fff; }
+.ia4-puce[aria-expanded="true"] .ia2-point { background: #fff; }
+.ia4-puce-fini { border-color: #9fd6b7; background: #fff; color: var(--ia4-vert); }
+.ia4-puce-fini .ia2-point { background: var(--ia4-vert); }
+.ia4-sous-champ { margin: 8px 0 14px; }
+.ia4-sous-champ[hidden], .ia4-sous-section[hidden] { display: none; }
+.ia4-sous-visa { margin: 4px 0 12px 24px; }
+.ia4-sous-section { margin: 8px 0 12px; }
+.ia4-champ-propose { box-shadow: 0 0 0 2px var(--ia4) !important; border-radius: 4px; }
+.ia4-champ-propose-groupe { box-shadow: inset 3px 0 0 var(--ia4); background: var(--ia4-fond); border-radius: 4px; }
+.ia4-lien-docs { border: 0; background: none; color: var(--ia4); font: 700 12.5px Catamaran, Arial, sans-serif; cursor: pointer; padding: 0 2px; }
+.ia4-tag .fa { font-size: 11px; }
+.ia4-synthese { margin: 0 0 14px; padding: 10px 12px; border-left: 3px solid var(--ia4-bord); background: #fbf9ff; font-size: 13px; line-height: 1.6; }
+/* Copier un texte ; trace « qui a decide et quand » */
+.ia4-copier { border: 1px solid #d9cdf5; background: #fff; color: #6f42c1; border-radius: 4px; padding: 1px 7px; font: 600 11px Catamaran, Arial, sans-serif;
+  cursor: pointer; text-transform: none; letter-spacing: 0; margin-left: 6px; }
+.ia4-copier:hover { background: #f4eefe; }
+.ia4-trace { font-size: 12px; }
+.ia4-trace .fa { color: #6f42c1; }
