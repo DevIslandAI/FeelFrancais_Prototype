@@ -373,15 +373,21 @@
       this.querySelectorAll('.v13-apercu').forEach(function (x) { x.remove(); });
     });
   }
-  // PDF : surlignages seulement la ou il y a quelque chose a corriger ou a verifier.
+  // PDF : tous les points de l'analyse sont poses, numerotes comme la liste ; seuls
+  // ceux a corriger ou a verifier sont visibles d'emblee, les autres apparaissent
+  // quand Perle clique sur leur ligne dans l'analyse.
   function dessinerPdf(ctrl, zone) {
     var tous = IA.constatsVisibles(ctrl.d, 'admin');
-    var cadres = [];
-    tous.forEach(function (k, i) {
-      var t = o.typeConstat(k);
-      if (t === 'probleme' || t === 'a-verifier') cadres.push({ rect: k.rect, numero: i + 1, teinte: t, titre: k.texte });
+    var cadres = tous.map(function (k, i) { return { rect: k.rect, numero: i + 1, teinte: o.typeConstat(k), titre: k.texte }; });
+    ctrl.zonePdf = zone;
+    IA.rendrePage(IA.urlDocument(ctrl.d.nom), cadres, zone, Math.max(420, zone.clientWidth - 40), function (i) { activerPoint(ctrl, i); }, false);
+  }
+  function activerPoint(ctrl, i) {
+    if (ctrl.zonePdf) ctrl.zonePdf.querySelectorAll('.ia-surlignage').forEach(function (c, j) {
+      c.classList.toggle('ia-actif', j === i);
+      if (j === i) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-    IA.rendrePage(IA.urlDocument(ctrl.d.nom), cadres, zone, Math.max(420, zone.clientWidth - 40), function () {}, false);
+    if (ctrl.listePoints) ctrl.listePoints.querySelectorAll('li').forEach(function (li, j) { li.classList.toggle('v13-actif', j === i); });
   }
   function panneauAnalyse(ctrl) {
     var d = ctrl.d, s = ctrl.s, n = d.note;
@@ -391,9 +397,14 @@
     function partie(nom, html) { var x = o.el('<section class="v13-ap-partie"><h4>' + nom + '</h4>' + (html || '') + '</section>'); p.appendChild(x); return x; }
     if (n) partie('Note', '<div class="v13-note v13-note-grande v13-note-' + (n.valeur >= n.seuil ? 'ok' : 'ko') + '">' + n.valeur + '<small>/20</small></div>');
     var tous = IA.constatsVisibles(d, 'admin');
-    partie('Analyse', '<ol class="v13-ap-constats">' + tous.map(function (k, i) {
-      return '<li class="v13-c-' + o.typeConstat(k) + '"><span class="v13-c-num">' + (i + 1) + '</span>' + e(k.texte) + '</li>';
+    var analyse = partie('Analyse', '<ol class="v13-ap-constats">' + tous.map(function (k, i) {
+      return '<li class="v13-c-' + o.typeConstat(k) + '" data-n="' + i + '" title="Voir sur le document"><span class="v13-c-num">' + (i + 1) + '</span>' + e(k.texte) + '</li>';
     }).join('') + '</ol>');
+    ctrl.listePoints = analyse.querySelector('ol');
+    ctrl.listePoints.addEventListener('click', function (ev) {
+      var li = ev.target.closest('li[data-n]');
+      if (li) activerPoint(ctrl, +li.getAttribute('data-n'));
+    });
     var verdict = partie('Verdict', '<div class="v13-seg"><button type="button" data-v="valide"><i class="fa fa-check"></i> valid</button>' +
       '<button type="button" data-v="invalide"><i class="fa fa-times"></i> invalid</button></div>');
     function majVerdict() {

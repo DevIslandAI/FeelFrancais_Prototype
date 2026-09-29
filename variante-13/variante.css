@@ -120,7 +120,11 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-note-grande { font-size: 28px; }
 .v13-note-grande small { font-size: 14px; }
 .v13-ap-constats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.v13-ap-constats li { display: flex; gap: 8px; align-items: flex-start; }
+.v13-ap-constats li { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; border-radius: 6px; padding: 3px 6px; margin: 0 -6px; }
+.v13-ap-constats li:hover { background: #f4eefe; }
+.v13-ap-constats li.v13-actif { background: #ece3fc; box-shadow: inset 3px 0 0 var(--v13); }
+/* Sur le PDF : points conformes ou simples faits caches tant qu'on ne clique pas dessus */
+.v13-ap-pdf .ia-surlignage.ia-t-conforme:not(.ia-actif), .v13-ap-pdf .ia-surlignage.ia-t-info:not(.ia-actif) { opacity: 0; pointer-events: none; }
 .v13-c-num { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 700 11px/1 Arial, sans-serif; color: #fff; background: #5b8def; margin-top: 1px; }
 .v13-c-probleme .v13-c-num { background: var(--v13-rouge); }
 .v13-c-a-verifier .v13-c-num { background: #e8a33d; }
