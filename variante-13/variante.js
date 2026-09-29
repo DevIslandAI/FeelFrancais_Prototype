@@ -118,7 +118,7 @@
           return '<button type="button" class="v13-b' + (b[2] ? ' v13-b-ok' : '') + '" data-a="' + b[0] + '">' + e(b[1]) + '</button>';
         }).join('')
         : '<span class="v13-fait v13-fait-' + x + '"><i class="fa ' + (x === 'refuse' ? 'fa-times' : 'fa-check') + '"></i> ' +
-          e(x === 'refuse' ? (p.libelleRefus || 'Refusé') : (p.memo.libelle || 'Accepté')) + '</span>' +
+          e(x === 'refuse' ? (p.libelleRefus || 'Refusé') : (p.memo.libelle || p.libelleFait || 'Accepté')) + '</span>' +
           '<button type="button" class="v13-lien" data-a="annuler">Annuler</button>';
       el.innerHTML = '<span class="v13-ia">IA</span>' + (p.avant ? '<span class="v13-avant">' + p.avant + '</span>' : '') + src +
         '<span class="v13-sep"></span><span class="v13-actions">' + act + '</span>';
@@ -282,7 +282,28 @@
     if (!verdict) {
       // L'IA ne tranche pas (a verifier, provisoire) : Perle choisit, en un clic.
       p.avant = s.statut === 'provisoire' ? 'Pièces encore attendues : pas de verdict pour l’instant.' : 'À vérifier : l’IA ne tranche pas.';
-      p.boutons = [['valide', 'valid', true], ['invalide', 'invalid']];
+      // Leurs boutons valid / invalid restent vides : Perle les choisit elle-meme
+      // (son clic est enregistre comme sa decision). S'il y a un commentaire
+      // general propose, un seul bouton : Accepter (le commentaire seulement).
+      var clesCommentaire = function () { return clesSec().filter(function (k) { return k !== cleV; }); };
+      if (texte) {
+        p.cles = clesCommentaire;
+        p.boutons = [['accepter', 'Accepter', true]];
+        p.action = function () {
+          if (note && note.zone.value.trim()) IA.ecrire.commentaire(s.idSection, 'general', note.zone.value);
+          clesCommentaire().forEach(function (k) {
+            IA.decider(k, k.indexOf(':interne') > 0 ? 'refuse' : (note && note.zone.value.trim() === texte ? 'accepte' : 'modifie'), k.indexOf(':interne') > 0 ? null : note.zone.value);
+          });
+          if (note) note.carte.classList.remove('v13-pre');
+          return {};
+        };
+        p.refuser = function () { clesCommentaire().forEach(function (k) { IA.decider(k, 'refuse', null); }); if (note) note.restaurer(); };
+        p.annuler = function () { clesCommentaire().forEach(function (k) { IA.annuler(k); }); proposer(); };
+      } else {
+        p.boutons = [];
+        p.libelleFait = 'Verdict choisi';
+        p.annuler = function () { remettreVerdict(entete, SEL, null); IA.annuler(cleV); };
+      }
     } else {
       p.avant = 'Verdict proposé : <span class="v13-verdict v13-verdict-' + verdict + '">' + (verdict === 'valide' ? 'valid' : 'invalid') + '</span>';
     }
