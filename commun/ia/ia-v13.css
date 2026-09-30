@@ -187,7 +187,17 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-c-dep-txt { display: flex; gap: 7px; flex: 1 1 220px; }
 .v13-c-dep-txt > .fa { color: var(--v13); margin-top: 3px; }
 .v13-c-dep-txt small { display: block; color: #6c757d; font-size: 11.5px; }
-.v13-c-dep-act { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.v13-c-dep:not(.v13-c-dep-fait) { display: block; }
+.v13-dep-doc { margin: 5px 0 0; }
+.v13-dep-trajet { display: flex; align-items: stretch; gap: 8px; margin-top: 8px; }
+.v13-dep-de, .v13-dep-vers { flex: 1 1 0; min-width: 0; padding: 5px 9px; border-radius: 7px; font-weight: 600; font-size: 12.5px; line-height: 1.3; }
+.v13-dep-de small, .v13-dep-vers small { display: block; font-weight: 700; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; }
+.v13-dep-de { background: #f3f4f6; border: 1px solid #e3e8ec; color: #6c757d; }
+.v13-dep-de small { color: #98a2ab; }
+.v13-dep-vers { background: #eef9f3; border: 1.5px solid var(--v13-vert); color: #1f6e45; }
+.v13-dep-vers small { color: var(--v13-vert); }
+.v13-dep-fleche { flex: none; align-self: center; color: var(--v13); font-size: 18px; }
+.v13-c-dep-act { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 8px; }
 .v13-c-dep-fait { border-style: solid; border-color: #e3e8ec; color: #4a5560; font-size: 12px; }
 .v13-c-dep-fait .fa { color: var(--v13-vert); }
 .v13-c-dep-fait { flex-wrap: nowrap; }

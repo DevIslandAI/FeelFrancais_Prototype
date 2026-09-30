@@ -398,8 +398,15 @@
       if (fait) return '<div class="v13-c-dep v13-c-dep-fait"><i class="fa ' + (fait.statut === 'refuse' ? 'fa-times' : 'fa-check') + '"></i> <span>' +
         (fait.statut === 'refuse' ? 'Document laissé dans cette section' : 'Document déplacé vers <b>' + e(dep.m.sectionProposee) + '</b> · analyse relancée') +
         '</span><button type="button" class="v13-lien" data-c="dep-annuler">Annuler</button></div>';
-      return '<div class="v13-c-dep"><div class="v13-c-dep-txt"><i class="fa fa-exchange"></i> <span>Document mal placé : <b>' + e(dep.m.motifCourt || dep.m.motif || '') + '</b>' +
-        '<small>De « ' + e(dep.m.sectionActuelle || IA.ui2.nom(s)) + ' » vers « ' + e(dep.m.sectionProposee) + ' »</small></span></div>' +
+      // Explicite : QUEL document, D'OU, VERS OU. La justification reste dans « Pourquoi ».
+      var dd = docs(s)[0];
+      return '<div class="v13-c-dep"><div class="v13-c-lbl"><i class="fa fa-exchange"></i> Document à déplacer</div>' +
+        (dd ? '<button type="button" class="v13-preuve v13-dep-doc" data-preuve="' + e(dd.nom) + '" title="Ouvrir ce document"><i class="fa fa-file-pdf-o"></i> ' + e(nomDoc(dd)) + '</button>' : '') +
+        '<div class="v13-dep-trajet">' +
+          '<div class="v13-dep-de"><small>De</small>' + e(dep.m.sectionActuelle || IA.ui2.nom(s)) + '</div>' +
+          '<span class="v13-dep-fleche"><i class="fa fa-long-arrow-right"></i></span>' +
+          '<div class="v13-dep-vers"><small>Vers</small>' + e(dep.m.sectionProposee) + '</div>' +
+        '</div>' +
         '<div class="v13-c-dep-act"><button type="button" class="v13-lien" data-c="dep-laisser">Laisser ici</button>' +
         '<button type="button" class="v13-b v13-b-ok" data-c="deplacer"><i class="fa fa-arrows"></i> Déplacer</button></div></div>';
     }
