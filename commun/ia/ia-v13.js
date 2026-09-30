@@ -515,28 +515,30 @@
   //   (cases du haut, verdicts des sections et des documents, deplacements).
   //   Ce que l'IA ne tranche pas reste a Perle. « Annuler » defait le lot.
   function toutAccepter() {
-    var zone = document.querySelector('.student-service-data') || IA.blocDocuments().parentNode;
+    // Une pastille dans LEUR ligne de titre (« Visa … Afficher les autres services ») :
+    // aucune hauteur ajoutee, rien ne se decale.
+    var tete = document.querySelector('.admin-student-header');
     var b = o.el('<div class="v13-global"></div>');
     var lot = null;
+    function pl(n, x) { return n + ' ' + x + (n > 1 ? 's' : ''); }
     function dessiner() {
       var attente = registre.filter(function (r) { return r.attente(); });
       var aAccepter = attente.filter(function (r) { return !r.indecis; });
       var aDecider = attente.filter(function (r) { return r.indecis; });
-      var reste = aDecider.length ? '<small>' + aDecider.length + ' où l’IA ne tranche pas : à décider vous-même</small>' : '';
+      var reste = aDecider.length ? '<span class="v13-g-reste" title="L’IA ne tranche pas : à décider vous-même">' + aDecider.length + ' à décider</span>' : '';
+      var tout = aAccepter.length ? '<button type="button" class="v13-g-tout" data-g="tout" title="Accepter les ' + aAccepter.length +
+        ' suggestions tranchées par l’IA"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>' : '';
       if (lot) {
         b.className = 'v13-global v13-global-fait';
-        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + lot.length + ' suggestion' + (lot.length > 1 ? 's' : '') +
-          ' de l’IA acceptée' + (lot.length > 1 ? 's' : '') + '</b>' + reste + '</span>' +
-          (aAccepter.length ? '<button type="button" class="v13-g-tout" data-g="tout"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>' : '') +
-          '<button type="button" class="v13-annuler" data-g="annuler"><i class="fa fa-undo"></i> Annuler</button>';
+        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + pl(lot.length, 'acceptée') + '</b></span>' +
+          reste + tout + '<button type="button" class="v13-annuler" data-g="annuler" title="Retirer tout ce lot"><i class="fa fa-undo"></i> Annuler</button>';
       } else if (aAccepter.length) {
         b.className = 'v13-global';
-        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt"><b>' + aAccepter.length + ' suggestion' + (aAccepter.length > 1 ? 's' : '') + ' de l’IA à confirmer</b>' + reste + '</span>' +
-          '<button type="button" class="v13-g-tout" data-g="tout"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>';
+        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt"><b>' + pl(aAccepter.length, 'suggestion') + '</b> à confirmer</span>' + reste + tout;
       } else {
         b.className = 'v13-global v13-global-fait';
         b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' +
-          (aDecider.length ? 'Toutes les suggestions de l’IA sont traitées' : 'Dossier entièrement traité') + '</b>' + reste + '</span>';
+          (aDecider.length ? 'Suggestions IA traitées' : 'Dossier traité') + '</b></span>' + reste;
       }
     }
     b.addEventListener('click', function (ev) {
@@ -555,7 +557,9 @@
       IA.emettre('decision', {});
     });
     IA.on('decision', dessiner);
-    zone.insertBefore(b, zone.firstChild);
+    var h3 = tete && tete.querySelector('.information-title');
+    if (h3) h3.insertAdjacentElement('afterend', b);
+    else (document.querySelector('.student-service-data') || IA.blocDocuments().parentNode).prepend(b);
     dessiner();
   }
 
