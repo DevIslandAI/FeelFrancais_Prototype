@@ -461,53 +461,54 @@
     dessiner();
   }
 
-  // ─── Document : RIEN sur la page. Le verdict et le commentaire proposes
-  //     n'apparaissent que dans l'apercu du document, et ne s'acceptent que la.
+  // ─── Document : RIEN sur la page. Tout se passe dans l'apercu du document :
+  //     Perle y ajuste l'analyse, le verdict et le commentaire, puis « Sauvegarder »
+  //     (un seul bouton ; chaque partie a son « Annuler mes changements »).
+  function analyseIA(d) {
+    return IA.constatsVisibles(d, 'admin').map(function (k, i) { return { texte: k.texte, ia: k.texte, teinte: o.typeConstat(k), n: i, origine: 'ia' }; });
+  }
   function proposerDocument(s, d, rang, total) {
     var boutons = d.el.querySelector('.doc-info-buttons');
     var SEL = '.changeState';
     var texte = (d.commentaire || {}).etudiant || '';
-    var note = noteFF(d.id, 'staff');
-    var ctrl = controles[d.nom] = { s: s, d: d, note: note, texte: texte, brouillon: texte,
-      choix: d.verdict === 'a-verifier' ? null : d.verdict, rang: rang, total: total };
+    var iaChoix = d.verdict === 'a-verifier' ? null : d.verdict;
+    var ctrl = controles[d.nom] = { s: s, d: d, texte: texte, rang: rang, total: total, iaChoix: iaChoix,
+      choix: iaChoix, brouillon: texte, analyse: analyseIA(d), enregistre: null, snapFF: null };
     var clesD = function () { return cles(s, 'doc:' + d.nom + ':'); };
     ctrl.choisir = function (v) { ctrl.choix = v; };
-    ctrl.p = {
-      id: 'doc:' + d.nom,
-      memo: { local: null, snap: null },
-      cles: clesD,
-      action: function (a) {
-        if (a === 'valide' || a === 'invalide') ctrl.choix = a;
-        if (!ctrl.choix) { o.toast('Choisissez d’abord valid ou invalid.'); return false; }
-        var snap = { verdict: verdictActif(boutons, SEL) };
-        var com = (ctrl.brouillon || '').trim();
-        // Seul leur bouton valid / invalid est ecrit sur la page. « Commentaire du
-        // staff » reste a Perle : l'IA n'y ecrit jamais (le commentaire reste dans l'apercu).
-        IA.ecrire.verdictDocument(d, ctrl.choix === 'valide');
-        if (existe(s, 'doc:' + d.nom + ':verdict')) IA.decider('doc:' + d.nom + ':verdict', ctrl.choix === d.verdict ? 'accepte' : 'modifie', ctrl.choix);
-        if (existe(s, 'doc:' + d.nom + ':etudiant')) IA.decider('doc:' + d.nom + ':etudiant', com === texte ? 'accepte' : 'modifie', com || null);
-        if (existe(s, 'doc:' + d.nom + ':interne')) IA.decider('doc:' + d.nom + ':interne', 'refuse', null);
-        return snap;
-      },
-      refuser: function () { clesD().forEach(function (k) { IA.decider(k, 'refuse', null); }); },
-      annuler: function (snap) {
-        if ('verdict' in snap) remettreVerdict(boutons, SEL, snap.verdict, function (v) { IA.ecrire.verdictDocument(d, v); });
-        clesD().forEach(function (k) { IA.annuler(k); });
-      }
+    ctrl.etat = function () {
+      return { choix: ctrl.choix, com: (ctrl.brouillon || '').trim(), analyse: JSON.stringify(ctrl.analyse.map(function (k) { return [k.texte, k.teinte]; })) };
     };
-    // L'IA ne tranche pas sur ce document : Perle choisit valid / invalid dans
-    // « Verdict », puis un seul bouton, Accepter.
-    if (!ctrl.choix) ctrl.p.boutons = [['accepter', 'Accepter', true]];
-    ctrl.p.fait = function (x) {
-      var dv = IA.decision('doc:' + d.nom + ':verdict');
-      var v = dv && (dv.valeur === 'valide' || dv.valeur === 'invalide') ? dv.valeur : ctrl.choix;
-      if (x === 'refuse') return { teinte: 'refuse', titre: 'Suggestion refusée', details: nomDoc(d) };
-      return { teinte: v === 'invalide' ? 'ko' : 'ok', titre: 'Document ' + (v === 'invalide' ? 'invalidé' : 'validé'),
-        details: d.verdict === 'a-verifier' ? 'Votre décision' : v === d.verdict ? 'Suggestion de l’IA suivie' : 'Votre choix (l’IA suggérait ' + (d.verdict === 'valide' ? 'valid' : 'invalid') + ')' };
+    ctrl.modifie = function () {
+      var a = ctrl.etat(), b = ctrl.enregistre;
+      return !b || a.choix !== b.choix || a.com !== b.com || a.analyse !== b.analyse;
+    };
+    // Sauvegarder : seul leur bouton valid / invalid est ecrit sur la page. « Commentaire
+    // du staff » reste a Perle : l'IA n'y ecrit jamais (le commentaire reste dans l'apercu).
+    ctrl.sauver = function (depuisFF) {
+      if (!ctrl.choix) { o.toast('Choisissez d’abord valid ou invalid.'); return false; }
+      if (!ctrl.enregistre) ctrl.snapFF = depuisFF ? depuisFF.avant : verdictActif(boutons, SEL);
+      if (!depuisFF) IA.ecrire.verdictDocument(d, ctrl.choix === 'valide');
+      var com = (ctrl.brouillon || '').trim();
+      clesD().forEach(function (k) {
+        if (/:verdict$/.test(k)) IA.decider(k, ctrl.choix === iaChoix ? 'accepte' : 'modifie', ctrl.choix);
+        else if (/:interne$/.test(k)) IA.decider(k, 'refuse', null);
+        else IA.decider(k, com === texte.trim() ? 'accepte' : 'modifie', com || null);
+      });
+      ctrl.enregistre = ctrl.etat();
+      ctrl.enregistre.le = new Date();
+      IA.emettre('decision', {});
+      return true;
+    };
+    ctrl.annulerSauvegarde = function () {
+      remettreVerdict(boutons, SEL, ctrl.snapFF, function (v) { IA.ecrire.verdictDocument(d, v); });
+      clesD().forEach(function (k) { IA.annuler(k); });
+      ctrl.enregistre = null; ctrl.snapFF = null;
+      IA.emettre('decision', {});
     };
     // « Tout accepter » : le verdict suggere pour ce document (pas quand l'IA ne tranche pas).
-    registre.push({ indecis: !ctrl.choix, attente: function () { return etatDe(ctrl.p) === 'attente'; },
-      accepter: function () { if (ctrl.choix) agir(ctrl.p, 'accepter'); }, annuler: function () { agir(ctrl.p, 'annuler'); } });
+    registre.push({ indecis: !iaChoix, attente: function () { return !ctrl.enregistre; },
+      accepter: function () { if (ctrl.choix) ctrl.sauver(); }, annuler: function () { ctrl.annulerSauvegarde(); } });
   }
 
   // ─── « Tout accepter » : toutes les suggestions de l'IA en un clic ────────
@@ -593,28 +594,89 @@
       c.classList.toggle('ia-actif', j === i);
       if (j === i) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-    if (ctrl.listePoints) ctrl.listePoints.querySelectorAll('li').forEach(function (li, j) { li.classList.toggle('v13-actif', j === i); });
+    if (ctrl.listePoints) ctrl.listePoints.querySelectorAll('li').forEach(function (li) { li.classList.toggle('v13-actif', li.getAttribute('data-n') === String(i)); });
   }
   function panneauAnalyse(ctrl) {
     var d = ctrl.d, s = ctrl.s, n = d.note;
     var p = o.el('<div class="v13-ap-panneau"></div>');
     var titre = o.el('<div class="v13-ap-titre">' + e(nomDoc(d)) + (ctrl.total > 1 ? ' <span class="v13-ap-rang">' + ctrl.rang + ' / ' + ctrl.total + '</span>' : '') + '</div>');
     p.appendChild(titre);
-    function partie(nom, html) { var x = o.el('<section class="v13-ap-partie"><h4>' + nom + '</h4>' + (html || '') + '</section>'); p.appendChild(x); return x; }
+    // Chaque partie modifiable a son « Annuler mes changements » (retour a la suggestion de l'IA).
+    function partie(nom, html, retour) {
+      var x = o.el('<section class="v13-ap-partie"><div class="v13-ap-tete"><h4>' + nom + '</h4>' +
+        (retour ? '<button type="button" class="v13-ap-retour" data-retour="' + retour + '" hidden title="Revenir à la suggestion de l’IA"><i class="fa fa-undo"></i> Annuler mes changements</button>' : '') +
+        '</div>' + (html || '') + '</section>');
+      p.appendChild(x);
+      return x;
+    }
     if (n) partie('Note', '<div class="v13-note v13-note-grande v13-note-' + (n.valeur >= n.seuil ? 'ok' : 'ko') + '">' + n.valeur + '<small>/20</small></div>');
-    var tous = IA.constatsVisibles(d, 'admin');
-    if (OPTS.analyseMarge) tous = [];  // l'analyse est ecrite dans la marge du document
-    var analyse = tous.length ? null : partie('Analyse', '<p class="v13-ap-marge"><i class="fa fa-long-arrow-left"></i> Dans la marge du document, à côté de chaque passage.</p>');
-    if (tous.length) analyse = partie('Analyse', '<ol class="v13-ap-constats">' + tous.map(function (k, i) {
-      return '<li class="v13-c-' + o.typeConstat(k) + '" data-n="' + i + '" title="Voir sur le document"><span class="v13-c-num">' + (i + 1) + '</span>' + e(k.texte) + '</li>';
-    }).join('') + '</ol>');
-    ctrl.listePoints = analyse.querySelector('ol');
-    if (ctrl.listePoints) ctrl.listePoints.addEventListener('click', function (ev) {
-      var li = ev.target.closest('li[data-n]');
-      if (li) activerPoint(ctrl, +li.getAttribute('data-n'));
-    });
+
+    // ── Analyse : cliquer un point le montre sur le PDF ; ✎ le modifie ; « + Ajouter un point »
+    //    (les points ajoutes par Perle sont des corrections : en rouge).
+    var analyse;
+    if (OPTS.analyseMarge) analyse = partie('Analyse', '<p class="v13-ap-marge"><i class="fa fa-long-arrow-left"></i> Dans la marge du document, à côté de chaque passage.</p>');
+    else {
+      analyse = partie('Analyse', '<ol class="v13-ap-constats"></ol><button type="button" class="v13-ap-ajout"><i class="fa fa-plus"></i> Ajouter un point</button>', 'analyse');
+      var liste = ctrl.listePoints = analyse.querySelector('ol');
+      var dessinerAnalyse = function () {
+        liste.innerHTML = ctrl.analyse.map(function (k, j) {
+          var perle = k.origine === 'perle', modif = !perle && k.texte !== k.ia;
+          return '<li class="v13-c-' + k.teinte + (perle ? ' v13-c-perle' : '') + '" data-j="' + j + '"' + (k.n != null ? ' data-n="' + k.n + '" title="Voir sur le document"' : '') + '>' +
+            '<span class="v13-c-num">' + (j + 1) + '</span><span class="v13-c-txt">' + e(k.texte) +
+            (perle ? ' <span class="v13-c-tag">ajouté</span>' : modif ? ' <span class="v13-c-tag">modifié</span>' : '') + '</span>' +
+            '<span class="v13-c-outils"><button type="button" data-edit="' + j + '" title="Modifier ce point"><i class="fa fa-pencil"></i></button>' +
+            (perle ? '<button type="button" data-suppr="' + j + '" title="Supprimer ce point"><i class="fa fa-trash-o"></i></button>' : '') + '</span></li>';
+        }).join('');
+        maj();
+      };
+      var editer = function (j, nouveau) {
+        var li = liste.querySelector('[data-j="' + j + '"]');
+        var k = ctrl.analyse[j];
+        var zone = o.el('<textarea class="v13-c-edit" rows="2" placeholder="Votre remarque sur le document…"></textarea>');
+        zone.value = k.texte;
+        li.querySelector('.v13-c-txt').replaceWith(zone);
+        li.querySelector('.v13-c-outils').remove();
+        li.classList.add('v13-c-edition');
+        zone.focus();
+        var fini = false;
+        function fin(garder) {
+          if (fini) return;
+          fini = true;
+          var v = zone.value.trim();
+          if (garder && v) k.texte = v;
+          else if (nouveau && !v) ctrl.analyse.splice(j, 1);
+          dessinerAnalyse();
+        }
+        zone.addEventListener('keydown', function (ev) {
+          ev.stopPropagation();  // Echap ne doit pas fermer leur fenetre
+          if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); fin(true); }
+          else if (ev.key === 'Escape') { ev.preventDefault(); fin(false); }
+        });
+        zone.addEventListener('blur', function () { fin(true); });
+      };
+      liste.addEventListener('click', function (ev) {
+        var ed = ev.target.closest('[data-edit]');
+        if (ed) return editer(+ed.getAttribute('data-edit'));
+        var su = ev.target.closest('[data-suppr]');
+        if (su) { ctrl.analyse.splice(+su.getAttribute('data-suppr'), 1); return dessinerAnalyse(); }
+        if (ev.target.closest('textarea')) return;
+        var li = ev.target.closest('li[data-n]');
+        if (li) activerPoint(ctrl, +li.getAttribute('data-n'));
+      });
+      liste.addEventListener('dblclick', function (ev) {
+        var li = ev.target.closest('li[data-j]');
+        if (li && !li.classList.contains('v13-c-edition')) editer(+li.getAttribute('data-j'));
+      });
+      analyse.querySelector('.v13-ap-ajout').addEventListener('click', function () {
+        ctrl.analyse.push({ texte: '', ia: null, teinte: 'probleme', n: null, origine: 'perle' });
+        dessinerAnalyse();
+        editer(ctrl.analyse.length - 1, true);
+      });
+    }
+
+    // ── Verdict
     var verdict = partie('Verdict', '<div class="v13-seg"><button type="button" data-v="valide"><i class="fa fa-check"></i> valid</button>' +
-      '<button type="button" data-v="invalide"><i class="fa fa-times"></i> invalid</button></div>');
+      '<button type="button" data-v="invalide"><i class="fa fa-times"></i> invalid</button></div>', 'verdict');
     function majVerdict() {
       verdict.querySelectorAll('[data-v]').forEach(function (b) {
         var v = b.getAttribute('data-v');
@@ -622,17 +684,71 @@
         b.innerHTML = (v === 'valide' ? '<i class="fa fa-check"></i> valid' : '<i class="fa fa-times"></i> invalid') + (v === d.verdict ? ' <span class="v13-ia v13-ia-mini">IA</span>' : '');
       });
     }
-    verdict.addEventListener('click', function (ev) { var b = ev.target.closest('[data-v]'); if (b) { ctrl.choisir(b.getAttribute('data-v')); majVerdict(); } });
+    verdict.addEventListener('click', function (ev) { var b = ev.target.closest('[data-v]'); if (b) { ctrl.choisir(b.getAttribute('data-v')); majVerdict(); maj(); } });
     majVerdict();
+
     var r = s.reponseEtudiant;
     if (r && ctrl.rang === ctrl.total) partie('Commentaire de l’étudiant', '<blockquote class="v13-ap-mot">« ' + e(r.texte) + ' »</blockquote>');
-    var com = partie('Commentaire', '<textarea rows="4" placeholder="Aucun commentaire proposé"></textarea>');
+
+    // ── Commentaire
+    var com = partie('Commentaire', '<textarea rows="4" placeholder="Aucun commentaire proposé"></textarea>', 'commentaire');
     var zone = com.querySelector('textarea');
     zone.value = ctrl.brouillon;  // la proposition, ou la version de Perle
-    zone.addEventListener('input', function () { ctrl.brouillon = zone.value; });
-    var b = barre(ctrl.p);
-    b.classList.add('v13-prop-ap');
-    p.appendChild(b);
+    zone.addEventListener('input', function () { ctrl.brouillon = zone.value; maj(); });
+
+    // ── Un seul bouton : Sauvegarder. Apres : la ligne « fait » et Annuler.
+    var pied = o.el('<div class="v13-ap-pied"></div>');
+    pied.setAttribute('data-prop', 'doc:' + d.nom);
+    p.appendChild(pied);
+    function heure(x) { return ('0' + x.getHours()).slice(-2) + ':' + ('0' + x.getMinutes()).slice(-2); }
+    function dessinerPied() {
+      var fait = ctrl.enregistre && !ctrl.modifie();
+      pied.classList.toggle('v13-prop-attente', !fait);
+      pied.classList.toggle('v13-ap-pied-fait', !!fait);
+      if (fait) {
+        var ch = [];
+        if (ctrl.iaChoix && ctrl.enregistre.choix !== ctrl.iaChoix) ch.push('verdict');
+        if (ctrl.enregistre.com !== ctrl.texte.trim()) ch.push('commentaire');
+        var na = ctrl.analyse.filter(function (k) { return k.origine === 'perle' || k.texte !== k.ia; }).length;
+        if (na) ch.push('analyse (' + na + ' point' + (na > 1 ? 's' : '') + ')');
+        var details = (!ctrl.iaChoix ? 'Votre décision' : ch.length ? 'Modifié par vous : ' + ch.join(', ') : 'Suggestion de l’IA suivie') +
+          ' · sauvegardé à ' + heure(ctrl.enregistre.le);
+        pied.innerHTML = faitHtml(ctrl.enregistre.choix === 'invalide' ? 'ko' : 'ok', 'Document ' + (ctrl.enregistre.choix === 'invalide' ? 'invalidé' : 'validé'), e(details));
+      } else {
+        var msg = !ctrl.choix ? 'Choisissez valid ou invalid pour sauvegarder.' : ctrl.enregistre ? 'Modifications non sauvegardées.' : 'Rien n’est enregistré avant « Sauvegarder ».';
+        pied.innerHTML = '<span class="v13-ap-msg">' + msg + '</span>' +
+          '<button type="button" class="v13-sauver" data-a="sauver"' + (ctrl.choix ? '' : ' disabled') + '><i class="fa fa-floppy-o"></i> Sauvegarder</button>';
+      }
+    }
+    pied.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-a]');
+      if (!b || b.disabled) return;
+      if (b.getAttribute('data-a') === 'sauver') { if (ctrl.sauver()) o.toast('Sauvegardé : verdict posé sur la page.'); }
+      else { ctrl.annulerSauvegarde(); o.toast('Annulé : rien n’est plus enregistré pour ce document.'); }
+    });
+
+    // Les « Annuler mes changements » de chaque partie.
+    function maj() {
+      var boutonsRetour = p.querySelectorAll('[data-retour]');
+      boutonsRetour.forEach(function (b) {
+        var x = b.getAttribute('data-retour');
+        b.hidden = x === 'analyse' ? !ctrl.analyse.some(function (k) { return k.origine === 'perle' || k.texte !== k.ia; })
+          : x === 'verdict' ? !ctrl.iaChoix || ctrl.choix === ctrl.iaChoix
+          : (ctrl.brouillon || '').trim() === ctrl.texte.trim();
+      });
+      dessinerPied();
+    }
+    p.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-retour]');
+      if (!b) return;
+      var x = b.getAttribute('data-retour');
+      if (x === 'analyse') { ctrl.analyse = analyseIA(d); dessinerAnalyse(); }
+      else if (x === 'verdict') { ctrl.choix = ctrl.iaChoix; majVerdict(); }
+      else { ctrl.brouillon = ctrl.texte; zone.value = ctrl.texte; }
+      maj();
+    });
+    IA.on('decision', function () { if (document.contains(pied)) dessinerPied(); });
+    if (dessinerAnalyse) dessinerAnalyse(); else maj();
     return p;
   }
 
@@ -652,9 +768,9 @@
         } else {
           docs(s).forEach(function (d) {
             if (!d.el.contains(b)) return;
+            // Son clic sur leur bouton = la sauvegarde de son verdict (Annuler possible dans l'apercu).
             var ctrl = controles[d.nom];
-            if (ctrl) ctrl.choix = v;
-            if (existe(s, 'doc:' + d.nom + ':verdict')) IA.decider('doc:' + d.nom + ':verdict', 'modifie', v);
+            if (ctrl) { var avant = verdictActif(d.el.querySelector('.doc-info-buttons'), '.changeState'); ctrl.choix = v; ctrl.sauver({ avant: avant }); }
           });
         }
       });
