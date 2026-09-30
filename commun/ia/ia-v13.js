@@ -147,6 +147,8 @@
       }).join('');
       var src = p.source || preuves ? '<span class="v13-src" title="D’où l’IA tire cette proposition"><i class="fa fa-search"></i> ' + e(p.source || 'Preuve :') +
         (preuves ? ' <span class="v13-preuves">' + preuves + '</span>' : '') + '</span>' : '';
+      el.classList.toggle('v13-carte', !!p.carte && x === 'attente');
+      if (p.carte && x === 'attente') return dessinerCarte(preuves);
       var act = x === 'attente'
         ? (p.boutons || [['accepter', 'Accepter', true], ['refuser', 'Refuser']]).map(function (b) {
           var icone = OPTS.icones && ICONES_B[b[0]];
@@ -159,6 +161,24 @@
       el.innerHTML = '<span class="v13-ia">IA</span>' + (p.avant ? '<span class="v13-avant">' + p.avant + '</span>' : '') + src +
         '<span class="v13-sep"></span><span class="v13-actions">' + act + '</span>';
       if (p.surEtat) p.surEtat(x);
+    }
+    // L'IA ne tranche pas : une carte (pas d'etiquette « a verifier »), les
+    // documents analyses cliquables, Valider / Invalider, Ignorer la suggestion.
+    function dessinerCarte(preuves) {
+      var ICONES = { valide: 'fa-check-circle', invalide: 'fa-times', refuser: 'fa-eye-slash' };
+      var FAIT = { valide: 'Validé', invalide: 'Invalidé' };
+      el.innerHTML =
+        '<div class="v13-c-tete"><span class="v13-ia">IA</span> Analyse IA</div>' +
+        '<div class="v13-c-titre"><span class="v13-c-icone"><i class="fa fa-exclamation"></i></span>' +
+          '<span><b>L’IA ne peut pas trancher</b><small>' + e(p.sousTitre || 'Décision humaine requise') + '</small></span></div>' +
+        (p.avant ? '<div class="v13-c-dep">' + p.avant + '</div>' : '') +
+        (preuves ? '<div class="v13-c-docs"><div class="v13-c-lbl"><i class="fa fa-file-pdf-o"></i> Documents analysés</div>' +
+          '<div class="v13-preuves">' + preuves + '</div></div>' : '') +
+        '<div class="v13-actions v13-c-actions">' + p.boutons.map(function (b) {
+          return '<button type="button" class="v13-cb v13-cb-' + b[0] + '" data-a="' + b[0] + '"' + (FAIT[b[0]] ? ' data-fait="' + FAIT[b[0]] + '"' : '') +
+            ' title="' + e(b[1]) + '"><i class="fa ' + ICONES[b[0]] + '"></i> ' + e(b[1]) + '</button>';
+        }).join('') + '</div>';
+      if (p.surEtat) p.surEtat('attente');
     }
     el.addEventListener('click', function (ev) {
       var pr = ev.target.closest('[data-preuve]');
@@ -326,30 +346,20 @@
       if (x) p.preuves = [preuve(x.a.nom, x.a.fichier), preuve(x.b.nom, x.b.fichier)];
     }
     if (!verdict) {
-      // L'IA ne tranche pas (a verifier, provisoire) : Perle choisit, en un clic.
-      p.avant = s.statut === 'provisoire' ? 'Pièces encore attendues : pas de verdict pour l’instant.' : 'À vérifier : l’IA ne tranche pas.';
-      // Leurs boutons valid / invalid restent vides : Perle les choisit elle-meme
-      // (son clic est enregistre comme sa decision). S'il y a un commentaire
-      // general propose, un seul bouton : Accepter (le commentaire seulement).
-      var clesCommentaire = function () { return clesSec().filter(function (k) { return k !== cleV; }); };
-      if (texte) {
-        p.cles = clesCommentaire;
-        p.boutons = [['accepter', 'Accepter', true]];
-        p.action = function () {
-          if (note && note.zone.value.trim()) IA.ecrire.commentaire(s.idSection, 'general', note.zone.value);
-          clesCommentaire().forEach(function (k) {
-            IA.decider(k, k.indexOf(':interne') > 0 ? 'refuse' : (note && note.zone.value.trim() === texte ? 'accepte' : 'modifie'), k.indexOf(':interne') > 0 ? null : note.zone.value);
-          });
-          if (note) note.carte.classList.remove('v13-pre');
-          return {};
-        };
-        p.refuser = function () { clesCommentaire().forEach(function (k) { IA.decider(k, 'refuse', null); }); if (note) note.restaurer(); };
-        p.annuler = function () { clesCommentaire().forEach(function (k) { IA.annuler(k); }); proposer(); };
-      } else {
-        p.boutons = [];
-        p.libelleFait = 'Verdict choisi';
-        p.annuler = function () { remettreVerdict(entete, SEL, null); IA.annuler(cleV); };
-      }
+      // L'IA ne tranche pas (a verifier, provisoire) : une carte « L'IA ne peut pas
+      // trancher » ; leurs boutons valid / invalid restent vides et Perle decide
+      // depuis la carte (Valider / Invalider) ou directement sur leurs boutons.
+      p.carte = true;
+      p.sousTitre = s.statut === 'provisoire' ? 'Pièces encore attendues · décision humaine requise' : 'Décision humaine requise';
+      p.avant = '';
+      p.boutons = [['valide', 'Valider', true], ['invalide', 'Invalider'], ['refuser', 'Ignorer la suggestion']];
+      p.libelleFait = 'Verdict choisi';
+      p.libelleRefus = 'Suggestion ignorée';
+      var annuler1 = p.annuler;
+      p.annuler = function (snap) {
+        annuler1(snap);
+        if (!('verdict' in snap)) remettreVerdict(entete, SEL, null);
+      };
     } else {
       p.avant = 'Verdict proposé : <span class="v13-verdict v13-verdict-' + verdict + '">' + (verdict === 'valide' ? 'valid' : 'invalid') + '</span>';
     }
@@ -374,7 +384,7 @@
     // Un seul bloc : leur « Commentaire general » pre-rempli, et juste dessous,
     // colles a lui, le verdict propose, la source et Accepter / Refuser.
     // Sans commentaire propose : le bloc se pose sous l'en-tete de la section.
-    if (note && texte) {
+    if (note && texte && !p.carte) {
       note.carte.classList.add('v13-attache');
       note.carte.insertAdjacentElement('afterend', el);
       el.classList.add('v13-prop-pied');
