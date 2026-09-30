@@ -163,7 +163,7 @@
       if (p.surEtat) p.surEtat(x);
     }
     // L'IA ne tranche pas : une carte (pas d'etiquette « a verifier »), les
-    // documents analyses cliquables, Valider / Invalider, Ignorer la suggestion.
+    // documents analyses cliquables, Valide / Invalide.
     function dessinerCarte(preuves) {
       var ICONES = { valide: 'fa-check-circle', invalide: 'fa-times', refuser: 'fa-eye-slash' };
       var FAIT = { valide: 'Validé', invalide: 'Invalidé' };
@@ -352,9 +352,8 @@
       p.carte = true;
       p.sousTitre = s.statut === 'provisoire' ? 'Pièces encore attendues · décision humaine requise' : 'Décision humaine requise';
       p.avant = '';
-      p.boutons = [['valide', 'Valider', true], ['invalide', 'Invalider'], ['refuser', 'Ignorer la suggestion']];
+      p.boutons = [['valide', 'Valide', true], ['invalide', 'Invalide']];
       p.libelleFait = 'Verdict choisi';
-      p.libelleRefus = 'Suggestion ignorée';
       var annuler1 = p.annuler;
       p.annuler = function (snap) {
         annuler1(snap);
