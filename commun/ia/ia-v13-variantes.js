@@ -46,7 +46,6 @@
       proposerSection(s);
       docs(s).forEach(function (d, i) { proposerDocument(s, d, i + 1, docs(s).length); });
     });
-    toutAccepter();
     brancherApercu();
     ecouterBoutonsFF();
     if (OPTS.apresPret) OPTS.apresPret(api());
@@ -125,74 +124,61 @@
   //         annuler(instantane), surEtat(etat), boutons?: [[action, libelle, principal]] }
   var ICONES_B = { accepter: '<i class="fa fa-check"></i>', refuser: '<i class="fa fa-times"></i>', deplacer: '<i class="fa fa-arrows"></i>' };
   function court(x, n) { x = String(x || '').replace(/\s+/g, ' ').trim(); return x.length > n ? x.slice(0, n - 1) + '…' : x; }
-  function etatDe(p) {
-    p.memo = p.memo || { local: null, snap: null };
-    var c = p.cles ? p.cles() : [];
-    if (!c.length) return p.memo.local || 'attente';
-    var ds = c.map(function (k) { return IA.decision(k); });
-    if (!ds.every(Boolean)) return 'attente';
-    return ds.every(function (d) { return d.statut === 'refuse'; }) ? 'refuse' : 'accepte';
-  }
-  // Le geste sur une proposition (bouton de sa barre, ou « Tout accepter »).
-  function agir(p, a, fait) {
-    p.memo = p.memo || { local: null, snap: null };
-    if (a === 'annuler') {
-      p.annuler(p.memo.snap || {});
-      p.memo.snap = null; p.memo.local = null; p.memo.libelle = null;
-    } else if (a === 'refuser') {
-      p.memo.snap = p.refuser() || {}; p.memo.local = 'refuse';
-    } else {
-      var r = p.action(a);
-      if (r === false) return false;  // action impossible (ex. verdict pas encore choisi)
-      p.memo.snap = r || {}; p.memo.local = 'accepte';
-      p.memo.libelle = fait || 'Accepté';
-    }
-    IA.emettre('decision', {});  // les autres barres du meme objet se redessinent
-    return true;
-  }
-  function preuvesHtml(liste) {
-    return (liste || []).filter(Boolean).map(function (x) {
-      return '<button type="button" class="v13-preuve" data-preuve="' + e(x.nom) + '" title="Ouvrir ce document"><i class="fa fa-file-pdf-o"></i> ' + e(x.libelle) + '</button>';
-    }).join('');
-  }
-  // Apres la decision : la meme ligne partout (case du haut, section, apercu).
-  function faitHtml(teinte, titre, details) {
-    return '<div class="v13-f"><span class="v13-f-icone v13-f-' + teinte + '"><i class="fa ' + (teinte === 'ko' || teinte === 'refuse' ? 'fa-times' : 'fa-check') + '"></i></span>' +
-      '<span class="v13-f-txt"><b>' + titre + '</b>' + (details ? '<small>' + details + '</small>' : '') + '</span>' +
-      '<button type="button" class="v13-annuler" data-a="annuler" title="Revenir à la suggestion de l’IA"><i class="fa fa-undo"></i> Annuler</button></div>';
-  }
   function barre(p) {
     var el = o.el('<div class="v13-prop"></div>');
     if (p.id) el.setAttribute('data-prop', p.id);
     if (p.libelle) el.setAttribute('data-libelle', p.libelle);
     if (p.resume) el.setAttribute('data-resume', p.resume);
     p.memo = p.memo || { local: null, snap: null };
+    function etat() {
+      var c = p.cles ? p.cles() : [];
+      if (!c.length) return p.memo.local || 'attente';
+      var ds = c.map(function (k) { return IA.decision(k); });
+      if (!ds.every(Boolean)) return 'attente';
+      return ds.every(function (d) { return d.statut === 'refuse'; }) ? 'refuse' : 'accepte';
+    }
     function dessiner() {
-      var x = etatDe(p);
+      var x = etat();
       // Seul l'etat change : les autres classes (section, pied de commentaire…) restent.
       el.classList.remove('v13-prop-attente', 'v13-prop-accepte', 'v13-prop-refuse');
       el.classList.add('v13-prop-' + x);
-      if (x !== 'attente') {
-        var f = p.fait ? p.fait(x) : {
-          teinte: x === 'refuse' ? 'refuse' : 'ok',
-          titre: x === 'refuse' ? (p.libelleRefus || 'Suggestion refusée') : 'Suggestion acceptée',
-          details: [p.libelle, x === 'refuse' ? 'la case est revenue comme avant' : p.resume].filter(Boolean).join(' · ')
-        };
-        el.innerHTML = faitHtml(f.teinte, e(f.titre), e(f.details || ''));
-        if (p.surEtat) p.surEtat(x);
-        return;
-      }
-      var preuves = preuvesHtml(p.preuves);
+      var preuves = (p.preuves || []).filter(Boolean).map(function (x) {
+        return '<button type="button" class="v13-preuve" data-preuve="' + e(x.nom) + '" title="Ouvrir ce document"><i class="fa fa-file-pdf-o"></i> ' + e(x.libelle) + '</button>';
+      }).join('');
       var src = p.source || preuves ? '<span class="v13-src" title="D’où l’IA tire cette proposition"><i class="fa fa-search"></i> ' + e(p.source || 'Preuve :') +
         (preuves ? ' <span class="v13-preuves">' + preuves + '</span>' : '') + '</span>' : '';
-      var act = (p.boutons || [['accepter', 'Accepter', true], ['refuser', 'Refuser']]).map(function (b) {
-        var icone = OPTS.icones && ICONES_B[b[0]];
-        return '<button type="button" class="v13-b' + (b[2] ? ' v13-b-ok' : '') + (icone ? ' v13-b-icone' : '') + '" data-a="' + b[0] + '" title="' + e(b[1]) + '">' +
-          (icone || e(b[1])) + '</button>';
-      }).join('');
+      el.classList.toggle('v13-carte', !!p.carte && x === 'attente');
+      if (p.carte && x === 'attente') return dessinerCarte(preuves);
+      var act = x === 'attente'
+        ? (p.boutons || [['accepter', 'Accepter', true], ['refuser', 'Refuser']]).map(function (b) {
+          var icone = OPTS.icones && ICONES_B[b[0]];
+          return '<button type="button" class="v13-b' + (b[2] ? ' v13-b-ok' : '') + (icone ? ' v13-b-icone' : '') + '" data-a="' + b[0] + '" title="' + e(b[1]) + '">' +
+            (icone || e(b[1])) + '</button>';
+        }).join('')
+        : '<span class="v13-fait v13-fait-' + x + '"><i class="fa ' + (x === 'refuse' ? 'fa-times' : 'fa-check') + '"></i> ' +
+          e(x === 'refuse' ? (p.libelleRefus || 'Refusé') : (p.memo.libelle || p.libelleFait || 'Accepté')) + '</span>' +
+          '<button type="button" class="v13-lien" data-a="annuler">Annuler</button>';
       el.innerHTML = '<span class="v13-ia">IA</span>' + (p.avant ? '<span class="v13-avant">' + p.avant + '</span>' : '') + src +
         '<span class="v13-sep"></span><span class="v13-actions">' + act + '</span>';
       if (p.surEtat) p.surEtat(x);
+    }
+    // L'IA ne tranche pas : une carte (pas d'etiquette « a verifier »), les
+    // documents analyses cliquables, Valide / Invalide.
+    function dessinerCarte(preuves) {
+      var ICONES = { valide: 'fa-check-circle', invalide: 'fa-times', refuser: 'fa-eye-slash' };
+      var FAIT = { valide: 'Validé', invalide: 'Invalidé' };
+      el.innerHTML =
+        '<div class="v13-c-tete"><span class="v13-ia">IA</span> Analyse IA</div>' +
+        '<div class="v13-c-titre"><span class="v13-c-icone"><i class="fa fa-exclamation"></i></span>' +
+          '<span><b>L’IA ne peut pas trancher</b><small>' + e(p.sousTitre || 'Décision humaine requise') + '</small></span></div>' +
+        (p.avant ? '<div class="v13-c-dep">' + p.avant + '</div>' : '') +
+        (preuves ? '<div class="v13-c-docs"><div class="v13-c-lbl"><i class="fa fa-file-pdf-o"></i> Documents analysés</div>' +
+          '<div class="v13-preuves">' + preuves + '</div></div>' : '') +
+        '<div class="v13-actions v13-c-actions">' + p.boutons.map(function (b) {
+          return '<button type="button" class="v13-cb v13-cb-' + b[0] + '" data-a="' + b[0] + '"' + (FAIT[b[0]] ? ' data-fait="' + FAIT[b[0]] + '"' : '') +
+            ' title="' + e(b[1]) + '"><i class="fa ' + ICONES[b[0]] + '"></i> ' + e(b[1]) + '</button>';
+        }).join('') + '</div>';
+      if (p.surEtat) p.surEtat('attente');
     }
     el.addEventListener('click', function (ev) {
       var pr = ev.target.closest('[data-preuve]');
@@ -200,9 +186,19 @@
       var b = ev.target.closest('[data-a]');
       if (!b) return;
       var a = b.getAttribute('data-a');
-      if (agir(p, a, b.getAttribute('data-fait') || (a === 'accepter' ? 'Accepté' : b.textContent.trim())) && a === 'annuler') {
-        o.toast('Annulé : la suggestion est de nouveau à décider.');
+      if (a === 'annuler') {
+        p.annuler(p.memo.snap || {});
+        p.memo.snap = null; p.memo.local = null; p.memo.libelle = null;
+        o.toast('Annulé : la proposition est de nouveau à décider.');
+      } else if (a === 'refuser') {
+        p.memo.snap = p.refuser() || {}; p.memo.local = 'refuse';
+      } else {
+        var r = p.action(a);
+        if (r === false) return;  // action impossible (ex. verdict pas encore choisi)
+        p.memo.snap = r || {}; p.memo.local = 'accepte';
+        p.memo.libelle = b.getAttribute('data-fait') || (a === 'accepter' ? 'Accepté' : b.textContent);
       }
+      IA.emettre('decision', {});  // les autres barres du meme objet se redessinent
     });
     IA.on('decision', function () { if (document.contains(el)) dessiner(); });
     dessiner();
@@ -238,8 +234,7 @@
     var s2 = c.type === 'select' && champ.nextElementSibling && champ.nextElementSibling.classList.contains('select2') ? champ.nextElementSibling : null;
     var cadre = s2 ? (s2.querySelector('.select2-selection') || s2) : champ;
     poserChamp(champ, c, c.propose);
-    var pc;
-    placerSous(champ, barre(pc = {
+    placerSous(champ, barre({
       id: cle, libelle: c.libelle, resume: court(c.proposeLibelle || c.propose, 90), source: c.motif,
       preuves: [c.source ? preuve(c.source.nom, c.source.fichier) : null],
       cles: function () { return [cle]; },
@@ -252,10 +247,6 @@
       annuler: function () { poserChamp(champ, c, c.propose); IA.annuler(cle); },
       surEtat: function (x) { cadre.classList.toggle('v13-pre', x === 'attente'); }
     }), s2);
-    inscrire(pc);
-  }
-  function inscrire(p) {
-    registre.push({ attente: function () { return etatDe(p) === 'attente'; }, accepter: function () { agir(p, 'accepter'); }, annuler: function () { agir(p, 'annuler'); } });
   }
 
   // Questions-reponses Campus France, dans leur case « campus message ».
@@ -270,15 +261,13 @@
     champ.value = texte;
     var c = { selecteur: '#App_data_campusMessage', type: 'texte' };
     var memo = { local: null, snap: null };
-    var pc;
-    placerSous(champ, barre(pc = {
+    placerSous(champ, barre({
       id: 'campus', libelle: 'Q/R Campus France', resume: cf.questions.length + ' questions numérotées', source: 'Questions Campus France préparées d’après : ' + sources.join(', '), memo: memo,
       action: function () { IA.ecrire.champ(c, champ.value); },
       refuser: function () { champ.value = avant; },
       annuler: function () { champ.value = texte; },
       surEtat: function (x) { champ.classList.toggle('v13-pre', x === 'attente'); }
     }));
-    inscrire(pc);
   }
 
   // ─── Etapes Visa : case cochee et date deja posees ───────────────────────
@@ -290,8 +279,7 @@
     var avant = { coche: cb.checked, le: date.value };
     function poser(v) { cb.checked = v.coche; date.value = v.coche ? (v.le || '') : ''; }
     poser({ coche: x.coche, le: x.le });
-    var pc;
-    groupe.parentNode.insertBefore(barre(pc = {
+    groupe.parentNode.insertBefore(barre({
       id: 'visa:' + x.cle, libelle: 'Visa · ' + x.libelle, resume: x.coche ? 'Cocher · ' + (x.le || '') : 'Laisser décoché', source: x.motif,
       preuves: [x.source ? preuve(x.source.nom, x.source.fichier) : null],
       action: function () {
@@ -302,156 +290,106 @@
       annuler: function () { poser({ coche: x.coche, le: x.le }); },
       surEtat: function (etat) { groupe.classList.toggle('v13-pre-groupe', etat === 'attente'); }
     }), groupe.nextSibling);
-    inscrire(pc);
   }
 
-  // ─── Section : une carte « Analyse IA », le MEME format dans tous les cas ──
-  //   (verdict seul, verdict + commentaire, verdict + document a deplacer, alerte,
-  //   l'IA ne tranche pas). Pas d'Accepter / Refuser : Perle confirme avec LEURS
-  //   boutons valid / invalid ; celui que l'IA suggere est mis en evidence.
-  //   La carte dit POURQUOI (le resume de l'analyse) et sur quels documents.
-  var CAS = {
-    valide: { icone: 'fa-check', teinte: 'ok', titre: 'Section conforme' },
-    invalide: { icone: 'fa-times', teinte: 'ko', titre: 'Section à corriger' },
-    alerte: { icone: 'fa-exclamation-triangle', teinte: 'alerte', titre: 'Validation à revoir' },
-    indecis: { icone: 'fa-exclamation', teinte: 'indecis', titre: 'L’IA ne peut pas trancher' }
-  };
-  var sectionsIA = {};  // alias -> controle de la carte (leurs boutons, « Tout accepter »)
-  var registre = [];    // toutes les suggestions de la page, pour « Tout accepter »
-  function miniBouton(v) { return '<span class="v13-mini v13-mini-' + v + '">' + (v === 'valide' ? 'valid' : 'invalid') + '</span>'; }
-
+  // ─── Section : leur verdict encadre + leur « Commentaire general » pre-rempli ──
   function proposerSection(s) {
+    var cont = s.el.querySelector('.doc-container');
+    var rangee = cont.querySelector(':scope > .doc-general-messages-row');
     var entete = s.el.querySelector('.doc-general-state');
     var SEL = '.changeGeneralState';
-    var alerte = s.statut === 'alerte';
-    var verdict = alerte ? 'invalide' : verdictSection(s);
-    var cas = CAS[alerte ? 'alerte' : (verdict || 'indecis')];
+    // Alerte sur une validation de Perle : meme format, l'IA propose simplement un autre verdict.
+    var verdict = s.statut === 'alerte' ? 'invalide' : verdictSection(s);
     var texte = (s.commentaireSection || {}).etudiant || '';
     var note = noteFF(s.idSection, 'general');
-    var cleV = alerte ? 'alerte:' + s.alias : 'sec:' + s.alias + ':verdict';
-    var clesSec = function () { return cles(s, 'sec:' + s.alias + ':').concat(cles(s, 'alerte:' + s.alias)).filter(function (k) { return k.indexOf(':deplacement') < 0; }); };
+    var clesSec = function () { return cles(s, 'sec:' + s.alias + ':').concat(cles(s, 'alerte:')).filter(function (k) { return k.indexOf(':deplacement') < 0; }); };
+    var cleV = s.statut === 'alerte' ? 'alerte:' + s.alias : 'sec:' + s.alias + ':verdict';
+    function proposer() { if (note && texte) note.poser(texte, true); encadrer(entete, SEL, verdict); }
+    function retirer() { encadrer(entete, SEL, null); if (note) note.carte.classList.remove('v13-pre'); }
+    function enregistrer(valide, statut, valeur) {
+      if (valide != null) IA.ecrire.verdictSection(s, valide);
+      if (note && note.zone.value.trim()) IA.ecrire.commentaire(s.idSection, 'general', note.zone.value);
+      if (existe(s, cleV)) IA.decider(cleV, statut, valeur);
+      if (existe(s, 'sec:' + s.alias + ':etudiant')) IA.decider('sec:' + s.alias + ':etudiant', note && note.zone.value.trim() === texte ? 'accepte' : 'modifie', note ? note.zone.value : null);
+      if (existe(s, 'sec:' + s.alias + ':interne')) IA.decider('sec:' + s.alias + ':interne', 'refuse', null);
+    }
+    var p = {
+      id: 'sec:' + s.alias,
+      libelle: 'Section · ' + IA.ui2.nom(s),
+      source: 'd’après :',
+      preuves: docs(s).map(function (d) { return preuve(d.nom); }),
+      cles: clesSec,
+      action: function (a) {
+        var snap = { verdict: verdictActif(entete, SEL) };
+        if (a === 'valide' || a === 'invalide') {
+          enregistrer(a === 'valide', 'modifie', a);
+        } else {
+          enregistrer(verdict === 'valide', 'accepte', verdict);
+        }
+        retirer();
+        return snap;
+      },
+      refuser: function () {
+        clesSec().forEach(function (k) { IA.decider(k, 'refuse', k.indexOf('alerte:') === 0 ? 'Validation conservée' : null); });
+        retirer();
+        if (note) note.restaurer();
+      },
+      annuler: function (snap) {
+        if ('verdict' in snap) remettreVerdict(entete, SEL, snap.verdict, function (v) { IA.ecrire.verdictSection(s, v); });
+        clesSec().forEach(function (k) { IA.annuler(k); });
+        proposer();
+      }
+    };
+    if (s.statut === 'alerte' && s.alerte.source) {
+      p.source = s.alerte.source;
+      var x = (s.croisements || [])[0];
+      if (x) p.preuves = [preuve(x.a.nom, x.a.fichier), preuve(x.b.nom, x.b.fichier)];
+    }
+    if (!verdict) {
+      // L'IA ne tranche pas (a verifier, provisoire) : une carte « L'IA ne peut pas
+      // trancher » ; leurs boutons valid / invalid restent vides et Perle decide
+      // depuis la carte (Valider / Invalider) ou directement sur leurs boutons.
+      p.carte = true;
+      p.sousTitre = s.statut === 'provisoire' ? 'Pièces encore attendues · décision humaine requise' : 'Décision humaine requise';
+      p.avant = '';
+      p.boutons = [['valide', 'Valide', true], ['invalide', 'Invalide']];
+      p.libelleFait = 'Verdict choisi';
+      var annuler1 = p.annuler;
+      p.annuler = function (snap) {
+        annuler1(snap);
+        if (!('verdict' in snap)) remettreVerdict(entete, SEL, null);
+      };
+    } else {
+      p.avant = 'Verdict proposé : <span class="v13-verdict v13-verdict-' + verdict + '">' + (verdict === 'valide' ? 'valid' : 'invalid') + '</span>';
+    }
+    // Document mal place : dans le meme bloc que le verdict. « Accepter » pose le
+    // verdict ET deplace le document (leur menu ⇄) : un seul clic.
     var dep = s.mauvaiseSection ? deplacement(s) : null;
-    var pourquoi = alerte ? s.alerte.texte : s.resume;
-    var preuves = docs(s).map(function (d) { return preuve(d.nom); });
-    var x0 = (s.croisements || [])[0];
-    if (alerte && x0) preuves = [preuve(x0.a.nom, x0.a.fichier), preuve(x0.b.nom, x0.b.fichier)];
-    var sous = alerte ? 'Validée par ' + e((s.humain || {}).par || 'Perle') + ((s.humain || {}).le ? ' le ' + e(s.humain.le.slice(0, 5)) : '') + ' · nouvelle incohérence'
-      : !verdict ? (s.statut === 'provisoire' ? 'Pièces encore attendues · décision humaine requise' : 'Décision humaine requise') : '';
-    var memo = { snap: null, com: false };
-    var carte = o.el('<div class="v13-carte v13-carte-' + cas.teinte + '"></div>');
-    carte.setAttribute('data-prop', 'sec:' + s.alias);
-    carte.setAttribute('data-libelle', 'Section · ' + IA.ui2.nom(s));
-    carte.setAttribute('data-resume', verdict ? 'Verdict ' + (verdict === 'valide' ? 'valid' : 'invalid') : 'Verdict à choisir');
-
-    function boutonsFF() { return entete.querySelectorAll(SEL); }
-    function eteindre() { boutonsFF().forEach(function (b) { b.classList.remove('v13-pre-btn', 'v13-pre-q'); }); }
-    function proposer() {
-      if (note && texte) note.poser(texte, true);
-      eteindre();
-      if (verdict) encadrer(entete, SEL, verdict);
-      else boutonsFF().forEach(function (b) { b.classList.add('v13-pre-q'); });
+    if (dep) {
+      p.avant += '<span class="v13-dep-ligne"><i class="fa fa-exchange"></i> Document mal placé : il sera déplacé vers <b>' +
+        e(dep.m.sectionProposee) + '</b></span>';
+      p.source = dep.m.motifCourt || dep.m.motif;
+      var cles0 = p.cles, action0 = p.action, refuser0 = p.refuser, annuler0 = p.annuler;
+      p.cles = function () { return cles0().concat([dep.cle]); };
+      p.action = function (a) { var snap = action0(a); dep.deplacer(); return snap; };
+      p.refuser = function () { refuser0(); IA.decider(dep.cle, 'refuse', 'Laissé dans cette section'); };
+      p.annuler = function (snap) { annuler0(snap); dep.remettre(); };
     }
-    // Perle a choisi (v = 'valide' | 'invalide') : on note sa decision ; le
-    // « Commentaire general » pre-rempli est enregistre s'il va dans son sens.
-    function decider(v, avant) {
-      if (IA.decision(cleV)) { IA.decider(cleV, v === verdict ? 'accepte' : 'modifie', v); IA.emettre('decision', {}); return; }
-      memo.snap = avant;
-      var suit = !verdict || v === verdict;
-      memo.com = false;
-      if (note && texte) {
-        if (suit && note.zone.value.trim()) { IA.ecrire.commentaire(s.idSection, 'general', note.zone.value); memo.com = true; note.carte.classList.remove('v13-pre'); }
-        else note.restaurer();
-      }
-      clesSec().forEach(function (k) {
-        if (k === cleV) IA.decider(k, v === verdict ? 'accepte' : (alerte ? 'refuse' : 'modifie'), alerte && v === 'valide' ? 'Validation conservée' : v);
-        else if (/:interne$/.test(k)) IA.decider(k, 'refuse', null);
-        else IA.decider(k, memo.com ? (note.zone.value.trim() === texte ? 'accepte' : 'modifie') : 'refuse', memo.com ? note.zone.value : null);
-      });
-      eteindre();
-      IA.emettre('decision', {});
-    }
-    function accepter() {  // « Tout accepter » : le verdict suggere, ecrit dans leurs boutons
-      if (!verdict || IA.decision(cleV)) return;
-      var avant = verdictActif(entete, SEL);
-      IA.ecrire.verdictSection(s, verdict === 'valide');
-      decider(verdict, avant);
-    }
-    function garder() {  // alerte : Perle garde sa validation
-      memo.snap = verdictActif(entete, SEL);
-      clesSec().forEach(function (k) { IA.decider(k, 'refuse', k === cleV ? 'Validation conservée' : null); });
-      if (note) note.restaurer();
-      eteindre();
-      IA.emettre('decision', {});
-    }
-    function annuler() {
-      if (dep && IA.decision(dep.cle)) dep.remettre();
-      remettreVerdict(entete, SEL, memo.snap, function (v) { IA.ecrire.verdictSection(s, v); });
-      clesSec().forEach(function (k) { IA.annuler(k); });
-      memo.snap = null; memo.com = false;
-      proposer();
-      IA.emettre('decision', {});
-    }
-
-    function blocDeplacement() {
-      if (!dep) return '';
-      var fait = IA.decision(dep.cle);
-      if (fait) return '<div class="v13-c-dep v13-c-dep-fait"><i class="fa ' + (fait.statut === 'refuse' ? 'fa-times' : 'fa-check') + '"></i> <span>' +
-        (fait.statut === 'refuse' ? 'Document laissé dans cette section' : 'Document déplacé vers <b>' + e(dep.m.sectionProposee) + '</b> · analyse relancée') +
-        '</span><button type="button" class="v13-lien" data-c="dep-annuler">Annuler</button></div>';
-      return '<div class="v13-c-dep"><div class="v13-c-dep-txt"><i class="fa fa-exchange"></i> <span>Document mal placé : <b>' + e(dep.m.motifCourt || dep.m.motif || '') + '</b>' +
-        '<small>De « ' + e(dep.m.sectionActuelle || IA.ui2.nom(s)) + ' » vers « ' + e(dep.m.sectionProposee) + ' »</small></span></div>' +
-        '<div class="v13-c-dep-act"><button type="button" class="v13-lien" data-c="dep-laisser">Laisser ici</button>' +
-        '<button type="button" class="v13-b v13-b-ok" data-c="deplacer"><i class="fa fa-arrows"></i> Déplacer</button></div></div>';
-    }
-    function dessiner() {
-      var dv = IA.decision(cleV);
-      carte.classList.toggle('v13-carte-faite', !!dv);
-      carte.classList.toggle('v13-prop-attente', !dv || !!(dep && !IA.decision(dep.cle)));
-      if (dv) {
-        var v = dv.statut === 'refuse' && alerte ? 'valide' : dv.valeur === 'valide' || dv.valeur === 'invalide' ? dv.valeur : verdict;
-        var titre = alerte && dv.statut === 'refuse' ? 'Validation conservée' : 'Section ' + (v === 'valide' ? 'validée' : 'invalidée');
-        var details = [dv.statut === 'accepte' ? 'Suggestion de l’IA suivie' : !verdict ? 'Votre décision' : 'Votre choix (l’IA suggérait ' + (verdict === 'valide' ? 'valid' : 'invalid') + ')'];
-        if (memo.com) details.push('commentaire général enregistré');
-        var dd = dep && IA.decision(dep.cle);
-        if (dd) details.push(dd.statut === 'refuse' ? 'document laissé dans cette section' : 'document déplacé vers « ' + e(dep.m.sectionProposee) + ' », analyse relancée');
-        carte.innerHTML = faitHtml(v === 'valide' ? 'ok' : 'ko', titre, details.join(' · ')) + (dd ? '' : blocDeplacement());
-        carte.classList.add('v13-carte-' + (v === 'valide' ? 'fait-ok' : 'fait-ko'));
-        carte.classList.remove(v === 'valide' ? 'v13-carte-fait-ko' : 'v13-carte-fait-ok');
-        return;
-      }
-      var pied = verdict
-        ? '<i class="fa fa-hand-o-up"></i> ' + (alerte ? 'Pour retirer la validation, cliquez sur ' + miniBouton('invalide') + ' en haut à droite' : 'Confirmez avec ' + miniBouton(verdict) + ' en haut à droite')
-        : '<i class="fa fa-hand-o-up"></i> Choisissez ' + miniBouton('valide') + ' ou ' + miniBouton('invalide') + ' en haut à droite';
-      var ph = preuvesHtml(preuves);
-      carte.innerHTML =
-        '<div class="v13-c-tete"><span class="v13-ia">IA</span> Analyse IA</div>' +
-        '<div class="v13-c-titre"><span class="v13-c-icone"><i class="fa ' + cas.icone + '"></i></span>' +
-          '<span><b>' + cas.titre + '</b>' + (sous ? '<small>' + sous + '</small>' : '') + '</span></div>' +
-        (pourquoi ? '<div class="v13-c-pourquoi"><span class="v13-c-lbl">Pourquoi</span>' + e(pourquoi) + '</div>' : '') +
-        (ph ? '<div class="v13-c-docs"><span class="v13-c-lbl"><i class="fa fa-file-pdf-o"></i> Documents analysés</span><span class="v13-preuves">' + ph + '</span></div>' : '') +
-        (texte && note ? '<div class="v13-c-com"><i class="fa fa-comment-o"></i> Commentaire général pré-rempli ci-dessous (modifiable) : enregistré avec votre choix</div>' : '') +
-        blocDeplacement() +
-        '<div class="v13-c-pied">' + pied + (alerte ? '<button type="button" class="v13-lien" data-c="garder">Garder ma validation</button>' : '') + '</div>';
-    }
-    carte.addEventListener('click', function (ev) {
-      var pr = ev.target.closest('[data-preuve]');
-      if (pr) return ouvrirPreuve(pr.getAttribute('data-preuve'));
-      var b = ev.target.closest('[data-c],[data-a]');
-      if (!b) return;
-      var a = b.getAttribute('data-c') || b.getAttribute('data-a');
-      if (a === 'annuler') { annuler(); o.toast('Annulé : la suggestion est de nouveau à décider.'); }
-      else if (a === 'garder') garder();
-      else if (a === 'deplacer') { dep.deplacer(); IA.emettre('decision', {}); }
-      else if (a === 'dep-laisser') { IA.decider(dep.cle, 'refuse', 'Laissé dans cette section'); IA.emettre('decision', {}); }
-      else if (a === 'dep-annuler') { dep.remettre(); IA.emettre('decision', {}); }
-    });
-    IA.on('decision', function () { if (document.contains(carte)) dessiner(); });
-    sectionsIA[s.alias] = { s: s, decider: decider };
-    registre.push({ indecis: !verdict, attente: function () { return !IA.decision(cleV); }, accepter: accepter, annuler: annuler });
-    if (dep) registre.push({ attente: function () { return !IA.decision(dep.cle); }, accepter: function () { dep.deplacer(); }, annuler: function () { dep.remettre(); } });
+    p.resume = (verdict ? 'Verdict ' + (verdict === 'valide' ? 'valid' : 'invalid') : 'Verdict à choisir') +
+      (texte ? ' · commentaire général' : '') + (dep ? ' · déplacer le document' : '');
     proposer();
-    entete.insertAdjacentElement('afterend', carte);
-    dessiner();
+    var el = barre(p);
+    el.classList.add('v13-prop-section');
+    // Un seul bloc : leur « Commentaire general » pre-rempli, et juste dessous,
+    // colles a lui, le verdict propose, la source et Accepter / Refuser.
+    // Sans commentaire propose : le bloc se pose sous l'en-tete de la section.
+    if (note && texte && !p.carte) {
+      note.carte.classList.add('v13-attache');
+      note.carte.insertAdjacentElement('afterend', el);
+      el.classList.add('v13-prop-pied');
+    } else {
+      entete.insertAdjacentElement('afterend', el);
+    }
   }
 
   // ─── Document : RIEN sur la page. Le verdict et le commentaire proposes
@@ -491,64 +429,6 @@
     // L'IA ne tranche pas sur ce document : Perle choisit valid / invalid dans
     // « Verdict », puis un seul bouton, Accepter.
     if (!ctrl.choix) ctrl.p.boutons = [['accepter', 'Accepter', true]];
-    ctrl.p.fait = function (x) {
-      var dv = IA.decision('doc:' + d.nom + ':verdict');
-      var v = dv && (dv.valeur === 'valide' || dv.valeur === 'invalide') ? dv.valeur : ctrl.choix;
-      if (x === 'refuse') return { teinte: 'refuse', titre: 'Suggestion refusée', details: nomDoc(d) };
-      return { teinte: v === 'invalide' ? 'ko' : 'ok', titre: 'Document ' + (v === 'invalide' ? 'invalidé' : 'validé'),
-        details: d.verdict === 'a-verifier' ? 'Votre décision' : v === d.verdict ? 'Suggestion de l’IA suivie' : 'Votre choix (l’IA suggérait ' + (d.verdict === 'valide' ? 'valid' : 'invalid') + ')' };
-    };
-    // « Tout accepter » : le verdict suggere pour ce document (pas quand l'IA ne tranche pas).
-    registre.push({ indecis: !ctrl.choix, attente: function () { return etatDe(ctrl.p) === 'attente'; },
-      accepter: function () { if (ctrl.choix) agir(ctrl.p, 'accepter'); }, annuler: function () { agir(ctrl.p, 'annuler'); } });
-  }
-
-  // ─── « Tout accepter » : toutes les suggestions de l'IA en un clic ────────
-  //   (cases du haut, verdicts des sections et des documents, deplacements).
-  //   Ce que l'IA ne tranche pas reste a Perle. « Annuler » defait le lot.
-  function toutAccepter() {
-    var zone = document.querySelector('.student-service-data') || IA.blocDocuments().parentNode;
-    var b = o.el('<div class="v13-global"></div>');
-    var lot = null;
-    function dessiner() {
-      var attente = registre.filter(function (r) { return r.attente(); });
-      var aAccepter = attente.filter(function (r) { return !r.indecis; });
-      var aDecider = attente.filter(function (r) { return r.indecis; });
-      var reste = aDecider.length ? '<small>' + aDecider.length + ' où l’IA ne tranche pas : à décider vous-même</small>' : '';
-      if (lot) {
-        b.className = 'v13-global v13-global-fait';
-        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + lot.length + ' suggestion' + (lot.length > 1 ? 's' : '') +
-          ' de l’IA acceptée' + (lot.length > 1 ? 's' : '') + '</b>' + reste + '</span>' +
-          (aAccepter.length ? '<button type="button" class="v13-g-tout" data-g="tout"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>' : '') +
-          '<button type="button" class="v13-annuler" data-g="annuler"><i class="fa fa-undo"></i> Annuler</button>';
-      } else if (aAccepter.length) {
-        b.className = 'v13-global';
-        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt"><b>' + aAccepter.length + ' suggestion' + (aAccepter.length > 1 ? 's' : '') + ' de l’IA à confirmer</b>' + reste + '</span>' +
-          '<button type="button" class="v13-g-tout" data-g="tout"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>';
-      } else {
-        b.className = 'v13-global v13-global-fait';
-        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' +
-          (aDecider.length ? 'Toutes les suggestions de l’IA sont traitées' : 'Dossier entièrement traité') + '</b>' + reste + '</span>';
-      }
-    }
-    b.addEventListener('click', function (ev) {
-      var x = ev.target.closest('[data-g]');
-      if (!x) return;
-      if (x.getAttribute('data-g') === 'tout') {
-        var faits = registre.filter(function (r) { return r.attente() && !r.indecis; });
-        faits.forEach(function (r) { r.accepter(); });
-        lot = (lot || []).concat(faits);
-        o.toast(faits.length + ' suggestion' + (faits.length > 1 ? 's acceptées' : ' acceptée') + '.');
-      } else {
-        lot.slice().reverse().forEach(function (r) { if (!r.attente()) r.annuler(); });
-        lot = null;
-        o.toast('Annulé : les suggestions sont de nouveau à décider.');
-      }
-      IA.emettre('decision', {});
-    });
-    IA.on('decision', dessiner);
-    zone.insertBefore(b, zone.firstChild);
-    dessiner();
   }
 
   // ─── Analyse du document dans LEUR apercu (« Aperçu du document ») ───────
@@ -639,9 +519,9 @@
       IA.analysees().forEach(function (s) {
         if (!s.el.contains(b)) return;
         if (b.classList.contains('changeGeneralState')) {
-          // Capture : on lit leur verdict AVANT que leur clic ne le change (pour Annuler).
-          var avant = verdictActif(s.el.querySelector('.doc-general-state'), '.changeGeneralState');
-          if (sectionsIA[s.alias]) sectionsIA[s.alias].decider(v, avant);
+          var k = s.statut === 'alerte' ? 'alerte:' + s.alias : 'sec:' + s.alias + ':verdict';
+          if (existe(s, k)) IA.decider(k, 'modifie', v);
+          encadrer(s.el.querySelector('.doc-general-state'), '.changeGeneralState', null);
         } else {
           docs(s).forEach(function (d) {
             if (!d.el.contains(b)) return;
