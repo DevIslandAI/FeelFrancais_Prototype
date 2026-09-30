@@ -530,7 +530,7 @@
         ' suggestions tranchées par l’IA"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>' : '';
       if (lot) {
         b.className = 'v13-global v13-global-fait';
-        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + pl(lot.length, 'acceptée') + '</b></span>' +
+        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + pl(lot.length, 'suggestion') + ' acceptée' + (lot.length > 1 ? 's' : '') + '</b></span>' +
           reste + tout + '<button type="button" class="v13-annuler" data-g="annuler" title="Retirer tout ce lot"><i class="fa fa-undo"></i> Annuler</button>';
       } else if (aAccepter.length) {
         b.className = 'v13-global';
