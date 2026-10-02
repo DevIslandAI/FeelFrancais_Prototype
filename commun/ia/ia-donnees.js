@@ -164,6 +164,35 @@ window.IA_DONNEES = {
       "le": "10/09/2026 10:00"
      },
      "resume": "Validé par Perle le 10/09. Nouvelle incohérence : le passeport expire avant la fin du cursus.",
+     "constatsSection": [
+      {
+       "t": "attention",
+       "texte": "Passeport : expiration le 14/02/2028.",
+       "docs": [
+        {
+         "fichier": "passport",
+         "lien": "Passeport",
+         "nom": "FF__137_89_awa-kouassi__passport_10_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "attention",
+       "texte": "Cursus : fin le 30/06/2028.",
+       "docs": [
+        {
+         "fichier": "enrollment-letter",
+         "lien": "Lettre d'inscription",
+         "nom": "FF__174_89_awa-kouassi__enrollment-letter_10_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "question",
+       "texte": "Vérifier la date de fin du visa et la validité requise après le visa.",
+       "docs": []
+      }
+     ],
      "alerte": {
       "texte": "Le passeport expire le 14/02/2028, soit 4 mois et demi avant la fin du cursus (30/06/2028, lettre d'inscription). La règle demande 3 mois de validité après le visa.",
       "proposition": "Conserver la validation et prévenir l'étudiante qu'elle devra renouveler son passeport avant février 2028 — ou invalider et demander un renouvellement dès maintenant.",
@@ -282,6 +311,41 @@ window.IA_DONNEES = {
      "statut": "a-corriger",
      "confiance": "élevée",
      "resume": "3 fichiers reçus pour un seul compte : un doublon, juillet manquant, dernier solde suffisant.",
+     "constatsSection": [
+      {
+       "t": "ko",
+       "texte": "Le relevé de juillet 2026 manque entre juin et août.",
+       "docs": [
+        {
+         "fichier": "releve-aout-2026-fcfa",
+         "lien": "Relevé d'août",
+         "nom": "FF__359_89_awa-kouassi__releve-aout-2026-fcfa_22_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "attention",
+       "texte": "« Relevé juin bis » est un doublon du relevé de juin.",
+       "docs": [
+        {
+         "fichier": "releve-juin-2026-bis",
+         "lien": "Relevé de juin (copie)",
+         "nom": "FF__322_89_awa-kouassi__releve-juin-2026-bis_22_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "ok",
+       "texte": "Dernier solde : 5 198,51 € au 31/08/2026.",
+       "docs": [
+        {
+         "fichier": "releve-aout-2026-fcfa",
+         "lien": "Relevé d'août",
+         "nom": "FF__359_89_awa-kouassi__releve-aout-2026-fcfa_22_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "regles": [
       {
        "id": "RES-03",
@@ -535,6 +599,30 @@ window.IA_DONNEES = {
      "statut": "a-corriger",
      "confiance": "élevée",
      "resume": "Lettre du père non signée ; sa pièce d'identité concorde.",
+     "constatsSection": [
+      {
+       "t": "ko",
+       "texte": "La lettre de prise en charge n'est pas signée.",
+       "docs": [
+        {
+         "fichier": "lettre-sponsor-pere",
+         "lien": "Attestation de prise en charge",
+         "nom": "FF__396_89_awa-kouassi__lettre-sponsor-pere_22_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "ok",
+       "texte": "La pièce d'identité du garant est présente et concorde.",
+       "docs": [
+        {
+         "fichier": "piece-identite-sponsor",
+         "lien": "Carte nationale d'identité du garant",
+         "nom": "FF__433_89_awa-kouassi__piece-identite-sponsor_22_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "regles": [
       {
        "id": "SPO-01",
@@ -761,6 +849,29 @@ window.IA_DONNEES = {
      "statut": "provisoire",
      "confiance": "moyenne",
      "resume": "1 pièce sur 3 reçue (acte de naissance). Conclusion provisoire.",
+     "constatsSection": [
+      {
+       "t": "ok",
+       "texte": "Reçu : extrait d'acte de naissance",
+       "docs": [
+        {
+         "fichier": "acte-de-naissance",
+         "lien": "Extrait d'acte de naissance",
+         "nom": "FF__470_89_awa-kouassi__acte-de-naissance_22_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "attention",
+       "texte": "Avis d'imposition",
+       "docs": []
+      },
+      {
+       "t": "attention",
+       "texte": "3 derniers bulletins de salaire du père",
+       "docs": []
+      }
+     ],
      "provisoire": {
       "recu": [
        "Acte de naissance"
@@ -824,6 +935,19 @@ window.IA_DONNEES = {
      "statut": "conforme",
      "confiance": "élevée",
      "resume": "Version 2 : la date de début a été corrigée comme demandé.",
+     "constatsSection": [
+      {
+       "t": "ok",
+       "texte": "La date de début a été corrigée dans la version 2.",
+       "docs": [
+        {
+         "fichier": "attestation-hebergement-v2",
+         "lien": "Attestation d'hébergement",
+         "nom": "FF__544_89_awa-kouassi__attestation-hebergement-v2_23_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "regles": [
       {
        "id": "HEB-01",
@@ -991,6 +1115,30 @@ window.IA_DONNEES = {
      "statut": "a-corriger",
      "confiance": "élevée",
      "resume": "Période vide depuis octobre 2025 ; niveau d'études non indiqué.",
+     "constatsSection": [
+      {
+       "t": "ko",
+       "texte": "Période vide depuis octobre 2025.",
+       "docs": [
+        {
+         "fichier": "resume",
+         "lien": "CV",
+         "nom": "FF__581_89_awa-kouassi__resume_21_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "ko",
+       "texte": "Niveau d'études non indiqué.",
+       "docs": [
+        {
+         "fichier": "resume",
+         "lien": "CV",
+         "nom": "FF__581_89_awa-kouassi__resume_21_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "regles": [
       {
        "id": "CV-02",
@@ -1121,6 +1269,24 @@ window.IA_DONNEES = {
      "statut": "a-verifier",
      "confiance": "moyenne",
      "resume": "Diplôme lisible ; l'année ne concorde pas avec le CV.",
+     "constatsSection": [
+      {
+       "t": "attention",
+       "texte": "L'année du diplôme ne concorde pas avec le CV.",
+       "docs": [
+        {
+         "fichier": "licence-professionnelle",
+         "lien": "Diplôme — licence professionnelle",
+         "nom": "FF__618_89_awa-kouassi__licence-professionnelle_21_09_2026.pdf"
+        },
+        {
+         "fichier": "resume",
+         "lien": "CV",
+         "nom": "FF__581_89_awa-kouassi__resume_21_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "regles": [
       {
        "id": "EEF-04",
@@ -1192,6 +1358,35 @@ window.IA_DONNEES = {
      "statut": "a-corriger",
      "confiance": "élevée",
      "resume": "Case 22 : école en France au lieu de l'établissement actuel. Case 26 : date différente du billet.",
+     "constatsSection": [
+      {
+       "t": "ko",
+       "texte": "Case 22 : école en France au lieu de l'établissement actuel.",
+       "docs": [
+        {
+         "fichier": "visa-form",
+         "lien": "Formulaire France-Visas",
+         "nom": "FF__655_89_awa-kouassi__visa-form_24_09_2026.pdf"
+        }
+       ]
+      },
+      {
+       "t": "ko",
+       "texte": "Case 26 : 01/10/2026, mais le vol est le 29/09/2026.",
+       "docs": [
+        {
+         "fichier": "visa-form",
+         "lien": "Formulaire France-Visas",
+         "nom": "FF__655_89_awa-kouassi__visa-form_24_09_2026.pdf"
+        },
+        {
+         "fichier": "billet-avion-abidjan-paris",
+         "lien": "Billet d'avion",
+         "nom": "FF__692_89_awa-kouassi__billet-avion-abidjan-paris_24_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "regles": [
       {
        "id": "FV-22",
@@ -1360,6 +1555,19 @@ window.IA_DONNEES = {
      "statut": "a-corriger",
      "confiance": "élevée",
      "resume": "Le fichier déposé est un billet d'avion, pas une assurance.",
+     "constatsSection": [
+      {
+       "t": "ko",
+       "texte": "Le fichier déposé est un billet d'avion, pas une assurance.",
+       "docs": [
+        {
+         "fichier": "billet-avion-abidjan-paris",
+         "lien": "Billet d'avion (aller simple)",
+         "nom": "FF__692_89_awa-kouassi__billet-avion-abidjan-paris_24_09_2026.pdf"
+        }
+       ]
+      }
+     ],
      "mauvaiseSection": {
       "detecte": "Billet d'avion Abidjan → Paris (vol AL 704, 29/09/2026)",
       "sectionProposee": "Flight ticket (one way)",
