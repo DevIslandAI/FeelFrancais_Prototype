@@ -172,41 +172,41 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 
 /* ── Section : la carte « Proposition IA » (gabarits valides le 02/10/2026) ──
    Meme format partout : etiquette · icone + titre · constats en lignes · [deplacement] · « Voir les verifications ». */
-.v13-carte { display: block; max-width: 640px; margin: 8px 15px 10px; padding: 12px 16px 6px; border: 1.5px solid #d6c8f5; border-radius: 12px;
-  background: #fff; font: 13px/1.45 Catamaran, Arial, sans-serif; color: #2b3a42; }
+.v13-carte { display: block; max-width: 640px; margin: 6px 12px 8px; padding: 8px 12px 2px; border: 1.5px solid #d6c8f5; border-radius: 10px;
+  background: #fff; font: 12.5px/1.35 Catamaran, Arial, sans-serif; color: #2b3a42; }
 .v13-carte-alerte:not(.v13-carte-faite) { border-left: 4px solid #6a3bd8; }
-.v13-c-tete { font-size: 12.5px; font-weight: 600; color: #5a2fd0; }
-.v13-c-titre { display: flex; align-items: center; gap: 10px; margin: 6px 0 10px; }
-.v13-c-icone { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; }
+.v13-c-tete { font-size: 11.5px; font-weight: 600; color: #5a2fd0; }
+.v13-c-titre { display: flex; align-items: center; gap: 8px; margin: 3px 0 6px; }
+.v13-c-icone { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; }
 .v13-carte-ok .v13-c-icone { background: #2f9e62; color: #fff; }
 .v13-carte-ko .v13-c-icone { background: #fde3e3; color: #e0303d; }
 .v13-carte-alerte .v13-c-icone, .v13-carte-indecis .v13-c-icone { background: #fde7cf; color: #ea7a12; }
-.v13-c-titre b { display: block; font: 700 17px/1.2 Catamaran, Arial, sans-serif; color: #15191d; }
-.v13-c-titre small { display: block; margin-top: 1px; font-size: 12.5px; color: #6c757d; }
+.v13-c-titre b { display: block; font: 700 15px/1.2 Catamaran, Arial, sans-serif; color: #15191d; }
+.v13-c-titre small { display: block; margin-top: 0; font-size: 11.5px; color: #6c757d; }
 /* Constats en lignes : icone d'etat · texte · lien vers le document (a droite) */
 .v13-lignes { list-style: none; margin: 0; padding: 0; border-top: 1px solid #ebe6f5; }
-.v13-l { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; padding: 7px 0; border-bottom: 1px solid #ebe6f5; }
-.v13-l-icone { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; }
+.v13-l { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; padding: 4px 0; border-bottom: 1px solid #ebe6f5; }
+.v13-l-icone { flex: none; width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; }
 .v13-l-ok .v13-l-icone { background: #2f9e62; color: #fff; }
 .v13-l-ko .v13-l-icone { background: #fde3e3; color: #e0303d; }
 .v13-l-attention .v13-l-icone { background: #fde7cf; color: #ea7a12; }
 .v13-l-question .v13-l-icone { background: #8a96a3; color: #fff; }
-.v13-l-txt { flex: 1 1 240px; min-width: 0; }
-.v13-l-docs { flex: 0 1 auto; margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 14px; }
-.v13-l-doc { border: 0; background: none; padding: 0; display: inline-flex; align-items: center; gap: 4px; color: #4f22c4; font: 600 12.5px Catamaran, Arial, sans-serif;
+.v13-l-txt { flex: 1 1 120px; min-width: 0; }
+.v13-l-docs { flex: 0 1 auto; margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 10px; }
+.v13-l-doc { border: 0; background: none; padding: 0; display: inline-flex; align-items: center; gap: 4px; color: #4f22c4; font: 600 12px Catamaran, Arial, sans-serif;
   text-decoration: underline; text-underline-offset: 2px; cursor: pointer; text-align: left; }
 .v13-l-doc:hover { color: #2f0f8f; }
-.v13-i-pdf { width: 15px; height: 15px; flex: none; }
+.v13-i-pdf { width: 13px; height: 13px; flex: none; }
 /* Deplacement : « Deplacer vers la section : X -> Y » · Laisser ici · Deplacer */
-.v13-c-dep { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 8px 0 0; padding: 9px 12px; border-radius: 8px; background: #f4effd; }
+.v13-c-dep { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin: 6px 0 0; padding: 6px 10px; border-radius: 8px; background: #f4effd; }
 .v13-dep-icone { color: #5a2fd0; font-size: 15px; }
 .v13-dep-txt { flex: 1 1 220px; min-width: 0; }
 .v13-dep-txt small { display: block; font-size: 11.5px; color: #4a5560; }
-.v13-dep-trajet { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; color: #15191d; }
+.v13-dep-trajet { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; font-size: 12.5px; color: #15191d; }
 .v13-dep-trajet .fa { color: #5a2fd0; }
 .v13-c-dep-act { display: flex; align-items: center; gap: 14px; margin-left: auto; }
-.v13-deplacer { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 6px; background: #2f9e62; color: #fff; padding: 6px 13px;
-  font: 700 13px Catamaran, Arial, sans-serif; cursor: pointer; }
+.v13-deplacer { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 6px; background: #2f9e62; color: #fff; padding: 4px 11px;
+  font: 700 12.5px Catamaran, Arial, sans-serif; cursor: pointer; }
 .v13-deplacer:hover { background: #268652; }
 .v13-i-transfert { width: 16px; height: 16px; }
 .v13-c-dep-fait { background: #fff; border: 1px solid #e3e8ec; color: #4a5560; font-size: 12.5px; flex-wrap: nowrap; }
@@ -214,10 +214,10 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-c-dep-fait > span { flex: 1 1 auto; }
 .v13-c-dep-fait .v13-lien { margin-left: auto; flex: none; }
 /* Pied : « Voir les verifications » a gauche, l'action eventuelle a droite */
-.v13-c-pied { display: flex; align-items: center; gap: 12px; padding: 8px 0 4px; }
-.v13-voir { border: 0; background: none; padding: 0; color: #4f22c4; font: 600 13px Catamaran, Arial, sans-serif; cursor: pointer; }
+.v13-c-pied { display: flex; align-items: center; gap: 12px; padding: 5px 0 5px; }
+.v13-voir { border: 0; background: none; padding: 0; color: #4f22c4; font: 600 12px Catamaran, Arial, sans-serif; cursor: pointer; }
 .v13-voir .fa { font-size: 10px; margin-right: 6px; }
-.v13-c-pied .v13-lien { margin-left: auto; font-size: 13px; color: #4f22c4; }
+.v13-c-pied .v13-lien { margin-left: auto; font-size: 12px; color: #4f22c4; }
 .v13-verifs { margin: 2px 0 8px; padding: 10px 12px; border-radius: 8px; background: #f8f6fc; font-size: 12.5px; }
 .v13-v-doc + .v13-v-doc, .v13-v-regles { margin-top: 8px; }
 .v13-verifs ul { list-style: none; margin: 4px 0 0; padding: 0; }
