@@ -309,3 +309,27 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-ap-pied.v13-ap-pied-fait { padding: 8px 10px; border: 1px solid #e3e8ec; border-radius: 8px; background: #fff; }
 .v13-ap-pied-fait:has(.v13-f-ko) { border-left: 3px solid var(--v13-rouge); }
 .v13-ap-pied-fait:has(.v13-f-ok) { border-left: 3px solid var(--v13-vert); }
+
+/* ── Profil de demonstration vide : la fenetre qui oriente vers les 3 dossiers ── */
+.v13-vide-fond { position: fixed; inset: 0; z-index: 3000; background: rgba(20, 24, 30, .45); display: grid; place-items: center; padding: 16px; }
+.v13-vide { position: relative; width: min(440px, 100%); background: #fff; border-radius: 14px; padding: 24px 24px 18px; box-shadow: 0 18px 50px rgba(20, 20, 40, .3);
+  font: 13.5px/1.5 Catamaran, Arial, sans-serif; color: #2b3a42; text-align: left; }
+.v13-vide-x { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: #f3f4f6; color: #6c757d; cursor: pointer; }
+.v13-vide-x:hover { background: #ebe6f5; color: #4f22c4; }
+.v13-vide-icone { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #efe6ff; color: #5a2fd0; font-size: 19px; margin-bottom: 10px; }
+.v13-vide h3 { margin: 0 0 6px; font: 700 18px/1.25 Catamaran, Arial, sans-serif; color: #15191d; }
+.v13-vide p { margin: 0 0 16px; color: #4a5560; }
+.v13-vide-etat { font-size: 11.5px !important; vertical-align: 1px; }
+.v13-vide-cours { background: #e6f1fb; color: #0c447c; }
+.v13-vide-echec { background: #fcebeb; color: #a32d2d; }
+.v13-vide-lbl { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #8a97a1; margin-bottom: 6px; }
+.v13-vide-dossier { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border: 1px solid #e8e3f3; border-radius: 10px; margin-bottom: 8px;
+  color: inherit !important; text-decoration: none !important; }
+.v13-vide-dossier:hover, .v13-vide-dossier:focus { border-color: #b499ee; background: #faf7ff; outline: none; }
+.v13-vide-dossier > span:nth-child(2) { flex: 1; min-width: 0; }
+.v13-vide-dossier b { display: block; color: #15191d; }
+.v13-vide-dossier small { display: block; color: #6c757d; font-size: 12px; }
+.v13-vide-dossier .fa { color: #5a2fd0; }
+.v13-vide-av { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #5a2fd0; color: #fff; font-weight: 700; font-size: 12.5px; }
+.v13-vide-ok { display: block; margin: 8px 0 0 auto; border: 1px solid #d5dbe0; background: #fff; border-radius: 6px; padding: 6px 16px; font: 600 13px Catamaran, Arial, sans-serif; cursor: pointer; }
+.v13-vide-ok:hover { border-color: #5a2fd0; color: #5a2fd0; }

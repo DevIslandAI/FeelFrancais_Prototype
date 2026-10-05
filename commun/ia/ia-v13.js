@@ -988,6 +988,47 @@
   //   Une seule pastille, du point de vue de Perle (pas de detail : il est en haut
   //   du dossier). Prevalidation prete = l'IA a fini, conforme ou non : a verifier.
   var ETATS_NOTIF = { 'Amadou Traoré': 'cours', 'Youssef Benali': 'attente', 'Nour El Amrani': 'echec' };
+  // Deux profils VIDES, gardes dans la liste uniquement pour montrer ces etats-la.
+  // (lu par commun/replique.js : ils passent apres les vrais dossiers)
+  var VIDES = { '95': { nom: 'Amadou Traoré', etat: 'cours' }, '98': { nom: 'Nour El Amrani', etat: 'echec' } };
+  window.REPLIQUE_VIDES = VIDES;
+  var DOSSIERS_DEMO = [
+    ['profil-A.html', 'Awa Kouassi', 'Le cas complet : corrections, alerte, document à déplacer'],
+    ['profil-B.html', 'Lucas Ferreira', 'Tout semble conforme'],
+    ['profil-C.html', 'Mariam Diallo', '3e tentative, questions Campus France']
+  ];
+  // Clic sur un profil vide : une fenetre claire, qui renvoie vers les 3 dossiers remplis.
+  function fenetreProfilVide(nom, etat) {
+    var ancien = document.querySelector('.v13-vide-fond');
+    if (ancien) ancien.remove();
+    var libelle = PASTILLES[etat] ? PASTILLES[etat][1] : '';
+    var f = o.el('<div class="v13-vide-fond" role="dialog" aria-modal="true" aria-labelledby="v13-vide-titre">' +
+      '<div class="v13-vide">' +
+        '<button type="button" class="v13-vide-x" data-v="fermer" aria-label="Fermer"><i class="fa fa-times"></i></button>' +
+        '<span class="v13-vide-icone"><i class="fa fa-user"></i></span>' +
+        '<h3 id="v13-vide-titre">Profil de démonstration vide</h3>' +
+        '<p><b>' + e(nom) + '</b> sert seulement à montrer l’état <span class="v13-n-pastille v13-vide-etat v13-vide-' + etat + '">' + e(libelle) +
+          '</span> dans la liste. Son dossier ne contient pas de données.</p>' +
+        '<div class="v13-vide-lbl">Les 3 dossiers de la démo</div>' +
+        DOSSIERS_DEMO.map(function (d) {
+          return '<a class="v13-vide-dossier" href="' + d[0] + '"><span class="v13-vide-av">' + e(d[1].split(' ').map(function (x) { return x[0]; }).join('')) + '</span>' +
+            '<span><b>' + e(d[1]) + '</b><small>' + e(d[2]) + '</small></span><i class="fa fa-chevron-right"></i></a>';
+        }).join('') +
+        '<button type="button" class="v13-vide-ok" data-v="fermer">Fermer</button>' +
+      '</div></div>');
+    // « modal-open » : comme leurs fenetres (la page ne defile plus, le bouton de notes s'efface).
+    function fermer() { f.remove(); document.body.classList.remove('modal-open'); document.removeEventListener('keydown', echap, true); }
+    function echap(ev) { if (ev.key === 'Escape') fermer(); }
+    f.addEventListener('click', function (ev) { if (ev.target === f || ev.target.closest('[data-v=fermer]')) fermer(); });
+    document.addEventListener('keydown', echap, true);
+    document.body.appendChild(f);
+    document.body.classList.add('modal-open');
+    f.querySelector('.v13-vide-dossier').focus();
+  }
+  document.addEventListener('replique:profil-vide', function (ev) {
+    var v = VIDES[ev.detail.id];
+    if (v) fenetreProfilVide(v.nom, v.etat);
+  });
   var PASTILLES = {
     prete: ['fa-check-circle', 'Prévalidation prête', 'L’IA a terminé : la prévalidation attend votre vérification.'],
     cours: ['fa-spinner fa-spin', 'Analyse en cours', 'L’IA analyse le dossier (environ une minute).'],
@@ -1004,17 +1045,22 @@
         boite.title = x[2] + (etat === 'prete' && info.dossier ? ' (analyse terminée le ' + info.dossier.analyse.date.replace(' ', ' à ') + ')' : '');
         boite.innerHTML = '<span class="v13-n-pastille"><i class="fa ' + x[0] + '"></i> ' + x[1] + '</span>' +
           (etat === 'echec' ? '<button type="button" class="v13-relancer" title="Relancer l’analyse de ce dossier"><i class="fa fa-refresh"></i> Relancer</button>' : '');
-        if (etat === 'cours' && !boite.__t) boite.__t = setTimeout(function () { boite.__t = null; poser('prete'); }, boite.__duree || 7000);
+        if (etat === 'cours' && !boite.__t && !boite.__vide) boite.__t = setTimeout(function () { boite.__t = null; poser('prete'); }, boite.__duree || 7000);
+        // Profil vide relance : il retourne a son etat de demonstration (rejouable).
+        if (etat === 'cours' && boite.__vide && boite.__retour) setTimeout(function () { var r = boite.__retour; boite.__retour = null; poser(r); }, 4000);
         var r = boite.querySelector('.v13-relancer');
         if (r) r.addEventListener('click', function (ev) {
           ev.preventDefault();
           ev.stopPropagation();
           o.toast('Analyse relancée.');
           boite.__duree = 4000;
+          if (boite.__vide) boite.__retour = 'echec';
           poser('cours');
         });
       }
-      poser(info.dossier ? 'prete' : (ETATS_NOTIF[o.texte(cellule).trim()] || 'prete'));
+      var nom = o.texte(cellule).trim();
+      boite.__vide = Object.keys(VIDES).some(function (k) { return VIDES[k].nom === nom; });
+      poser(info.dossier ? 'prete' : (ETATS_NOTIF[nom] || 'prete'));
     });
   }
   // ─── Point d'entree ─────────────────────────────────────────────────────

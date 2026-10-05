@@ -21,10 +21,14 @@
     return null;
   }
 
-  function aUnDossier(ligne) {
+  function idEtudiant(ligne) {
     var m = /\/admin\/student\/show\/(\d+)\//.exec(JSON.stringify(ligne));
-    return !!(m && PAGES[m[1]]);
+    return m ? m[1] : null;
   }
+  // Profils vides montres pour un etat de la liste (declares par la couche IA du prototype).
+  function vides() { return window.REPLIQUE_VIDES || {}; }
+  function aUnDossier(ligne) { var id = idEtudiant(ligne); return !!(id && PAGES[id]); }
+  function garder(ligne) { var id = idEtudiant(ligne); return !!(id && (PAGES[id] || vides()[id])); }
 
   // La cloche du bandeau : meme regle, et son compteur suit.
   function filtrerCloche() {
@@ -58,7 +62,8 @@
     var copie = JSON.parse(JSON.stringify(donnees));
     // Seuls les etudiants dont le dossier est reproduit apparaissent (pas de profil vide).
     if (Array.isArray(copie.data)) {
-      copie.data = copie.data.filter(aUnDossier);
+      // Les vrais dossiers d'abord, puis les profils vides de demonstration.
+      copie.data = copie.data.filter(garder).sort(function (a, b) { return aUnDossier(b) - aUnDossier(a); });
       copie.recordsFiltered = copie.recordsTotal = copie.data.length;
     }
     var draw = /[?&]draw=(\d+)/.exec(url);
@@ -129,6 +134,11 @@
       document.dispatchEvent(new CustomEvent('replique:deplacement', { detail: { alias: alias, lien: a } }));
       var menu = a.closest('.dropdown');
       if (menu) menu.classList.remove('open');
+      return;
+    }
+    var vide = /\/admin\/student\/show\/(\d+)\//.exec(href);
+    if (vide && vides()[vide[1]]) {
+      document.dispatchEvent(new CustomEvent('replique:profil-vide', { detail: { id: vide[1], nom: (a.closest('tr') && a.closest('tr').cells[1] ? a.closest('tr').cells[1].textContent : '') } }));
       return;
     }
     message('Maquette : cette page de la plateforme n’est pas reproduite.');
