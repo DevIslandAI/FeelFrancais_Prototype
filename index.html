@@ -20,7 +20,10 @@
   button { font: inherit; }
   a { color: var(--ia); }
 
-  /* ── Layout ── */
+  /* ── La plateforme en plein ecran ── */
+  .plein { position: fixed; inset: 0; background: #fff; }
+  .plein iframe { width: 100%; height: 100%; border: 0; display: block; }
+  /* ── (ancienne mise en page, plus utilisee) ── */
   .app { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 100vh; transition: grid-template-columns .15s; }
   .app.replie { grid-template-columns: 60px minmax(0, 1fr); }
 
@@ -138,7 +141,9 @@
   .comparer button { border: 0; background: none; color: var(--ia); font-weight: 600; cursor: pointer; padding: 0; }
 
   /* ── Notes de revue (fenetre flottante) ── */
-  .notes { position: fixed; left: 16px; bottom: 16px; z-index: 50; font-size: 13px; }
+  .notes { position: fixed; right: 16px; bottom: 16px; z-index: 50; font-size: 13px; }
+  .notes.discret .notes-pastille { display: none; }
+  .notes-pied .fictif-pied { color: #b3261e; white-space: nowrap; }
   .notes-pastille { display: inline-flex; align-items: center; gap: 8px; border: 0; background: var(--ia); color: #fff; font-weight: 700; padding: 10px 16px;
     border-radius: 24px; cursor: pointer; box-shadow: 0 6px 20px rgba(40, 20, 90, .35); }
   .notes-pastille:hover { background: var(--ia-fonce); }
@@ -211,61 +216,7 @@
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <aside class="side" aria-label="Prototypes">
-    <div class="side-tete">
-      <div class="textes">
-        <div class="marque">Prévalidation IA</div>
-        <h1>Yukta's final prototype</h1>
-      </div>
-      <button type="button" class="plier" id="replier" title="Replier le menu" aria-expanded="true"><i class="fa fa-angle-double-left"></i></button>
-    </div>
-    <nav class="side-liste" id="liste"></nav>
-    <div class="side-pied">
-      <div class="fictif" title="Données fictives : personnes, documents et écoles inventés"><i class="fa fa-exclamation-triangle"></i><span class="libelle"> Données fictives</span></div>
-      <button type="button" id="reinitialiser" title="Remet toutes les maquettes à zéro dans ce navigateur"><i class="fa fa-undo"></i><span class="libelle"> Réinitialiser la démo</span></button>
-    </div>
-  </aside>
-
-  <section class="main">
-    <div class="barre" id="barre" hidden>
-      <div class="titre"><h2 id="titre"></h2></div>
-      <div class="onglets" id="pages" role="tablist" aria-label="Page du prototype"></div>
-    </div>
-    <div class="cadre" id="cadre" hidden><iframe id="vue" title="Prototype"></iframe></div>
-
-    <div class="apercu" id="apercu">
-      <div class="apercu-in">
-        <div class="hero">
-          <span class="hero-tag">Feel Français · Prévalidation IA</span>
-          <h2>Yukta's final prototype</h2>
-          <p>La page de Perle dans Feel Français, avec les propositions de l’IA déjà posées dans ses cases.
-            Chaque section a sa « Proposition IA » : Perle lit les constats, ouvre les documents, puis décide avec ses boutons valid / invalid.
-            Rien de sa page n’est retiré.</p>
-          <div class="hero-actions">
-            <button type="button" class="bouton" id="aller-final"><i class="fa fa-star"></i> Ouvrir le prototype</button>
-          </div>
-          <span class="note-fictif"><i class="fa fa-exclamation-triangle"></i> Toutes les données sont fictives</span>
-        </div>
-
-        <div class="bloc">
-          <h3>Comment faire</h3>
-          <div class="etapes">
-            <div class="etape"><span class="rond"><i class="fa fa-star"></i></span><div><b>1. Ouvrir le prototype</b><span class="quoi">bouton ci-dessus, ou un dossier ci-dessous</span></div></div>
-            <div class="etape"><span class="rond"><i class="fa fa-hand-pointer-o"></i></span><div><b>2. Tester</b><span class="quoi">les cases en <span class="ia-tag">mauve</span> sont proposées par l’IA ; chaque section se décide avec valid / invalid ; un clic sur un document ouvre son analyse</span></div></div>
-            <div class="etape"><span class="rond"><i class="fa fa-sticky-note-o"></i></span><div><b>3. Noter ses remarques</b><span class="quoi">bouton « Ajouter un commentaire » en bas à gauche&nbsp;: un seul endroit pour tout</span></div></div>
-          </div>
-        </div>
-
-        <div class="bloc">
-          <h3>Les 3 dossiers de démonstration</h3>
-          <div class="dossiers" id="dossiers"></div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-</div>
+<div class="plein"><iframe id="vue" title="Yukta's final prototype"></iframe></div>
 
 <div class="notes" id="notes">
   <button type="button" class="notes-pastille" id="notes-ouvrir" aria-expanded="false"><i class="fa fa-comment-o"></i> Ajouter un commentaire <span class="compte" id="notes-compte">0</span></button>
@@ -291,6 +242,9 @@
         <div id="notes-liste"></div>
       </div>
     </div>
+    <div class="notes-pied notes-pied-demo"><span class="fictif-pied" title="Personnes, documents et écoles inventés"><i class="fa fa-exclamation-triangle"></i> Données fictives</span>
+      <span class="etat"></span>
+      <button type="button" id="reinitialiser" title="Remet la démo à zéro dans ce navigateur"><i class="fa fa-undo"></i> Réinitialiser la démo</button></div>
     <div class="notes-pied"><span class="etat" id="notes-etat"></span>
       <button type="button" id="notes-copier" title="Copier le commentaire général et toutes les remarques"><i class="fa fa-clone"></i> Copier tout</button>
       <button type="button" id="notes-telecharger" title="Télécharger tout dans un fichier"><i class="fa fa-download"></i> Télécharger</button></div>
@@ -318,9 +272,9 @@
   };
   var PAGES = [
     { id: 'notifications', t: 'Notifications', s: 'file de travail' },
-    { id: 'A', t: 'Awa', s: 'cas complet' },
-    { id: 'B', t: 'Lucas', s: 'tout conforme' },
-    { id: 'C', t: 'Mariam', s: '3e tentative' }
+    { id: 'A', t: 'Awa Kouassi', s: 'cas complet' },
+    { id: 'B', t: 'Lucas Ferreira', s: 'tout conforme' },
+    { id: 'C', t: 'Mariam Diallo', s: '3e tentative' }
   ];
   var ORIGINE = { t: 'Pages d’origine, sans IA', d: 'Feel Français as it is today, for comparison.',
     idee: 'The same pages with no AI layer at all: exactly what Perle uses today.', voir: ['Compare with any prototype to see what was added.'] };
@@ -332,132 +286,46 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
 
-  // ── Sidebar ──
-  var liste = $('liste');
-  function item(n, info, action) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'item' + (info.final ? ' final' : '');
-    b.setAttribute('data-proto', n);
-    b.innerHTML = '<span class="n">' + (n === 'base' ? '<i class="fa fa-eye-slash"></i>' : info.final ? '<i class="fa fa-star"></i>' : info.lettre || n) + '</span>' +
-      '<span class="t">' + esc(info.t) + '</span>';
-    b.title = info.t;
-    b.addEventListener('click', action || function () { aller(n, etat.page || 'A'); });
-    return b;
-  }
-  var accueil = item('apercu', { t: 'Vue d’ensemble' },
-    function () { history.pushState(null, '', location.pathname); afficherApercu(); });
-  accueil.querySelector('.n').innerHTML = '<i class="fa fa-home"></i>';
-  liste.appendChild(accueil);
-  TOURS.forEach(function (tour) {
-    var g = document.createElement('div');
-    g.className = 'groupe';
-    g.textContent = tour.nav;
-    liste.appendChild(g);
-    tour.ids.forEach(function (n) { liste.appendChild(item(n, P[n])); });
-  });
-
-  // Page d'accueil : les dossiers et le fil des tours
-  var DOSSIERS = [
-    { id: 'A', nom: 'Awa Kouassi', pays: 'Côte d’Ivoire', cas: 'Le cas complet', couleur: '#6f42c1', fond: '#f4f0fc',
-      puces: ['Alerte sur un passeport déjà validé', 'Relevés bancaires regroupés', 'Document mal placé', 'Pièce optionnelle'] },
-    { id: 'B', nom: 'Lucas Ferreira', pays: 'Canada', cas: 'Tout est conforme', couleur: '#2f9e62', fond: '#e9f7ef',
-      puces: ['Pas d’étape Études en France', 'Tout accepter en quelques clics', 'Message en anglais'] },
-    { id: 'C', nom: 'Mariam Diallo', pays: 'Sénégal', cas: '3e tentative', couleur: '#d98a1c', fond: '#fdf3e2',
-      puces: ['Versions comparées', 'Mot de l’étudiante', 'Questions Campus France'] }
-  ];
-  DOSSIERS.forEach(function (d) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'dossier';
-    b.innerHTML = '<div class="dossier-tete"><span class="avatar" style="background:' + d.couleur + '">' + esc(d.nom.split(' ').map(function (x) { return x[0]; }).join('')) +
-      '</span><div><b>' + esc(d.nom) + '</b><small>' + esc(d.pays) + '</small></div></div>' +
-      '<span class="cas" style="color:' + d.couleur + ';background:' + d.fond + '">' + esc(d.cas) + '</span>' +
-      '<div class="puces">' + d.puces.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>' +
-      '<span class="ouvrir">Ouvrir dans le prototype final <i class="fa fa-arrow-right"></i></span>';
-    b.addEventListener('click', function () { aller(13, d.id); });
-    $('dossiers').appendChild(b);
-  });
-  $('aller-final').addEventListener('click', function () { aller(13, 'A'); });
-
-  // Page tabs
-  var pages = $('pages');
-  PAGES.forEach(function (p) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.setAttribute('role', 'tab');
-    b.setAttribute('data-page', p.id);
-    b.innerHTML = esc(p.t) + '<small>' + esc(p.s) + '</small>';
-    b.addEventListener('click', function () { aller(etat.proto, p.id); });
-    pages.appendChild(b);
-  });
-
-  // ── Routing: #p13/A ──
-  var etat = { proto: null, page: null };
-  function aller(n, page) { location.hash = 'p' + n + '/' + page; }
-  function lireHash() {
-    var m = /^#p(\d+|base)\/(notifications|A|B|C)$/.exec(location.hash);
-    if (!m || !P[m[1]]) return afficherApercu();
-    afficher(+m[1], m[2]);
-  }
-  function marquerActif(n) {
-    liste.querySelectorAll('.item').forEach(function (b) { b.classList.toggle('actif', String(b.getAttribute('data-proto')) === String(n)); });
-  }
-  function afficherApercu() {
-    etat.proto = null;
-    $('apercu').hidden = false;
-    $('barre').hidden = true;
-    $('cadre').hidden = true;
-    $('vue').removeAttribute('src');
-    marquerActif('apercu');
-    majContexte();
-  }
-  function afficher(n, page) {
-    var info = n === 'base' ? ORIGINE : P[n];
-
-    etat.proto = n;
+  // ── La plateforme : une seule vue, qui s'ouvre sur les Notifications ──
+  var etat = { proto: 13, page: null };
+  function afficher(page) {
     etat.page = page;
-    $('apercu').hidden = true;
-    $('barre').hidden = false;
-    $('cadre').hidden = false;
-    $('titre').innerHTML = esc(nomProto(n)) + (info.final ? ' <span class="pastille or">final</span>' : n !== 'base' ? ' <span class="pastille">' + esc(tourDe(n)) + '</span>' : '');
-    pages.querySelectorAll('button').forEach(function (b) {
-      var actif = b.getAttribute('data-page') === page;
-      b.classList.toggle('actif', actif);
-      b.setAttribute('aria-selected', actif);
-    });
-    var url = dossierDe(n) + fichier(page);
+    var url = dossierDe(13) + fichier(page);
     var vue = $('vue');
-    if (!vue.src || vue.getAttribute('src') !== url) vue.setAttribute('src', url);
-    marquerActif(n);
+    if (vue.getAttribute('src') !== url) vue.setAttribute('src', url);
+    history.replaceState(null, '', '#p13/' + page);
+    document.title = (page === 'notifications' ? 'Notifications' : nomPage(page)) + ' · Yukta\'s final prototype';
     majContexte();
-    document.title = nomProto(n) + ' · Revue';
   }
-  function tourDe(n) {
-    for (var i = 0; i < TOURS.length; i++) if (TOURS[i].ids.indexOf(n) >= 0) return TOURS[i].nav.split(' · ')[0];
-    return '';
+  function lireHash() {
+    var m = /^#p13\/(notifications|A|B|C)$/.exec(location.hash);
+    afficher(m ? m[1] : 'notifications');
   }
-  function replier(oui) {
-    $('app').classList.toggle('replie', oui);
-    $('replier').innerHTML = '<i class="fa fa-angle-double-' + (oui ? 'right' : 'left') + '"></i>';
-    $('replier').title = oui ? 'Déplier le menu' : 'Replier le menu';
-    $('replier').setAttribute('aria-expanded', !oui);
-    lsEcrire('revue:menu-replie', oui);
-  }
-  $('replier').addEventListener('click', function () { replier(!$('app').classList.contains('replie')); });
   window.addEventListener('hashchange', lireHash);
 
-  // Links clicked inside a prototype (e.g. a row of the notifications list) → keep tabs in sync.
+  // Les liens de leur plateforme (liste des notifications, menu « Notification »)
+  // changent la page affichee : on suit, pour l'adresse et pour les notes.
+  // Quand une fenetre de leur plateforme est ouverte (apercu d'un document…), le
+  // bouton de notes s'efface pour ne rien couvrir (« Sauvegarder » est en bas a droite).
+  var observateur = null;
+  function suivreFenetres(doc) {
+    if (observateur) observateur.disconnect();
+    var maj = function () { $('notes').classList.toggle('discret', doc.body.classList.contains('modal-open')); };
+    observateur = new MutationObserver(maj);
+    observateur.observe(doc.body, { attributes: true, attributeFilter: ['class'] });
+    maj();
+  }
   $('vue').addEventListener('load', function () {
+    try { suivreFenetres(this.contentDocument); } catch (e) { /* autre origine */ }
     try {
-      var chemin = this.contentWindow.location.pathname;
-      var m = /\/(variante-(\d+)|base)\/(notifications|profil-([ABC]))\.html$/.exec(chemin);
+      var m = /\/variante-13\/(notifications|profil-([ABC]))\.html$/.exec(this.contentWindow.location.pathname);
       if (!m) return;
-      var n = m[1] === 'base' ? 'base' : +m[2];
-      var page = m[3] === 'notifications' ? 'notifications' : m[4];
-      if (n !== etat.proto || page !== etat.page) {
-        history.replaceState(null, '', '#p' + n + '/' + page);
-        afficher(n, page);
+      var page = m[1] === 'notifications' ? 'notifications' : m[2];
+      if (page !== etat.page) {
+        etat.page = page;
+        history.replaceState(null, '', '#p13/' + page);
+        document.title = (page === 'notifications' ? 'Notifications' : nomPage(page)) + ' · Yukta\'s final prototype';
+        majContexte();
       }
     } catch (e) { /* page d'une autre origine : rien a synchroniser */ }
   });
@@ -470,7 +338,7 @@
       });
     } catch (e) { /* stockage indisponible */ }
     toast(n ? 'Démo réinitialisée : le prototype repart de zéro.' : 'Rien à réinitialiser.');
-    if (etat.proto) $('vue').contentWindow.location.reload();
+    $('vue').contentWindow.location.reload();
   });
 
   function toast(msg) {
@@ -705,7 +573,6 @@
   // Les notes des autres relecteurs apparaissent pendant que la fenetre est ouverte.
   setInterval(function () { if (!$('notes-panneau').hidden && serveur && !enEdition && !$('notes-texte').value) charger(); }, 20000);
 
-  replier(lsLire('revue:menu-replie', false));
   charger();
   lireHash();
   if (lsLire(CLE_OUVERT, false)) ouvrirNotes(true);
