@@ -46,6 +46,7 @@
       proposerSection(s);
       docs(s).forEach(function (d, i) { proposerDocument(s, d, i + 1, docs(s).length); });
     });
+    brefPrevalidation();
     toutAccepter();
     brancherApercu();
     ecouterBoutonsFF();
@@ -362,6 +363,7 @@
   }
   var sectionsIA = {};  // alias -> controle de la carte (leurs boutons, « Tout accepter »)
   var registre = [];    // toutes les suggestions de la page, pour « Tout accepter »
+  var bilanSections = []; // l'etat de chaque section, pour le bref en haut du dossier
   function miniBouton(v) { return '<span class="v13-mini v13-mini-' + v + '">' + (v === 'valide' ? 'valid' : 'invalid') + '</span>'; }
 
   function proposerSection(s) {
@@ -493,6 +495,8 @@
     IA.on('decision', function () { if (document.contains(carte)) dessiner(); });
     sectionsIA[s.alias] = { s: s, decider: decider };
     registre.push({ indecis: !verdict, attente: function () { return !IA.decision(cleV); }, accepter: accepter, annuler: annuler });
+    bilanSections.push({ famille: verdict === 'valide' ? 'conforme' : verdict === 'invalide' && !alerte ? 'corriger' : 'verifier',
+      attente: function () { return !IA.decision(cleV); }, el: carte, entete: entete });
     if (dep) registre.push({ attente: function () { return !IA.decision(dep.cle); }, accepter: function () { dep.deplacer(); }, annuler: function () { dep.remettre(); } });
     proposer();
     entete.insertAdjacentElement('afterend', carte);
@@ -552,39 +556,89 @@
   // ─── « Tout accepter » : toutes les suggestions de l'IA en un clic ────────
   //   (cases du haut, verdicts des sections et des documents, deplacements).
   //   Ce que l'IA ne tranche pas reste a Perle. « Annuler » defait le lot.
-  function toutAccepter() {
-    // Une pastille dans LEUR ligne de titre (« Visa … Afficher les autres services ») :
-    // aucune hauteur ajoutee, rien ne se decale.
+  // ─── En haut du dossier : le BREF de la prevalidation (discret, sans bouton) ──
+  //   Dans leur ligne de titre « Visa » : ce qui reste a decider, par famille. Chaque
+  //   compteur mene a la prochaine section concernee. Tout decide : « Prevalidation revue ».
+  // Hauteur de leur barre fixe en haut de page (logo, administrateur) : on defile en dessous.
+  function hauteurBarreFixe() {
+    var el = document.elementFromPoint(window.innerWidth / 2, 5);
+    for (; el && el !== document.body; el = el.parentElement) {
+      var pos = getComputedStyle(el).position;
+      if (pos === 'fixed' || pos === 'sticky') return el.getBoundingClientRect().bottom;
+    }
+    return 0;
+  }
+  function brefPrevalidation() {
     var tete = document.querySelector('.admin-student-header');
+    var b = o.el('<div class="v13-bref" role="status"></div>');
+    var quand = (IA.dossier.analyse || {}).date ? 'Analyse de l’IA terminée le ' + IA.dossier.analyse.date.replace(' ', ' à ') : '';
+    var FAMILLES = [['corriger', 'à corriger'], ['verifier', 'à vérifier'], ['conforme', 'conforme']];
+    var suivant = {};
+    function dessiner() {
+      var reste = bilanSections.filter(function (x) { return x.attente(); });
+      if (!reste.length) {
+        b.className = 'v13-bref v13-bref-fait';
+        b.innerHTML = '<i class="fa fa-check-circle"></i> Prévalidation revue';
+        b.title = 'Toutes les sections ont reçu votre décision.';
+        return;
+      }
+      b.className = 'v13-bref';
+      b.title = quand;
+      b.innerHTML = '<span class="v13-bref-lbl">Prévalidation IA</span>' + FAMILLES.map(function (f) {
+        var n = reste.filter(function (x) { return x.famille === f[0]; }).length;
+        if (!n) return '';
+        var lib = f[0] === 'conforme' ? n + ' conforme' + (n > 1 ? 's' : '') : n + ' ' + f[1];
+        return '<button type="button" class="v13-bref-n" data-famille="' + f[0] + '" title="Aller à la prochaine section « ' + f[1] + ' »">' +
+          '<span class="v13-g-pt v13-g-' + (f[0] === 'corriger' ? 'ko' : f[0] === 'verifier' ? 'att' : 'ok') + '"></span>' + lib + '</button>';
+      }).join('');
+    }
+    b.addEventListener('click', function (ev) {
+      var x = ev.target.closest('[data-famille]');
+      if (!x) return;
+      var fam = x.getAttribute('data-famille');
+      var liste = bilanSections.filter(function (s) { return s.famille === fam && s.attente(); });
+      if (!liste.length) return;
+      var k = (suivant[fam] || 0) % liste.length;
+      suivant[fam] = k + 1;
+      // Sous leur barre noire fixe (en haut de la page), pas derriere.
+      var cible = (liste[k].entete || liste[k].el).closest('.ia2-sec') || liste[k].el;
+      cible.style.scrollMarginTop = (hauteurBarreFixe() + 16) + 'px';
+      cible.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      o.flash(liste[k].el);
+    });
+    IA.on('decision', dessiner);
+    var h3 = tete && tete.querySelector('.information-title');
+    if (h3) h3.insertAdjacentElement('afterend', b);
+    dessiner();
+  }
+
+  // ─── A la fin du dossier : « Tout accepter », une fois tout relu ─────────────
+  //   (cases du haut, verdicts des sections et des documents, deplacements). Ce que
+  //   l'IA ne tranche pas reste a Perle. « Annuler » defait le lot.
+  function toutAccepter() {
     var b = o.el('<div class="v13-global"></div>');
     var lot = null;
     function pl(n, x) { return n + ' ' + x + (n > 1 ? 's' : ''); }
-    // Le verdict de l'analyse, en bref (meme code couleur que les cartes de section).
-    var n = IA.ui.resumeDossier(IA.dossier);
-    var aCorriger = n['a-corriger'], aVerifier = n['a-verifier'] + n.provisoire + n.alerte;
-    var bilan = '<span class="v13-g-bilan">' + (aCorriger || aVerifier
-      ? (aCorriger ? '<span class="v13-g-pt v13-g-ko"></span>' + aCorriger + ' à corriger' : '') +
-        (aVerifier ? '<span class="v13-g-pt v13-g-att"></span>' + aVerifier + ' à vérifier' : '')
-      : '<span class="v13-g-pt v13-g-ok"></span>Tout semble conforme') + '</span>';
-    var quand = (IA.dossier.analyse || {}).date ? 'Analyse de l’IA terminée le ' + IA.dossier.analyse.date.replace(' ', ' à ') : '';
     function dessiner() {
       var attente = registre.filter(function (r) { return r.attente(); });
       var aAccepter = attente.filter(function (r) { return !r.indecis; });
       var aDecider = attente.filter(function (r) { return r.indecis; });
-      var reste = aDecider.length ? '<span class="v13-g-reste" title="L’IA ne tranche pas : à décider vous-même">' + aDecider.length + ' à décider</span>' : '';
-      var tout = aAccepter.length ? '<button type="button" class="v13-g-tout" data-g="tout" title="Accepter les ' + aAccepter.length +
-        ' suggestions tranchées par l’IA"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>' : '';
+      var reste = aDecider.length ? pl(aDecider.length, 'point') + ' où l’IA ne tranche pas reste' + (aDecider.length > 1 ? 'nt' : '') + ' à votre décision.' : '';
+      var tout = aAccepter.length ? '<button type="button" class="v13-g-tout" data-g="tout"><i class="fa fa-check"></i> Tout accepter (' + aAccepter.length + ')</button>' : '';
       if (lot) {
         b.className = 'v13-global v13-global-fait';
-        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + pl(lot.length, 'suggestion') + ' acceptée' + (lot.length > 1 ? 's' : '') + '</b></span>' +
-          reste + tout + '<button type="button" class="v13-annuler" data-g="annuler" title="Retirer tout ce lot"><i class="fa fa-undo"></i> Annuler</button>';
+        b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' + pl(lot.length, 'suggestion') + ' acceptée' + (lot.length > 1 ? 's' : '') + '</b>' +
+          (reste ? '<small>' + reste + '</small>' : '') + '</span>' + tout +
+          '<button type="button" class="v13-annuler" data-g="annuler" title="Retirer tout ce lot"><i class="fa fa-undo"></i> Annuler</button>';
       } else if (aAccepter.length) {
         b.className = 'v13-global';
-        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt" title="' + e(quand) + '"><b>Prévalidation prête</b></span>' + bilan + tout;
+        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt"><b>Vous avez tout relu ?</b><small>Acceptez en une fois les ' +
+          pl(aAccepter.length, 'suggestion') + ' de l’IA encore en attente.' + (reste ? ' ' + reste : '') + '</small></span>' + tout;
       } else {
         b.className = 'v13-global v13-global-fait';
         b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' +
-          (aDecider.length ? 'Suggestions de l’IA traitées' : 'Prévalidation revue') + '</b></span>' + reste;
+          (aDecider.length ? 'Suggestions de l’IA traitées' : 'Prévalidation revue') + '</b><small>' +
+          (reste || 'Toutes les suggestions de l’IA ont reçu votre décision.') + '</small></span>';
       }
     }
     b.addEventListener('click', function (ev) {
@@ -603,9 +657,9 @@
       IA.emettre('decision', {});
     });
     IA.on('decision', dessiner);
-    var h3 = tete && tete.querySelector('.information-title');
-    if (h3) h3.insertAdjacentElement('afterend', b);
-    else (document.querySelector('.student-service-data') || IA.blocDocuments().parentNode).prepend(b);
+    // Juste apres la derniere section (fin de la liste des documents).
+    var bloc = IA.blocDocuments();
+    bloc.parentNode.insertBefore(b, bloc.nextSibling);
     dessiner();
   }
 
