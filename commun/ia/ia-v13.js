@@ -559,6 +559,14 @@
     var b = o.el('<div class="v13-global"></div>');
     var lot = null;
     function pl(n, x) { return n + ' ' + x + (n > 1 ? 's' : ''); }
+    // Le verdict de l'analyse, en bref (meme code couleur que les cartes de section).
+    var n = IA.ui.resumeDossier(IA.dossier);
+    var aCorriger = n['a-corriger'], aVerifier = n['a-verifier'] + n.provisoire + n.alerte;
+    var bilan = '<span class="v13-g-bilan">' + (aCorriger || aVerifier
+      ? (aCorriger ? '<span class="v13-g-pt v13-g-ko"></span>' + aCorriger + ' à corriger' : '') +
+        (aVerifier ? '<span class="v13-g-pt v13-g-att"></span>' + aVerifier + ' à vérifier' : '')
+      : '<span class="v13-g-pt v13-g-ok"></span>Tout semble conforme') + '</span>';
+    var quand = (IA.dossier.analyse || {}).date ? 'Analyse de l’IA terminée le ' + IA.dossier.analyse.date.replace(' ', ' à ') : '';
     function dessiner() {
       var attente = registre.filter(function (r) { return r.attente(); });
       var aAccepter = attente.filter(function (r) { return !r.indecis; });
@@ -572,11 +580,11 @@
           reste + tout + '<button type="button" class="v13-annuler" data-g="annuler" title="Retirer tout ce lot"><i class="fa fa-undo"></i> Annuler</button>';
       } else if (aAccepter.length) {
         b.className = 'v13-global';
-        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt"><b>' + pl(aAccepter.length, 'suggestion') + '</b> à confirmer</span>' + reste + tout;
+        b.innerHTML = '<span class="v13-ia">IA</span><span class="v13-g-txt" title="' + e(quand) + '"><b>Prévalidation prête</b></span>' + bilan + tout;
       } else {
         b.className = 'v13-global v13-global-fait';
         b.innerHTML = '<span class="v13-f-icone v13-f-ok"><i class="fa fa-check"></i></span><span class="v13-g-txt"><b>' +
-          (aDecider.length ? 'Suggestions IA traitées' : 'Dossier traité') + '</b></span>' + reste;
+          (aDecider.length ? 'Suggestions de l’IA traitées' : 'Prévalidation revue') + '</b></span>' + reste;
       }
     }
     b.addEventListener('click', function (ev) {
@@ -920,47 +928,37 @@
     return b;
   }
 
-  // ─── Notifications : l'etat de l'analyse de chaque dossier ───────────────
+  // ─── Notifications : l'etat de la prevalidation de chaque dossier ─────────
+  //   Une seule pastille, du point de vue de Perle (pas de detail : il est en haut
+  //   du dossier). Prevalidation prete = l'IA a fini, conforme ou non : a verifier.
   var ETATS_NOTIF = { 'Amadou Traoré': 'cours', 'Youssef Benali': 'attente', 'Nour El Amrani': 'echec' };
+  var PASTILLES = {
+    prete: ['fa-check-circle', 'Prévalidation prête', 'L’IA a terminé : la prévalidation attend votre vérification.'],
+    cours: ['fa-spinner fa-spin', 'Analyse en cours', 'L’IA analyse le dossier (environ une minute).'],
+    attente: ['fa-upload', 'Dépôts en cours', 'L’étudiant dépose encore : l’IA attend la fin de ses dépôts pour analyser.'],
+    echec: ['fa-exclamation-triangle', 'Analyse impossible', 'L’analyse n’a pas abouti : relancez-la, ou traitez le dossier sans l’IA.']
+  };
   function notifications() {
     IA.ui.notifications(function (tr, cellule, info) {
-      var boite = o.el('<div class="ia2-notif v13-notif"></div>');
+      var boite = o.el('<div class="v13-notif"></div>');
       cellule.appendChild(boite);
-      var fin;
-      if (info.dossier) {
-        var n = info.compte;
-        var aFaire = n['a-corriger'] + n['a-verifier'] + n['alerte'] + n['provisoire'];
-        fin = [aFaire ? 'a-corriger' : 'conforme', aFaire ? aFaire + ' à traiter' : 'conforme', info.dossier.analyse.date.replace(' ', ' à ')];
-      } else fin = [info.figurant[0], info.figurant[1], ''];
-      function fait() {
-        boite.className = 'ia2-notif v13-notif ia2-t-' + fin[0];
-        boite.innerHTML = '<span class="ia2-point"></span>IA · ' + e(fin[1]) + (fin[2] ? ' <span class="v13-n-quand">· ' + e(fin[2].replace(/\/\d{4} à/, '')) + '</span>' : '');
-        boite.title = fin[2] ? 'Analysé le ' + fin[2] : 'Analyse faite';
-      }
-      function cours(duree) {
-        boite.className = 'ia2-notif v13-notif v13-n-cours';
-        boite.title = 'Analyse en cours';
-        boite.innerHTML = '<i class="fa fa-spinner fa-spin"></i> IA · en cours…';
-        setTimeout(fait, duree);
-      }
-      var etat = info.dossier ? 'fait' : (ETATS_NOTIF[o.texte(cellule).replace(/IA ·.*$/, '').trim()] || 'fait');
-      if (etat === 'cours') cours(7000);
-      else if (etat === 'attente') {
-        boite.className = 'ia2-notif v13-notif v13-n-attente';
-        boite.title = 'L’étudiant dépose encore : l’analyse attend la fin de ses dépôts.';
-        boite.innerHTML = '<i class="fa fa-clock-o"></i> IA · en attente';
-      } else if (etat === 'echec') {
-        boite.className = 'ia2-notif v13-notif v13-n-echec';
-        boite.title = 'L’analyse n’a pas abouti.';
-        boite.innerHTML = '<i class="fa fa-exclamation-triangle"></i> IA · échec ' +
-          '<button type="button" class="v13-relancer" title="Relancer l’analyse de ce dossier"><i class="fa fa-refresh"></i> Relancer</button>';
-        boite.querySelector('button').addEventListener('click', function (ev) {
+      function poser(etat) {
+        var x = PASTILLES[etat];
+        boite.className = 'v13-notif v13-n-' + etat;
+        boite.title = x[2] + (etat === 'prete' && info.dossier ? ' (analyse terminée le ' + info.dossier.analyse.date.replace(' ', ' à ') + ')' : '');
+        boite.innerHTML = '<span class="v13-n-pastille"><i class="fa ' + x[0] + '"></i> ' + x[1] + '</span>' +
+          (etat === 'echec' ? '<button type="button" class="v13-relancer" title="Relancer l’analyse de ce dossier"><i class="fa fa-refresh"></i> Relancer</button>' : '');
+        if (etat === 'cours' && !boite.__t) boite.__t = setTimeout(function () { boite.__t = null; poser('prete'); }, boite.__duree || 7000);
+        var r = boite.querySelector('.v13-relancer');
+        if (r) r.addEventListener('click', function (ev) {
           ev.preventDefault();
           ev.stopPropagation();
           o.toast('Analyse relancée.');
-          cours(4000);
+          boite.__duree = 4000;
+          poser('cours');
         });
-      } else fait();
+      }
+      poser(info.dossier ? 'prete' : (ETATS_NOTIF[o.texte(cellule).trim()] || 'prete'));
     });
   }
   // ─── Point d'entree ─────────────────────────────────────────────────────
