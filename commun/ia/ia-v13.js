@@ -190,7 +190,7 @@
         return;
       }
       var preuves = preuvesHtml(p.preuves);
-      var src = p.source || preuves ? '<span class="v13-src" title="D’où l’IA tire cette proposition"><i class="fa fa-search"></i> ' + e(p.source || 'Preuve :') +
+      var src = p.source || preuves ? '<span class="v13-src" title="' + e(p.sourceTitre || 'D’où l’IA tire cette proposition') + '"><i class="fa fa-search"></i> ' + e(p.source || 'Preuve :') +
         (preuves ? ' <span class="v13-preuves">' + preuves + '</span>' : '') + '</span>' : '';
       var act = (p.boutons || [['accepter', 'Accepter', true], ['refuser', 'Refuser']]).map(function (b) {
         var icone = OPTS.icones && ICONES_B[b[0]];
@@ -279,7 +279,9 @@
     var memo = { local: null, snap: null };
     var pc;
     placerSous(champ, barre(pc = {
-      id: 'campus', libelle: 'Q/R Campus France', resume: cf.questions.length + ' questions numérotées', source: 'Questions Campus France préparées d’après : ' + sources.join(', '), memo: memo,
+      id: 'campus', libelle: 'Q/R Campus France', resume: cf.questions.length + ' questions numérotées', // Droit au but : combien de questions, d'apres combien de documents ; la liste au survol.
+      source: cf.questions.length + ' questions préparées · d’après ' + sources.length + ' documents du dossier',
+      sourceTitre: 'Documents utilisés : ' + sources.join(', '), memo: memo,
       action: function () { IA.ecrire.champ(c, champ.value); },
       refuser: function () { champ.value = avant; },
       annuler: function () { champ.value = texte; },
