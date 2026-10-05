@@ -148,13 +148,17 @@
     border-radius: 24px; cursor: pointer; box-shadow: 0 6px 20px rgba(40, 20, 90, .35); }
   .notes-pastille:hover { background: var(--ia-fonce); }
   .notes-pastille .compte { background: #fff; color: var(--ia); border-radius: 10px; padding: 0 7px; font-size: 12px; }
-  .notes-panneau { width: min(420px, calc(100vw - 32px)); height: min(680px, calc(100vh - 32px)); background: #fff; border: 1px solid var(--bord); border-radius: 12px;
+  .notes-panneau { width: min(380px, calc(100vw - 32px)); height: min(560px, calc(100vh - 32px)); background: #fff; border: 1px solid var(--bord); border-radius: 12px;
     box-shadow: 0 16px 48px rgba(20, 30, 40, .28); display: flex; flex-direction: column; overflow: hidden; }
   .notes-tete { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: var(--ia); color: #fff; }
   .notes-tete b { flex: 1; font-size: 14px; }
   .notes-tete button { border: 0; background: rgba(255, 255, 255, .16); color: #fff; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; }
   .notes-tete button:hover { background: rgba(255, 255, 255, .3); }
-  .notes-defile { flex: 1; overflow-y: auto; }
+  .notes-defile { flex: 1; overflow-y: auto; padding: 0 14px; }
+  .notes-saisie { padding: 12px 14px; border-bottom: 1px solid var(--bord); }
+  .notes-saisie textarea { width: 100%; min-height: 76px; border: 1px solid #d5dbe0; border-radius: 6px; padding: 8px 10px; font: inherit; color: var(--texte); resize: vertical; }
+  .notes-saisie textarea:focus { outline: 2px solid var(--ia-bord); border-color: var(--ia); }
+  .notes-pied button.lien { border: 0; background: none; padding: 0; color: var(--gris); text-decoration: underline; }
   .notes-bloc { padding: 12px 14px; border-bottom: 1px solid var(--bord); }
   .notes-bloc h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); }
   .notes-bloc h4 .sep { flex: 1; }
@@ -192,6 +196,7 @@
   .note .actions button.ok { background: var(--ia); color: #fff; border-color: var(--ia); }
   .notes-pied { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-top: 1px solid var(--bord); background: #fafbfc; font-size: 11.5px; color: var(--gris); }
   .notes-pied .etat { flex: 1; }
+  .note-meta .ctx { white-space: nowrap; }
   .notes-pied button { border: 1px solid var(--bord); background: #fff; border-radius: 5px; padding: 4px 9px; cursor: pointer; font-size: 12px; color: var(--texte); }
   .notes-pied button:hover { border-color: var(--ia); color: var(--ia); }
   .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: #22313a; color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 60; font-size: 13px; }
@@ -220,34 +225,19 @@
 
 <div class="notes" id="notes">
   <button type="button" class="notes-pastille" id="notes-ouvrir" aria-expanded="false"><i class="fa fa-comment-o"></i> Ajouter un commentaire <span class="compte" id="notes-compte">0</span></button>
-  <div class="notes-panneau" id="notes-panneau" role="dialog" aria-label="Notes de revue" hidden>
-    <div class="notes-tete"><i class="fa fa-sticky-note-o"></i><b>Notes de revue</b>
+  <div class="notes-panneau" id="notes-panneau" role="dialog" aria-label="Commentaires" hidden>
+    <div class="notes-tete"><i class="fa fa-comment-o"></i><b>Vos commentaires</b>
       <button type="button" id="notes-fermer" title="Réduire"><i class="fa fa-minus"></i></button></div>
-    <div class="notes-defile">
-      <div class="notes-bloc">
-        <h4><i class="fa fa-globe"></i> Commentaire général <span class="sep"></span><small id="general-etat"></small></h4>
-        <textarea id="notes-general" maxlength="20000" placeholder="Votre avis d’ensemble sur les prototypes… (enregistré automatiquement)"></textarea>
-      </div>
-      <div class="notes-bloc">
-        <h4><i class="fa fa-map-marker"></i> Remarque sur le prototype ouvert</h4>
-        <div id="proto-courant"></div>
-        <div id="proto-saisie">
-          <textarea id="notes-texte" maxlength="5000" placeholder="Votre remarque sur ce prototype…"></textarea>
-          <div class="notes-ligne"><span class="aide">Ctrl + Entrée pour ajouter</span><button type="button" class="notes-ajouter" id="notes-ajouter" disabled>Ajouter</button></div>
-        </div>
-      </div>
-      <div class="notes-bloc">
-        <h4><i class="fa fa-list"></i> Remarques par prototype</h4>
-        <div class="filtre" role="tablist"><button type="button" data-filtre="courant" class="actif">Ce prototype</button><button type="button" data-filtre="tous">Tous les prototypes</button></div>
-        <div id="notes-liste"></div>
-      </div>
+    <div class="notes-saisie">
+      <textarea id="notes-texte" maxlength="5000" placeholder="Écrivez votre commentaire…"></textarea>
+      <div class="notes-ligne"><span class="aide" id="notes-page"></span><button type="button" class="notes-ajouter" id="notes-ajouter" disabled>Ajouter</button></div>
     </div>
-    <div class="notes-pied notes-pied-demo"><span class="fictif-pied" title="Personnes, documents et écoles inventés"><i class="fa fa-exclamation-triangle"></i> Données fictives</span>
+    <div class="notes-defile"><div id="notes-liste"></div></div>
+    <div class="notes-pied">
+      <button type="button" id="notes-copier" title="Copier tous les commentaires"><i class="fa fa-clone"></i> Copier</button>
+      <button type="button" id="notes-telecharger" title="Télécharger tous les commentaires"><i class="fa fa-download"></i> Télécharger</button>
       <span class="etat"></span>
-      <button type="button" id="reinitialiser" title="Remet la démo à zéro dans ce navigateur"><i class="fa fa-undo"></i> Réinitialiser la démo</button></div>
-    <div class="notes-pied"><span class="etat" id="notes-etat"></span>
-      <button type="button" id="notes-copier" title="Copier le commentaire général et toutes les remarques"><i class="fa fa-clone"></i> Copier tout</button>
-      <button type="button" id="notes-telecharger" title="Télécharger tout dans un fichier"><i class="fa fa-download"></i> Télécharger</button></div>
+      <button type="button" id="reinitialiser" class="lien" title="Remet la démo à zéro (données fictives)"><i class="fa fa-undo"></i> Réinitialiser la démo</button></div>
   </div>
 </div>
 
@@ -370,8 +360,6 @@
       serveur = false; notes = lsLire(CLE_LOCALE, []); general = lsLire(CLE_GENERAL, { text: '', at: null });
     }).then(function () {
       // Ne pas ecraser ce que la personne est en train de taper.
-      if (document.activeElement !== $('notes-general') && !minuterieGeneral) $('notes-general').value = general.text || '';
-      majGeneralEtat();
       dessinerNotes();
     });
   }
@@ -386,17 +374,8 @@
   }
   function nomPage(id) { var pg = PAGES.filter(function (p) { return p.id === id; })[0]; return pg ? pg.t : ''; }
   function majContexte() {
-    var c = protoCourant();
-    var z = $('proto-courant');
-    if (!c) {
-      z.innerHTML = '<div class="proto-aucun"><i class="fa fa-hand-o-left"></i> Ouvrez le prototype pour lui ajouter une remarque. ' +
-        'Pour un avis d’ensemble, utilisez le commentaire général ci-dessus.</div>';
-      $('proto-saisie').hidden = true;
-    } else {
-      z.innerHTML = '<div class="proto-courant' + (c.final ? ' final' : '') + '"><span class="num">' + (c.final ? '<i class="fa fa-star"></i>' : esc(c.num)) + '</span>' +
-        '<span>' + esc(c.final ? c.nom : c.libelle) + '<small>page ouverte : ' + esc(nomPage(etat.page)) + '</small></span></div>';
-      $('proto-saisie').hidden = false;
-    }
+    var z = $('notes-page');
+    if (z) z.innerHTML = etat.page ? '<i class="fa fa-map-marker"></i> ' + esc(nomPage(etat.page)) : '';
     dessinerNotes();
   }
   function quand(iso) {
@@ -405,6 +384,7 @@
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
   function libelleNote(n) {
+    if (String(n.proto) === '13') return nomPage(n.page) || 'Prototype';
     if (n.proto && (n.proto === 'base' || P[n.proto])) {
       var info = n.proto === 'base' ? ORIGINE : P[n.proto];
       return (n.proto === 'base' || info.final ? info.t : prefixe(n.proto) + info.t);
@@ -414,25 +394,19 @@
   function dessinerNotes() {
     var total = notes.length + (general.text ? 1 : 0);
     $('notes-compte').textContent = total;
-    $('notes-etat').innerHTML = serveur ? '<i class="fa fa-cloud"></i> Partagé : tous les relecteurs voient ces notes'
-      : '<i class="fa fa-laptop"></i> Enregistré dans ce navigateur';
-    var c = protoCourant();
-    document.querySelectorAll('.filtre button').forEach(function (b) {
-      var n = b.getAttribute('data-filtre') === 'courant' ? notes.filter(function (x) { return c && x.proto === c.id; }).length : notes.length;
-      b.textContent = (b.getAttribute('data-filtre') === 'courant' ? 'Ce prototype' : 'Tous les prototypes') + ' (' + n + ')';
-      b.classList.toggle('actif', b.getAttribute('data-filtre') === filtre);
-    });
-    var visibles = filtre === 'courant' ? notes.filter(function (x) { return c && x.proto === c.id; }) : notes;
+    var visibles = notes.slice();
+    // Un ancien « commentaire general » reste visible, en tete de liste.
+    if (general.text) visibles.push({ id: '__general', text: general.text, at: general.at, general: true });
     var l = $('notes-liste');
     if (!visibles.length) {
-      l.innerHTML = '<div class="notes-vide">' + (filtre === 'courant' ? (c ? 'Aucune remarque sur ce prototype pour l’instant.' : 'Aucun prototype ouvert.') : 'Aucune remarque pour l’instant.') + '</div>';
+      l.innerHTML = '<div class="notes-vide">Aucun commentaire pour l’instant.</div>';
       return;
     }
     l.innerHTML = visibles.slice().reverse().map(function (n) {
       var edite = enEdition === n.id;
-      return '<div class="note" data-id="' + esc(n.id) + '"><div class="note-meta"><span class="ctx">' + esc(libelleNote(n)) + '</span>' +
-        (n.page ? '<span>' + esc(nomPage(n.page)) + '</span>' : '') + '<span>· ' + esc(quand(n.at)) + (n.edited ? ' · modifiée' : '') + '</span><span class="sep"></span>' +
-        (edite ? '' : '<button type="button" data-a="editer" title="Modifier"><i class="fa fa-pencil"></i></button><button type="button" data-a="suppr" title="Supprimer"><i class="fa fa-trash-o"></i></button>') +
+      return '<div class="note" data-id="' + esc(n.id) + '"><div class="note-meta"><span class="ctx">' + esc(n.general ? 'Général' : libelleNote(n)) + '</span>' +
+        '<span>' + esc(quand(n.at)) + (n.edited ? ' · modifié' : '') + '</span><span class="sep"></span>' +
+        (edite || n.general ? '' : '<button type="button" data-a="editer" title="Modifier"><i class="fa fa-pencil"></i></button><button type="button" data-a="suppr" title="Supprimer"><i class="fa fa-trash-o"></i></button>') +
         '</div>' + (edite ? '<textarea maxlength="5000">' + esc(n.text) + '</textarea><div class="actions"><button type="button" data-a="annuler">Annuler</button>' +
         '<button type="button" class="ok" data-a="enregistrer">Enregistrer</button></div>' : '<div class="note-texte">' + esc(n.text) + '</div>') + '</div>';
     }).join('');
@@ -440,24 +414,7 @@
     if (z) { z.focus(); z.setSelectionRange(z.value.length, z.value.length); }
   }
 
-  // Commentaire general : enregistre tout seul, une seconde apres la derniere frappe.
-  function majGeneralEtat(texte) {
-    $('general-etat').textContent = texte || (general.at && general.text ? 'enregistré ' + quand(general.at) : '');
-  }
-  function enregistrerGeneral() {
-    minuterieGeneral = null;
-    var texte = $('notes-general').value;
-    if (texte === (general.text || '')) return;
-    var fin = function (g) { general = g; majGeneralEtat(); dessinerNotes(); };
-    if (serveur) api('PUT', 'api/general', { text: texte }).then(fin, function () { majGeneralEtat('non enregistré — réessayez'); });
-    else { var g = { text: texte, at: new Date().toISOString() }; lsEcrire(CLE_GENERAL, g); fin(g); }
-  }
-  $('notes-general').addEventListener('input', function () {
-    majGeneralEtat('…');
-    clearTimeout(minuterieGeneral);
-    minuterieGeneral = setTimeout(enregistrerGeneral, 1000);
-  });
-  $('notes-general').addEventListener('blur', function () { if (minuterieGeneral) { clearTimeout(minuterieGeneral); enregistrerGeneral(); } });
+  function enregistrerGeneral() { /* plus de saisie separee : le commentaire general existant reste lisible et exporte */ }
 
   function ajouter() {
     var c = protoCourant();
@@ -465,7 +422,7 @@
     if (!texte || !c) return;
     var note = { text: texte, proto: c.id, page: etat.page, context: c.libelle + ' · ' + nomPage(etat.page) };
     $('notes-ajouter').disabled = true;
-    var fin = function () { $('notes-texte').value = ''; $('notes-texte').focus(); filtre = 'courant'; dessinerNotes(); };
+    var fin = function () { $('notes-texte').value = ''; $('notes-texte').focus(); dessinerNotes(); };
     if (serveur) {
       api('POST', 'api/notes', note).then(function (n) { notes.push(n); fin(); },
         function () { $('notes-ajouter').disabled = false; toast('La remarque n’a pas pu être enregistrée : réessayez.'); });
@@ -477,10 +434,7 @@
   $('notes-texte').addEventListener('input', function () { $('notes-ajouter').disabled = !this.value.trim(); });
   $('notes-texte').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ajouter(); } });
   $('notes-ajouter').addEventListener('click', ajouter);
-  document.querySelector('.filtre').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-filtre]');
-    if (b) { filtre = b.getAttribute('data-filtre'); dessinerNotes(); }
-  });
+
   $('notes-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]');
     if (!b) return;
@@ -503,27 +457,14 @@
     }
   });
 
-  // Export : le commentaire general, puis les remarques groupees par prototype (ordre du menu).
+  // Export : la liste des commentaires, chacun avec sa page.
   function enTexte() {
-    var ordre = [];
-    TOURS.forEach(function (tr) { tr.ids.forEach(function (n) { ordre.push(String(n)); }); });
-    ordre.push('base');
-    var groupes = {};
-    notes.forEach(function (n) { var k = n.proto || '?'; (groupes[k] = groupes[k] || []).push(n); });
-    Object.keys(groupes).forEach(function (k) { if (ordre.indexOf(k) < 0) ordre.push(k); });
-    var lignes = ['# Notes de revue des prototypes', '', 'Exporté le ' + quand(new Date().toISOString()), '', '## Commentaire général', '',
-      (general.text || '').trim() || '_(aucun)_', '', '## Remarques par prototype', ''];
-    var aucune = true;
-    ordre.forEach(function (k) {
-      if (!groupes[k]) return;
-      aucune = false;
-      lignes.push('### ' + libelleNote(groupes[k][0]), '');
-      groupes[k].forEach(function (n) {
-        lignes.push('- ' + (n.page ? '_' + nomPage(n.page) + '_ · ' : '') + quand(n.at) + '  ', '  ' + n.text.replace(/\n/g, '\n  '));
-      });
-      lignes.push('');
+    var lignes = ['# Commentaires — Yukta\'s final prototype', '', 'Exporté le ' + quand(new Date().toISOString()), ''];
+    if (general.text) lignes.push('## Général', '', general.text.trim(), '');
+    if (!notes.length) lignes.push('_(aucun commentaire)_', '');
+    notes.forEach(function (n) {
+      lignes.push('- **' + libelleNote(n) + '** · ' + quand(n.at) + '  ', '  ' + n.text.replace(/\n/g, '\n  '));
     });
-    if (aucune) lignes.push('_(aucune remarque)_', '');
     return lignes.join('\n');
   }
   function copierTexte(texte) {
@@ -553,19 +494,19 @@
     var url = URL.createObjectURL(new Blob(['\ufeff' + enTexte()], { type: 'text/markdown;charset=utf-8' }));
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'notes-revue-prototypes.md';
+    a.download = 'commentaires-prototype.md';
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-    toast('Fichier téléchargé : notes-revue-prototypes.md');
+    toast('Fichier téléchargé : commentaires-prototype.md');
   });
   function ouvrirNotes(oui) {
     $('notes-panneau').hidden = !oui;
     $('notes-ouvrir').hidden = oui;
     $('notes-ouvrir').setAttribute('aria-expanded', oui);
     lsEcrire(CLE_OUVERT, oui);
-    if (oui) { charger(); setTimeout(function () { (protoCourant() ? $('notes-texte') : $('notes-general')).focus(); }, 0); }
+    if (oui) { charger(); setTimeout(function () { $('notes-texte').focus(); }, 0); }
   }
   $('notes-ouvrir').addEventListener('click', function () { ouvrirNotes(true); });
   $('notes-fermer').addEventListener('click', function () { enregistrerGeneral(); ouvrirNotes(false); });
