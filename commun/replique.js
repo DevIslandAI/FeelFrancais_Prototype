@@ -21,6 +21,28 @@
     return null;
   }
 
+  function aUnDossier(ligne) {
+    var m = /\/admin\/student\/show\/(\d+)\//.exec(JSON.stringify(ligne));
+    return !!(m && PAGES[m[1]]);
+  }
+
+  // La cloche du bandeau : meme regle, et son compteur suit.
+  function filtrerCloche() {
+    var menu = document.querySelector('.dropdown-menu.notifications');
+    if (!menu) return;
+    var restants = 0;
+    menu.querySelectorAll(':scope > .media').forEach(function (item) {
+      var a = item.querySelector('a[href*="/admin/student/show/"]');
+      var m = a && /\/admin\/student\/show\/(\d+)\//.exec(a.getAttribute('href'));
+      if (m && PAGES[m[1]]) restants++;
+      else item.remove();
+    });
+    var compteur = menu.closest('.dropdown-notifications') && menu.closest('.dropdown-notifications').querySelector('.carret');
+    if (compteur) compteur.textContent = restants;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', filtrerCloche);
+  else filtrerCloche();
+
   // Les liens de profil contenus dans les reponses JSON pointent vers la replique.
   function relierJson(texte) {
     return texte.replace(/\\?\/admin\\?\/student\\?\/show\\?\/(\d+)\\?\/VisaData(?:\\?\/[\w-]*)?/g, function (tout, id) {
@@ -34,6 +56,11 @@
     var donnees = AJAX[cle];
     if (!donnees) return null;
     var copie = JSON.parse(JSON.stringify(donnees));
+    // Seuls les etudiants dont le dossier est reproduit apparaissent (pas de profil vide).
+    if (Array.isArray(copie.data)) {
+      copie.data = copie.data.filter(aUnDossier);
+      copie.recordsFiltered = copie.recordsTotal = copie.data.length;
+    }
     var draw = /[?&]draw=(\d+)/.exec(url);
     if (draw) copie.draw = parseInt(draw[1], 10);
     return relierJson(JSON.stringify(copie));
