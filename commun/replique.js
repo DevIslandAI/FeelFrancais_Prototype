@@ -77,8 +77,23 @@
     var global = (p.get('search[value]') || '').toLowerCase().trim();
     if (global) lignes = lignes.filter(function (l) { return l.some(function (c) { return texteDe(c).indexOf(global) >= 0; }); });
     for (var i = 0; i < 12; i++) {
-      var v = (p.get('columns[' + i + '][search][value]') || '').toLowerCase().trim();
-      if (v) lignes = lignes.filter(function (l) { return texteDe(l[i]).indexOf(v) >= 0 || String(l[i] || '').toLowerCase().indexOf(v) >= 0; });
+      var brut = (p.get('columns[' + i + '][search][value]') || '').trim();
+      var v = brut.toLowerCase();
+      if (!v) continue;
+      if (v === '1' || v === '0') {
+        // Filtres Oui / Non : la cellule affiche « oui » / « non ».
+        var attendu = v === '1' ? ['oui', 'yes'] : ['non', 'no'];
+        lignes = lignes.filter(function (l) { return attendu.indexOf(texteDe(l[i]).trim()) >= 0; });
+      } else if (/^[A-Z]{2}$/.test(brut)) {
+        // Filtre pays : un code ISO ; la cellule affiche le nom du pays (français ou anglais).
+        var noms = [brut.toLowerCase()];
+        try {
+          noms = ['fr', 'en'].map(function (lg) { return new Intl.DisplayNames([lg], { type: 'region' }).of(brut).toLowerCase(); });
+        } catch (e) { /* navigateur sans Intl.DisplayNames */ }
+        lignes = lignes.filter(function (l) { var t = texteDe(l[i]); return noms.some(function (n) { return t.indexOf(n) >= 0; }); });
+      } else {
+        lignes = lignes.filter(function (l) { return texteDe(l[i]).indexOf(v) >= 0 || String(l[i] || '').toLowerCase().indexOf(v) >= 0; });
+      }
     }
     var col = parseInt(p.get('order[0][column]') || '0', 10);
     var sens = p.get('order[0][dir]') === 'desc' ? -1 : 1;
