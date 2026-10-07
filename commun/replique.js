@@ -18,6 +18,13 @@
     var m = /\/admin\/student\/show\/(\d+)\/VisaData/.exec(url || '');
     if (m && PAGES[m[1]]) return PAGES[m[1]];
     if (/\/admin\/notification\/list/.test(url || '')) return 'notifications.html';
+    // Référentiel Visa (données réelles de la plateforme) : listes et fiches.
+    if (/\/admin\/visa\/documentzone\/list/.test(url || '')) return 'visa-ref.html';
+    if (/\/admin\/visa\/zone\/list/.test(url || '')) return 'visa-zone.html';
+    var fiche = /\/admin\/visa\/documentzone\/edit\/(\d+)/.exec(url || '');
+    if (fiche) return 'visa-ref-' + fiche[1] + '.html';
+    fiche = /\/admin\/visa\/zone\/edit\/(\d+)/.exec(url || '');
+    if (fiche) return 'visa-zone-' + fiche[1] + '.html';
     return null;
   }
 
@@ -49,12 +56,47 @@
 
   // Les liens de profil contenus dans les reponses JSON pointent vers la replique.
   function relierJson(texte) {
+    texte = texte
+      .replace(/\\?\/admin\\?\/visa\\?\/documentzone\\?\/edit\\?\/(\d+)/g, function (t, id) { return 'visa-ref-' + id + '.html'; })
+      .replace(/\\?\/admin\\?\/visa\\?\/zone\\?\/edit\\?\/(\d+)/g, function (t, id) { return 'visa-zone-' + id + '.html'; });
     return texte.replace(/\\?\/admin\\?\/student\\?\/show\\?\/(\d+)\\?\/VisaData(?:\\?\/[\w-]*)?/g, function (tout, id) {
       return PAGES[id] || tout;
     });
   }
 
+  function texteDe(cellule) {
+    var d = document.createElement('div');
+    d.innerHTML = cellule == null ? '' : String(cellule);
+    return (d.textContent || '').toLowerCase();
+  }
+  function listeVisa(url) {
+    var cle = /\/admin\/visa\/documentzone\/list\?/.test(url) ? 'visa-ref' : /\/admin\/visa\/zone\/list\?/.test(url) ? 'visa-zone' : null;
+    if (!cle || !AJAX[cle]) return null;
+    var p = new URL(url, location.href).searchParams;
+    var lignes = AJAX[cle].data.slice();
+    var global = (p.get('search[value]') || '').toLowerCase().trim();
+    if (global) lignes = lignes.filter(function (l) { return l.some(function (c) { return texteDe(c).indexOf(global) >= 0; }); });
+    for (var i = 0; i < 12; i++) {
+      var v = (p.get('columns[' + i + '][search][value]') || '').toLowerCase().trim();
+      if (v) lignes = lignes.filter(function (l) { return texteDe(l[i]).indexOf(v) >= 0 || String(l[i] || '').toLowerCase().indexOf(v) >= 0; });
+    }
+    var col = parseInt(p.get('order[0][column]') || '0', 10);
+    var sens = p.get('order[0][dir]') === 'desc' ? -1 : 1;
+    lignes.sort(function (a, b) { return texteDe(a[col]).localeCompare(texteDe(b[col]), 'fr') * sens; });
+    var debut = parseInt(p.get('start') || '0', 10);
+    var nombre = parseInt(p.get('length') || '10', 10);
+    var page = nombre > 0 ? lignes.slice(debut, debut + nombre) : lignes;
+    return relierJson(JSON.stringify({
+      draw: parseInt(p.get('draw') || '1', 10),
+      recordsTotal: AJAX[cle].data.length,
+      recordsFiltered: lignes.length,
+      data: page,
+    }));
+  }
+
   function reponseFigee(url) {
+    var visa = listeVisa(url);
+    if (visa !== null) return visa;
     if (!/\/admin\/notification\/list\?/.test(url)) return null;
     var cle = /[?&]table=read/.test(url) ? 'notifications-lues' : 'notifications-non-lues';
     var donnees = AJAX[cle];
