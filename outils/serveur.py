@@ -65,6 +65,12 @@ def texte(valeur, limite):
 
 
 class Gestionnaire(SimpleHTTPRequestHandler):
+    # Pages et scripts en UTF-8 : sans l'annoncer, le navigateur devine (mal) l'encodage
+    # des pages dont la balise <meta charset> arrive tard (listes Visa avec données intégrées).
+    extensions_map = {**SimpleHTTPRequestHandler.extensions_map,
+                      ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+                      ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8"}
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(RACINE), **kwargs)
 
