@@ -826,11 +826,18 @@
           '<button type="button" class="v13-sauver" data-a="sauver"' + (ctrl.choix ? '' : ' disabled') + '><i class="fa fa-floppy-o"></i> Sauvegarder</button>';
       }
     }
+    // Sauvegarde faite : une confirmation animée, puis l'aperçu se ferme tout seul.
+    function confirmerEtFermer() {
+      pied.classList.remove('v13-prop-attente');
+      pied.innerHTML = '<div class="v13-ap-ok"><span class="v13-ap-ok-rond"><i class="fa fa-check"></i></span>' +
+        '<span>Sauvegardé · document ' + (ctrl.enregistre && ctrl.enregistre.choix === 'invalide' ? 'invalidé' : 'validé') + '</span></div>';
+      setTimeout(function () { if (window.jQuery) window.jQuery('#pdfModal').modal('hide'); }, 1100);
+    }
     pied.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-a]');
       if (!b || b.disabled) return;
-      if (b.getAttribute('data-a') === 'sauver') { if (ctrl.sauver()) o.toast('Sauvegardé : verdict posé sur la page.'); }
-      else { ctrl.annulerSauvegarde(); o.toast('Annulé : rien n’est plus enregistré pour ce document.'); }
+      if (b.getAttribute('data-a') === 'sauver') { if (ctrl.sauver()) confirmerEtFermer(); }
+      else ctrl.annulerSauvegarde();
     });
 
     // Les « Annuler mes changements » de chaque partie.

@@ -333,3 +333,11 @@ button.v13-e-item:hover { box-shadow: 0 0 0 1px var(--v13-bord); }
 .v13-vide-av { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #5a2fd0; color: #fff; font-weight: 700; font-size: 12.5px; }
 .v13-vide-ok { display: block; margin: 8px 0 0 auto; border: 1px solid #d5dbe0; background: #fff; border-radius: 6px; padding: 6px 16px; font: 600 13px Catamaran, Arial, sans-serif; cursor: pointer; }
 .v13-vide-ok:hover { border-color: #5a2fd0; color: #5a2fd0; }
+
+/* Sauvegarde d'un document : confirmation animée avant la fermeture de l'aperçu */
+.v13-ap-ok { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 10px 0; color: #23824e; font-weight: 700; font-size: 15px; animation: v13-ok-entree .25s ease-out; }
+.v13-ap-ok-rond { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #3cb371; color: #fff; font-size: 15px; }
+.v13-ap-ok-rond { animation: v13-ok-pop .45s cubic-bezier(.2, 1.6, .4, 1), v13-ok-halo 1s ease-out .2s; }
+@keyframes v13-ok-pop { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes v13-ok-halo { from { box-shadow: 0 0 0 0 rgba(60, 179, 113, .45); } to { box-shadow: 0 0 0 14px rgba(60, 179, 113, 0); } }
+@keyframes v13-ok-entree { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
